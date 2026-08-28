@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { CaseStatus, VoteType, VoteVisibility, MajorityKind, MajorityBase } from "@prisma/client";
+import { CaseStatus, VoteType, VoteVisibility } from "@prisma/client";
 
 const optionSchema = z.object({
   label: z.string().min(1).max(300),
@@ -14,8 +14,6 @@ const schema = z.object({
   description: z.string().max(5000).nullable().optional(),
   type: z.nativeEnum(VoteType).default(VoteType.STANDARD),
   visibility: z.nativeEnum(VoteVisibility).default(VoteVisibility.OPEN),
-  majorityKind: z.nativeEnum(MajorityKind).default(MajorityKind.SIMPLE),
-  majorityBase: z.nativeEnum(MajorityBase).default(MajorityBase.OF_VOTERS),
   minSelections: z.number().int().min(0).nullable().optional(),
   maxSelections: z.number().int().min(0).nullable().optional(),
   options: z.array(optionSchema).optional().default([]),
@@ -46,8 +44,6 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       description: parsed.data.description ?? null,
       type: parsed.data.type,
       visibility: parsed.data.visibility,
-      majorityKind: parsed.data.majorityKind,
-      majorityBase: parsed.data.majorityBase,
       minSelections: parsed.data.minSelections ?? null,
       maxSelections: parsed.data.maxSelections ?? null,
       options: {

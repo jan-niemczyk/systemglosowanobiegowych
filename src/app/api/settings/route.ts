@@ -3,12 +3,10 @@ import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { MajorityKind, MajorityBase, VoteVisibility, CloseMode, ResultsVisibility } from "@prisma/client";
+import { VoteVisibility, CloseMode, ResultsVisibility } from "@prisma/client";
 
 const schema = z.object({
   organizationName: z.string().min(1).max(200).optional(),
-  defaultMajorityKind: z.nativeEnum(MajorityKind).optional(),
-  defaultMajorityBase: z.nativeEnum(MajorityBase).optional(),
   defaultVoteVisibility: z.nativeEnum(VoteVisibility).optional(),
   defaultCloseMode: z.nativeEnum(CloseMode).optional(),
   defaultResultsVisibility: z.nativeEnum(ResultsVisibility).optional(),

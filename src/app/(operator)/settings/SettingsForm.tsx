@@ -2,15 +2,12 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { Settings, MajorityKind, MajorityBase, VoteVisibility, CloseMode, ResultsVisibility } from "@prisma/client";
-import { KIND_LABELS, BASE_LABELS } from "@/lib/majority";
+import type { Settings, VoteVisibility, CloseMode, ResultsVisibility } from "@prisma/client";
 import { VOTE_VISIBILITY_LABEL, CLOSE_MODE_LABEL, RESULTS_VISIBILITY_LABEL } from "@/lib/labels";
 
 export function SettingsForm({ settings }: { settings: Settings }) {
   const router = useRouter();
   const [organizationName, setOrganizationName] = useState(settings.organizationName);
-  const [defaultMajorityKind, setDefaultMajorityKind] = useState<MajorityKind>(settings.defaultMajorityKind);
-  const [defaultMajorityBase, setDefaultMajorityBase] = useState<MajorityBase>(settings.defaultMajorityBase);
   const [defaultVoteVisibility, setDefaultVoteVisibility] = useState<VoteVisibility>(settings.defaultVoteVisibility);
   const [defaultCloseMode, setDefaultCloseMode] = useState<CloseMode>(settings.defaultCloseMode);
   const [defaultResultsVisibility, setDefaultResultsVisibility] = useState<ResultsVisibility>(settings.defaultResultsVisibility);
@@ -29,7 +26,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
       const r = await fetch("/api/settings", {
         method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          organizationName, defaultMajorityKind, defaultMajorityBase, defaultVoteVisibility,
+          organizationName, defaultVoteVisibility,
           defaultCloseMode, defaultResultsVisibility, defaultAllowVoteChange,
           maxDocumentSizeMB: Number(maxDocumentSizeMB),
           allowedDocumentTypes: allowedDocumentTypes.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
@@ -70,18 +67,6 @@ export function SettingsForm({ settings }: { settings: Settings }) {
       <div className="border-t pt-4 space-y-4" style={{ borderColor: "var(--color-rule-soft)" }}>
         <div className="eyebrow">Wartości domyślne nowej sprawy</div>
         <div className="grid sm:grid-cols-2 gap-3">
-          <div>
-            <label className="label">Reguła większości</label>
-            <select className="input" value={defaultMajorityKind} onChange={(e) => setDefaultMajorityKind(e.target.value as MajorityKind)}>
-              {Object.entries(KIND_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="label">Mianownik</label>
-            <select className="input" value={defaultMajorityBase} onChange={(e) => setDefaultMajorityBase(e.target.value as MajorityBase)}>
-              {Object.entries(BASE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-            </select>
-          </div>
           <div>
             <label className="label">Jawność głosowania</label>
             <select className="input" value={defaultVoteVisibility} onChange={(e) => setDefaultVoteVisibility(e.target.value as VoteVisibility)}>

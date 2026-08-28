@@ -65,20 +65,6 @@ enum VoteChoice {
   ABSTAIN
 }
 
-/// Typ większości - jaki próg.
-enum MajorityKind {
-  SIMPLE                  // zwykła: ZA > PRZECIW
-  ABSOLUTE                // bezwzględna: ZA > połowa mianownika
-  QUALIFIED_TWO_THIRDS    // 2/3 mianownika musi być "za"
-  QUALIFIED_THREE_FIFTHS  // 3/5 mianownika musi być "za"
-}
-
-/// Mianownik większości - od czego liczona.
-enum MajorityBase {
-  OF_VOTERS     // od liczby oddanych głosów
-  OF_FULL_BODY  // od pełnego składu uprawnionych w sprawie
-}
-
 enum DocumentKind {
   DRAFT       // projekt uchwały/decyzji - publikowany przed otwarciem
   ATTACHMENT  // załącznik pomocniczy - publikowany przed otwarciem
@@ -136,8 +122,6 @@ model Settings {
   id                    String             @id @default("singleton")
   organizationName      String             @default("Organizacja")
   logoUrl               String?
-  defaultMajorityKind   MajorityKind       @default(SIMPLE)
-  defaultMajorityBase   MajorityBase       @default(OF_VOTERS)
   defaultVoteVisibility VoteVisibility     @default(OPEN)
   defaultCloseMode      CloseMode          @default(MANUAL)
   defaultResultsVisibility ResultsVisibility @default(MANUAL)
@@ -256,9 +240,6 @@ model VotingItem {
   type       VoteType       @default(STANDARD)
   visibility VoteVisibility @default(OPEN)
 
-  majorityKind MajorityKind @default(SIMPLE)
-  majorityBase MajorityBase @default(OF_VOTERS)
-
   // dla głosowania na listę:
   minSelections Int?
   maxSelections Int?
@@ -272,7 +253,6 @@ model VotingItem {
   resultYes           Int?
   resultNo            Int?
   resultAbstain       Int?
-  resultPassed        Boolean?
 
   // ── TAJNE: tylko zbiorcze liczniki + anonimowe znaczniki oddania głosu ──
   secretYes     Int @default(0)
@@ -299,7 +279,6 @@ model VoteOption {
   resultYes      Int?
   resultNo       Int?
   resultAbstain  Int?
-  resultPassed   Boolean?
   // anonimowe liczniki (tajne)
   secretYes      Int @default(0)
   secretNo       Int @default(0)

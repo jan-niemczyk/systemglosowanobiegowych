@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
-import { evaluateMajority } from "@/lib/majority";
-import { computeListVoteResult, listVoteThreshold } from "@/lib/listVote";
+import { computeListVoteResult } from "@/lib/listVote";
 import { VoteType, VoteVisibility, VoteChoice, ItemStatus, CaseStatus, ResultsVisibility } from "@prisma/client";
 
 /**
- * Zamyka sprawę: liczy i utrwala wyniki wszystkich pozycji głosowania, zamyka
+ * Zamyka sprawę: liczy i utrwala wyniki wszystkich pozycji głosowania (wyłącznie
+ * zliczenie głosów - bez żadnego automatycznego rozstrzygania większością), zamyka
  * sprawę oraz - zgodnie z konfiguracją - publikuje wyniki automatycznie.
  * Wywoływana zarówno przez operatora (ręczne zamknięcie), automatykę
  * "po oddaniu głosów przez wszystkich", jak i harmonogram (upływ terminu).
@@ -42,7 +42,6 @@ export async function closeCase(caseId: string, opts?: { closedByUserId?: string
         }
         castCount = item.ballots.length;
       }
-      const result = evaluateMajority(item.majorityKind, item.majorityBase, { yes, no, abstain, eligibleCount });
       await prisma.votingItem.update({
         where: { id: item.id },
         data: {
@@ -50,7 +49,6 @@ export async function closeCase(caseId: string, opts?: { closedByUserId?: string
           resultEligibleCount: eligibleCount,
           resultCastCount: castCount,
           resultYes: yes, resultNo: no, resultAbstain: abstain,
-          resultPassed: result.passed,
         },
       });
     } else if (item.type === VoteType.PACKAGE) {
@@ -69,10 +67,9 @@ export async function closeCase(caseId: string, opts?: { closedByUserId?: string
             else if (sel?.choice === VoteChoice.ABSTAIN) abstain++;
           }
         }
-        const result = evaluateMajority(item.majorityKind, item.majorityBase, { yes, no, abstain, eligibleCount });
         await prisma.voteOption.update({
           where: { id: opt.id },
-          data: { resultYes: yes, resultNo: no, resultAbstain: abstain, resultPassed: result.passed },
+          data: { resultYes: yes, resultNo: no, resultAbstain: abstain },
         });
       }
       await prisma.votingItem.update({
@@ -82,14 +79,13 @@ export async function closeCase(caseId: string, opts?: { closedByUserId?: string
     } else if (item.type === VoteType.LIST) {
       if (item.visibility === VoteVisibility.SECRET) {
         const voterCount = await prisma.secretBallotMarker.count({ where: { itemId: item.id } });
-        const { threshold } = listVoteThreshold(item.majorityKind, item.majorityBase, voterCount, eligibleCount);
         // Dla tajnej listy liczymy "za" wprost z secretYes każdej opcji, a "przeciw" jako dopełnienie do voterCount.
         for (const opt of item.options) {
           const yes = opt.secretYes;
           const no = Math.max(voterCount - yes, 0);
           await prisma.voteOption.update({
             where: { id: opt.id },
-            data: { resultYes: yes, resultNo: no, resultAbstain: 0, resultPassed: yes >= threshold && voterCount > 0 },
+            data: { resultYes: yes, resultNo: no, resultAbstain: 0 },
           });
         }
         await prisma.votingItem.update({
@@ -100,12 +96,11 @@ export async function closeCase(caseId: string, opts?: { closedByUserId?: string
         const result = computeListVoteResult({
           options: item.options.map((o) => ({ id: o.id, order: o.order, label: o.label })),
           ballots: item.ballots.map((b) => ({ id: b.id, userId: b.userId, selectedOptionIds: b.selections.map((s) => s.optionId) })),
-          majorityKind: item.majorityKind, majorityBase: item.majorityBase, eligibleCount,
         });
         for (const o of result.options) {
           await prisma.voteOption.update({
             where: { id: o.optionId },
-            data: { resultYes: o.yesCount, resultNo: o.noCount, resultAbstain: 0, resultPassed: o.passed },
+            data: { resultYes: o.yesCount, resultNo: o.noCount, resultAbstain: 0 },
           });
         }
         await prisma.votingItem.update({

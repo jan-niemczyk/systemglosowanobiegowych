@@ -7,6 +7,7 @@ import { ParticipantsEditor } from "./ParticipantsEditor";
 import { ItemsEditor } from "./ItemsEditor";
 import { ItemDocumentsPanel } from "./ItemDocumentsPanel";
 import { ItemResult } from "@/components/ItemResult";
+import { LiveItemPanel, computeLiveTally } from "./LiveItemPanel";
 import { ReportsPanel } from "./ReportsPanel";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +24,12 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
         participants: { include: { user: true }, orderBy: [{ lastName: "asc" }, { firstName: "asc" }] },
         items: {
           orderBy: { order: "asc" },
-          include: { options: { orderBy: { order: "asc" } }, documents: { orderBy: { uploadedAt: "asc" } } },
+          include: {
+            options: { orderBy: { order: "asc" } },
+            documents: { orderBy: { uploadedAt: "asc" } },
+            ballots: { include: { selections: true } },
+            secretMarkers: { select: { userId: true } },
+          },
         },
       },
     }),
@@ -101,17 +107,31 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
           />
         ) : (
           <div className="space-y-3">
-            {kase.items.map((item) => (
-              <div key={item.id} className="space-y-2">
-                <ItemResult item={item} showVoting={isOpen} />
-                <ItemDocumentsPanel
-                  caseId={kase.id}
-                  itemId={item.id}
-                  caseStatus={kase.status}
-                  documents={item.documents.map((d) => ({ ...d, uploadedAt: d.uploadedAt.toISOString() }))}
-                />
-              </div>
-            ))}
+            {kase.items.map((item) => {
+              const votedUserIds = item.visibility === "SECRET"
+                ? new Set(item.secretMarkers.map((m) => m.userId))
+                : new Set(item.ballots.map((b) => b.userId).filter((v): v is string => !!v));
+              return (
+                <div key={item.id} className="space-y-2">
+                  {isOpen ? (
+                    <LiveItemPanel
+                      item={item}
+                      participants={kase.participants.map((p) => ({ userId: p.userId, firstName: p.firstName, lastName: p.lastName, hasVotingRight: p.hasVotingRight }))}
+                      votedUserIds={votedUserIds}
+                      tally={computeLiveTally(item, item.ballots)}
+                    />
+                  ) : (
+                    <ItemResult item={item} />
+                  )}
+                  <ItemDocumentsPanel
+                    caseId={kase.id}
+                    itemId={item.id}
+                    caseStatus={kase.status}
+                    documents={item.documents.map((d) => ({ ...d, uploadedAt: d.uploadedAt.toISOString() }))}
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
       </section>
@@ -119,7 +139,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
       {isClosedOrPublished && (
         <section>
           <h2 className="text-sm font-medium mb-3">Wydruki</h2>
-          <ReportsPanel caseId={kase.id} items={kase.items.map((i) => ({ id: i.id, title: i.title, visibility: i.visibility }))} />
+          <ReportsPanel caseId={kase.id} items={kase.items.map((i) => ({ id: i.id, title: i.title }))} />
         </section>
       )}
     </div>

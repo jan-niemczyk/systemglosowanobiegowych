@@ -2,16 +2,15 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { DocumentKind, MajorityBase, MajorityKind, VoteType, VoteVisibility } from "@prisma/client";
+import type { DocumentKind, VoteType, VoteVisibility } from "@prisma/client";
 import { VOTE_TYPE_LABEL, VOTE_VISIBILITY_LABEL } from "@/lib/labels";
-import { KIND_LABELS, BASE_LABELS } from "@/lib/majority";
 import { ItemDocumentsPanel } from "./ItemDocumentsPanel";
 
 type Option = { id?: string; label: string; description?: string | null };
 type ItemDoc = { id: string; kind: DocumentKind; fileName: string; sizeBytes: number; uploadedAt: string };
 type Item = {
   id: string; order: number; title: string; description: string | null;
-  type: VoteType; visibility: VoteVisibility; majorityKind: MajorityKind; majorityBase: MajorityBase;
+  type: VoteType; visibility: VoteVisibility;
   minSelections: number | null; maxSelections: number | null;
   options: Option[];
   documents: ItemDoc[];
@@ -44,7 +43,7 @@ export function ItemsEditor({ caseId, items }: { caseId: string; items: Item[] }
             <div>
               <div className="font-medium text-sm">{item.order}. {item.title}</div>
               <div className="text-xs mt-1" style={{ color: "var(--color-ink-3)" }}>
-                {VOTE_TYPE_LABEL[item.type]} · {VOTE_VISIBILITY_LABEL[item.visibility]} · {KIND_LABELS[item.majorityKind]} · {BASE_LABELS[item.majorityBase]}
+                {VOTE_TYPE_LABEL[item.type]} {VOTE_VISIBILITY_LABEL[item.visibility]}
               </div>
               {item.options.length > 0 && (
                 <div className="text-xs mt-1" style={{ color: "var(--color-ink-3)" }}>
@@ -79,8 +78,6 @@ function ItemForm({
   const [description, setDescription] = useState(item?.description ?? "");
   const [type, setType] = useState<VoteType>(item?.type ?? "STANDARD");
   const [visibility, setVisibility] = useState<VoteVisibility>(item?.visibility ?? "OPEN");
-  const [majorityKind, setMajorityKind] = useState<MajorityKind>(item?.majorityKind ?? "SIMPLE");
-  const [majorityBase, setMajorityBase] = useState<MajorityBase>(item?.majorityBase ?? "OF_VOTERS");
   const [minSelections, setMinSelections] = useState(item?.minSelections?.toString() ?? "");
   const [maxSelections, setMaxSelections] = useState(item?.maxSelections?.toString() ?? "");
   const [optionsText, setOptionsText] = useState((item?.options ?? []).map((o) => o.label).join("\n"));
@@ -96,7 +93,7 @@ function ItemForm({
     if (needsOptions && options.length === 0) { setError("Podaj co najmniej jedną pozycję/kandydata (jeden na linię)."); return; }
 
     const payload = {
-      title, description: description || null, type, visibility, majorityKind, majorityBase,
+      title, description: description || null, type, visibility,
       minSelections: minSelections ? Number(minSelections) : null,
       maxSelections: maxSelections ? Number(maxSelections) : null,
       options: needsOptions ? options : [],
@@ -130,18 +127,6 @@ function ItemForm({
           <label className="label">Jawność</label>
           <select className="input" value={visibility} onChange={(e) => setVisibility(e.target.value as VoteVisibility)}>
             {Object.entries(VOTE_VISIBILITY_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="label">Reguła większości</label>
-          <select className="input" value={majorityKind} onChange={(e) => setMajorityKind(e.target.value as MajorityKind)}>
-            {Object.entries(KIND_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="label">Mianownik</label>
-          <select className="input" value={majorityBase} onChange={(e) => setMajorityBase(e.target.value as MajorityBase)} disabled={majorityKind === "SIMPLE"}>
-            {Object.entries(BASE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </div>
       </div>

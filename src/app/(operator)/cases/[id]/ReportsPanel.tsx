@@ -1,11 +1,9 @@
-import type { VoteVisibility } from "@prisma/client";
-
-export function ReportsPanel({ caseId, items }: { caseId: string; items: { id: string; title: string; visibility: VoteVisibility }[] }) {
+export function ReportsPanel({ caseId, items }: { caseId: string; items: { id: string; title: string }[] }) {
   return (
     <div className="space-y-4 text-sm">
       <div className="flex flex-wrap gap-2">
-        <a className="btn btn-sm" href={`/api/cases/${caseId}/reports/case-card`}>Zbiorcza karta sprawy (PDF)</a>
-        <a className="btn btn-sm" href={`/api/cases/${caseId}/reports/protocol`}>Protokół (DOCX)</a>
+        <a className="btn btn-sm" href={`/api/cases/${caseId}/reports/case-card`}>Protokół (PDF)</a>
+        <a className="btn btn-sm" href={`/api/cases/${caseId}/reports/protocol`}>Protokół (Word)</a>
       </div>
       <div>
         <div className="eyebrow mb-2">Raporty pozycji głosowania</div>
@@ -15,9 +13,6 @@ export function ReportsPanel({ caseId, items }: { caseId: string; items: { id: s
               <span className="min-w-0 truncate">{item.title}</span>
               <a className="btn btn-sm" href={`/api/cases/${caseId}/items/${item.id}/reports/vote-report`}>Raport głosowania</a>
               <a className="btn btn-sm" href={`/api/cases/${caseId}/items/${item.id}/reports/vote-report?format=csv`}>CSV</a>
-              {item.visibility === "OPEN" && (
-                <a className="btn btn-sm" href={`/api/cases/${caseId}/items/${item.id}/reports/roll-call`}>Imienny wykaz</a>
-              )}
             </li>
           ))}
         </ul>

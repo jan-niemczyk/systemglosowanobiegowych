@@ -25,7 +25,11 @@ export default async function MyCaseDetailPage({ params }: { params: Promise<{ i
       body: true,
       items: {
         orderBy: { order: "asc" },
-        include: { options: { orderBy: { order: "asc" } }, documents: { orderBy: { uploadedAt: "asc" } } },
+        include: {
+          options: { orderBy: { order: "asc" } },
+          documents: { orderBy: { uploadedAt: "asc" } },
+          ballots: { include: { selections: true } },
+        },
       },
     },
   });

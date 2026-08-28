@@ -1,4 +1,4 @@
-import { PrismaClient, Role, MajorityKind, MajorityBase, VoteVisibility, CloseMode, ResultsVisibility } from "@prisma/client";
+import { PrismaClient, Role, VoteVisibility, CloseMode, ResultsVisibility } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -18,8 +18,6 @@ async function main() {
     create: {
       id: "singleton",
       organizationName: "Organizacja",
-      defaultMajorityKind: MajorityKind.SIMPLE,
-      defaultMajorityBase: MajorityBase.OF_VOTERS,
       defaultVoteVisibility: VoteVisibility.OPEN,
       defaultCloseMode: CloseMode.MANUAL,
       defaultResultsVisibility: ResultsVisibility.MANUAL,

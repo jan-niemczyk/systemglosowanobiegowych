@@ -12,7 +12,15 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     where: { id },
     include: {
       body: true,
-      items: { orderBy: { order: "asc" }, include: { options: { orderBy: { order: "asc" } }, ballots: { include: { selections: { include: { option: true } } } } } },
+      participants: { orderBy: [{ lastName: "asc" }, { firstName: "asc" }] },
+      items: {
+        orderBy: { order: "asc" },
+        include: {
+          options: { orderBy: { order: "asc" } },
+          ballots: { include: { selections: true } },
+          secretMarkers: { select: { userId: true } },
+        },
+      },
     },
   });
   if (!kase) return new NextResponse("Not found", { status: 404 });
