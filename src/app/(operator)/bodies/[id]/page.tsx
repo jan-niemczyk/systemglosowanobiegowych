@@ -8,7 +8,8 @@ export default async function BodyDetailPage({ params }: { params: Promise<{ id:
   const { id } = await params;
   const [body, users] = await Promise.all([
     prisma.body.findUnique({ where: { id }, include: { members: { include: { user: true }, orderBy: { user: { lastName: "asc" } } } } }),
-    prisma.user.findMany({ where: { active: true }, orderBy: [{ lastName: "asc" }, { firstName: "asc" }] }),
+    // Operator nie może brać udziału w głosowaniu - nie jest kandydatem do składu organu.
+    prisma.user.findMany({ where: { active: true, role: "PARTICIPANT" }, orderBy: [{ lastName: "asc" }, { firstName: "asc" }] }),
   ]);
   if (!body) notFound();
 

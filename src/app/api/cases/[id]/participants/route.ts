@@ -40,7 +40,9 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   }
   if (candidates.length === 0) return new NextResponse("Brak osób do dodania", { status: 400 });
 
-  const users = await prisma.user.findMany({ where: { id: { in: candidates.map((c) => c.userId) } } });
+  // Operator nie może brać udziału w głosowaniu - wykluczony nawet jeśli trafił
+  // do listy przez skład organu.
+  const users = await prisma.user.findMany({ where: { id: { in: candidates.map((c) => c.userId) }, role: "PARTICIPANT" } });
   const byId = new Map(users.map((u) => [u.id, u]));
 
   const data = candidates

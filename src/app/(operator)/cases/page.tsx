@@ -68,10 +68,10 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
               <tr key={c.id} className="border-t" style={{ borderColor: "var(--color-rule-soft)" }}>
                 <td className="py-2">
                   <Link href={`/cases/${c.id}`} style={{ textDecoration: "none", color: "inherit" }} className="font-medium">
-                    {c.number ? `${c.number} — ` : ""}{c.title}
+                    {c.number ? `${c.number} - ` : ""}{c.title}
                   </Link>
                 </td>
-                <td className="py-2">{c.body?.name ?? "—"}</td>
+                <td className="py-2">{c.body?.name ?? "-"}</td>
                 <td className="py-2"><StatusPill status={c.status} /></td>
                 <td className="py-2 num">{c._count.items}</td>
                 <td className="py-2 num">{c._count.participants}</td>

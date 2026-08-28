@@ -34,7 +34,7 @@ export default async function DashboardPage() {
             {upcoming.map((c) => (
               <li key={c.id} className="card-soft p-3 flex items-center justify-between">
                 <Link href={`/cases/${c.id}`} className="text-sm font-medium" style={{ textDecoration: "none", color: "inherit" }}>
-                  {c.number ? `${c.number} — ` : ""}{c.title}
+                  {c.number ? `${c.number} - ` : ""}{c.title}
                 </Link>
                 <span className="text-xs" style={{ color: "var(--color-ink-3)" }}>{formatDateTime(c.deadlineAt)}</span>
               </li>
@@ -84,7 +84,7 @@ function CaseMiniList({ cases, empty }: { cases: { id: string; number: string | 
       {cases.map((c) => (
         <li key={c.id} className="card-soft p-3 flex items-center justify-between gap-3">
           <Link href={`/cases/${c.id}`} className="text-sm font-medium truncate" style={{ textDecoration: "none", color: "inherit" }}>
-            {c.number ? `${c.number} — ` : ""}{c.title}
+            {c.number ? `${c.number} - ` : ""}{c.title}
           </Link>
           <StatusPill status={c.status} />
         </li>

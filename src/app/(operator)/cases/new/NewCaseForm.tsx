@@ -54,7 +54,7 @@ export function NewCaseForm({ bodies, settings }: { bodies: { id: string; name: 
         <div>
           <label className="label">Organ / zespół</label>
           <select className="input" value={bodyId} onChange={(e) => setBodyId(e.target.value)}>
-            <option value="">— bez przypisania —</option>
+            <option value="">- bez przypisania -</option>
             {bodies.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
           </select>
         </div>

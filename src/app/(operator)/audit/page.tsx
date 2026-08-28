@@ -34,8 +34,8 @@ export default async function AuditPage() {
             <tr key={l.id} className="border-t" style={{ borderColor: "var(--color-rule-soft)" }}>
               <td className="py-1 num text-xs">{formatDateTime(l.createdAt)}</td>
               <td className="py-1">{l.description}</td>
-              <td className="py-1">{l.case ? (l.case.number ? `${l.case.number} — ` : "") + l.case.title : "—"}</td>
-              <td className="py-1">{l.user ? `${l.user.firstName} ${l.user.lastName}` : "—"}</td>
+              <td className="py-1">{l.case ? (l.case.number ? `${l.case.number} - ` : "") + l.case.title : "-"}</td>
+              <td className="py-1">{l.user ? `${l.user.firstName} ${l.user.lastName}` : "-"}</td>
             </tr>
           ))}
         </tbody>

@@ -33,13 +33,13 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string; ite
 
   const content: unknown[] = [
     { text: "Raport głosowania", fontSize: 16, bold: true, margin: [0, 0, 0, 2] },
-    { text: `${item.case.number ? item.case.number + " — " : ""}${item.case.title}`, fontSize: 10, color: "#555", margin: [0, 0, 0, 8] },
+    { text: `${item.case.number ? item.case.number + " - " : ""}${item.case.title}`, fontSize: 10, color: "#555", margin: [0, 0, 0, 8] },
     { text: `${item.order}. ${item.title}`, fontSize: 13, margin: [0, 0, 0, 4] },
     { text: `${VOTE_TYPE_LABEL[item.type]} · ${VOTE_VISIBILITY_LABEL[item.visibility]} · ${formatMajority(item.majorityKind, item.majorityBase)}`, fontSize: 9, color: "#555", margin: [0, 0, 0, 10] },
   ];
 
   if (item.status !== "CLOSED") {
-    content.push({ text: "Głosowanie jeszcze nie zostało zamknięte — wyniki nie są dostępne.", fontSize: 10, italics: true });
+    content.push({ text: "Głosowanie jeszcze nie zostało zamknięte - wyniki nie są dostępne.", fontSize: 10, italics: true });
   } else {
     content.push({
       table: { widths: ["auto", "*"], body: [["Uprawnionych", String(item.resultEligibleCount ?? "-")], ["Oddano głosów", String(item.resultCastCount ?? "-")]] },

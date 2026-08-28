@@ -15,8 +15,11 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return new NextResponse(`Bad request: ${parsed.error.message}`, { status: 400 });
 
+  // Operator nie może brać udziału w głosowaniu - nie wchodzi w skład organu.
+  const eligible = await prisma.user.findMany({ where: { id: { in: parsed.data.userIds }, role: "PARTICIPANT" }, select: { id: true } });
+
   await prisma.bodyMembership.createMany({
-    data: parsed.data.userIds.map((userId) => ({ bodyId: id, userId, hasVotingRight: parsed.data.hasVotingRight })),
+    data: eligible.map((u) => ({ bodyId: id, userId: u.id, hasVotingRight: parsed.data.hasVotingRight })),
     skipDuplicates: true,
   });
   return NextResponse.json({ ok: true });

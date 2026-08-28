@@ -18,11 +18,11 @@ export async function generateProtocolDocx(kase: FullCase, organizationName: str
   const children: (Paragraph | Table)[] = [
     new Paragraph({ text: organizationName, heading: HeadingLevel.HEADING_3, run: { font: FONT }, spacing: { after: 80 } }),
     new Paragraph({ text: "Protokół sprawy obiegowej", heading: HeadingLevel.HEADING_1, run: { font: FONT }, spacing: { after: 200 } }),
-    p(`1. ${kase.number ? kase.number + " — " : ""}${kase.title}`, { bold: true, size: 26 }),
+    p(`1. ${kase.number ? kase.number + " - " : ""}${kase.title}`, { bold: true, size: 26 }),
   ];
 
   if (kase.body) children.push(p(`Organ / zespół: ${kase.body.name}`, { size: 20 }));
-  children.push(p(`Termin: otwarcie ${formatDateTime(kase.openedAt)} — zamknięcie ${formatDateTime(kase.closedAt)}`, { size: 20 }));
+  children.push(p(`Termin: otwarcie ${formatDateTime(kase.openedAt)} - zamknięcie ${formatDateTime(kase.closedAt)}`, { size: 20 }));
   if (kase.description) children.push(p(kase.description, { italics: true, size: 20 }));
 
   for (const item of kase.items) {
@@ -55,7 +55,7 @@ export async function generateProtocolDocx(kase: FullCase, organizationName: str
       children.push(table);
       children.push(p(""));
     } else if (item.visibility === "SECRET") {
-      children.push(p("Głosowanie tajne — bez wykazu imiennego.", { italics: true, size: 20 }));
+      children.push(p("Głosowanie tajne - bez wykazu imiennego.", { italics: true, size: 20 }));
     }
 
     if (item.type !== "STANDARD" && item.options.length > 0) {

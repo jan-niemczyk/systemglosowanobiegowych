@@ -52,7 +52,7 @@ function CaseRow({ c }: { c: { id: string; number: string | null; title: string;
   return (
     <li className="card p-4 flex items-center justify-between gap-3">
       <Link href={`/my-cases/${c.id}`} className="min-w-0" style={{ textDecoration: "none", color: "inherit" }}>
-        <div className="font-medium truncate">{c.number ? `${c.number} — ` : ""}{c.title}</div>
+        <div className="font-medium truncate">{c.number ? `${c.number} - ` : ""}{c.title}</div>
         {c.deadlineAt && <div className="text-xs mt-1" style={{ color: "var(--color-ink-3)" }}>Termin: {formatDateTime(c.deadlineAt)}</div>}
       </Link>
       <StatusPill status={c.status} />

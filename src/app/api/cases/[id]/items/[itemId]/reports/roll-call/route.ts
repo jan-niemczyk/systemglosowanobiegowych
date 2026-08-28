@@ -40,7 +40,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string; it
     pageMargins: [40, 40, 40, 40],
     content: [
       { text: "Imienny wykaz głosów", fontSize: 16, bold: true, margin: [0, 0, 0, 2] },
-      { text: `${item.case.number ? item.case.number + " — " : ""}${item.case.title}`, fontSize: 10, color: "#555", margin: [0, 0, 0, 8] },
+      { text: `${item.case.number ? item.case.number + " - " : ""}${item.case.title}`, fontSize: 10, color: "#555", margin: [0, 0, 0, 8] },
       { text: `${item.order}. ${item.title}`, fontSize: 13, margin: [0, 0, 0, 10] },
       {
         table: { widths: ["*", "*"], body: [["Osoba", "Głos"], ...rows] },

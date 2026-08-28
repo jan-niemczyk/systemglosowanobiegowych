@@ -42,7 +42,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
       if (item.type === "STANDARD") voteText = ballot.choice ? CHOICE_LABEL[ballot.choice] : "-";
       else if (item.type === "PACKAGE") voteText = ballot.selections.map((s) => `${s.option.label}: ${s.choice ? CHOICE_LABEL[s.choice] : "-"}`).join("; ");
       else voteText = ballot.selections.map((s) => s.option.label).join(", ") || "(brak zaznaczeń)";
-      rows.push([item.title, `${voteText} — oddano ${formatDateTime(ballot.castAt)}`]);
+      rows.push([item.title, `${voteText} - oddano ${formatDateTime(ballot.castAt)}`]);
     }
   }
 
@@ -50,7 +50,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     pageMargins: [40, 40, 40, 40],
     content: [
       { text: "Potwierdzenie udziału w sprawie obiegowej", fontSize: 16, bold: true, margin: [0, 0, 0, 2] },
-      { text: `${kase.number ? kase.number + " — " : ""}${kase.title}`, fontSize: 12, margin: [0, 0, 0, 8] },
+      { text: `${kase.number ? kase.number + " - " : ""}${kase.title}`, fontSize: 12, margin: [0, 0, 0, 8] },
       { text: `${participant.lastName} ${participant.firstName}`, fontSize: 11, margin: [0, 0, 0, 10] },
       { table: { widths: ["*", "*"], body: [["Pozycja", "Status głosu"], ...rows] }, layout: "lightHorizontalLines" },
       { text: `Wydruk wygenerowano: ${formatDateTime(new Date())}`, fontSize: 8, color: "#777", margin: [0, 20, 0, 0] },

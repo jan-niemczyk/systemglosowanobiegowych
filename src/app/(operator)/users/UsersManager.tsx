@@ -78,7 +78,7 @@ export function UsersManager({ users }: { users: UserRow[] }) {
               <td className="py-1"><input type="checkbox" checked={selected.has(u.id)} onChange={() => toggle(u.id)} /></td>
               <td className="py-1">{u.lastName} {u.firstName}</td>
               <td className="py-1">{u.email}</td>
-              <td className="py-1">{u.functionTitle ?? "—"}</td>
+              <td className="py-1">{u.functionTitle ?? "-"}</td>
               <td className="py-1">
                 <select className="input" style={{ padding: "4px 8px" }} value={u.role} onChange={(e) => updateUser(u.id, { role: e.target.value })}>
                   <option value="OPERATOR">Operator</option>
@@ -177,7 +177,7 @@ function ImportUsersForm({ loginUrl, onDone }: { loginUrl: string; onDone: () =>
       {results && (
         <ul className="text-sm space-y-1">
           {results.map((r, i) => (
-            <li key={i}>{r.name} ({r.email}) — {r.status === "created" ? "utworzono" : r.status === "skipped" ? `pominięto: ${r.error}` : `błąd: ${r.error}`}</li>
+            <li key={i}>{r.name} ({r.email}) - {r.status === "created" ? "utworzono" : r.status === "skipped" ? `pominięto: ${r.error}` : `błąd: ${r.error}`}</li>
           ))}
         </ul>
       )}

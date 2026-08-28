@@ -105,7 +105,7 @@ export function ParticipantsEditor({
               <div className="flex-1">
                 <label className="label">Cały skład organu</label>
                 <select className="input" value={bodyId} onChange={(e) => setBodyId(e.target.value)}>
-                  <option value="">— wybierz organ —</option>
+                  <option value="">- wybierz organ -</option>
                   {bodies.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
               </div>

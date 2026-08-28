@@ -17,6 +17,7 @@ const bodySchema = z.union([
 export async function POST(req: Request, ctx: { params: Promise<{ itemId: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return new NextResponse("Unauthorized", { status: 401 });
+  if (session.user.role === "OPERATOR") return new NextResponse("Operator nie bierze udziału w głosowaniu", { status: 403 });
   const { itemId } = await ctx.params;
   const userId = session.user.id;
 

@@ -27,14 +27,14 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   const content: unknown[] = [
     { text: settings.organizationName, fontSize: 9, color: "#555" },
     { text: "Zbiorcza karta sprawy", fontSize: 16, bold: true, margin: [0, 4, 0, 2] },
-    { text: `${kase.number ? kase.number + " — " : ""}${kase.title}`, fontSize: 13, margin: [0, 0, 0, 8] },
+    { text: `${kase.number ? kase.number + " - " : ""}${kase.title}`, fontSize: 13, margin: [0, 0, 0, 8] },
     {
       table: {
         widths: ["auto", "*"],
         body: [
           ["Status", CASE_STATUS_LABEL[kase.status]],
-          ["Organ / zespół", kase.body?.name ?? "—"],
-          ["Operator prowadzący", kase.operator ? `${kase.operator.firstName} ${kase.operator.lastName}` : "—"],
+          ["Organ / zespół", kase.body?.name ?? "-"],
+          ["Operator prowadzący", kase.operator ? `${kase.operator.firstName} ${kase.operator.lastName}` : "-"],
           ["Otwarto", formatDateTime(kase.openedAt)],
           ["Termin końcowy", formatDateTime(kase.deadlineAt)],
           ["Zamknięto", formatDateTime(kase.closedAt)],
@@ -78,7 +78,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
       });
       if (item.type === "STANDARD") {
         content.push({
-          text: `ZA: ${item.resultYes ?? 0}   PRZECIW: ${item.resultNo ?? 0}   WSTRZYMAŁO SIĘ: ${item.resultAbstain ?? 0}   —   ${item.resultPassed ? "PRZYJĘTO" : "ODRZUCONO"}`,
+          text: `ZA: ${item.resultYes ?? 0}   PRZECIW: ${item.resultNo ?? 0}   WSTRZYMAŁO SIĘ: ${item.resultAbstain ?? 0}   -   ${item.resultPassed ? "PRZYJĘTO" : "ODRZUCONO"}`,
           fontSize: 10, bold: true, margin: [0, 2, 0, 4],
         });
       } else {

@@ -46,7 +46,7 @@ export function VotingItemCard({
       <div className="font-medium text-sm">{item.order}. {item.title}</div>
       {item.description && <div className="text-sm mt-1" style={{ color: "var(--color-ink-2)" }}>{item.description}</div>}
       <div className="text-xs mt-2" style={{ color: "var(--color-ink-3)" }}>
-        {item.visibility === "SECRET" ? "Głosowanie tajne — pierwszy oddany głos jest ostateczny." : (allowVoteChange ? "Głos można zmienić do zamknięcia sprawy." : "Zmiana głosu nie jest dopuszczona w tej sprawie.")}
+        {item.visibility === "SECRET" ? "Głosowanie tajne - pierwszy oddany głos jest ostateczny." : (allowVoteChange ? "Głos można zmienić do zamknięcia sprawy." : "Zmiana głosu nie jest dopuszczona w tej sprawie.")}
       </div>
 
       {locked ? (

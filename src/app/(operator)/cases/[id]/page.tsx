@@ -28,7 +28,8 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
       },
     }),
     prisma.body.findMany({ orderBy: { name: "asc" } }),
-    prisma.user.findMany({ where: { active: true }, orderBy: [{ lastName: "asc" }, { firstName: "asc" }] }),
+    // Operator nie może brać udziału w głosowaniu - nie jest kandydatem do składu sprawy.
+    prisma.user.findMany({ where: { active: true, role: "PARTICIPANT" }, orderBy: [{ lastName: "asc" }, { firstName: "asc" }] }),
   ]);
   if (!kase) notFound();
 
