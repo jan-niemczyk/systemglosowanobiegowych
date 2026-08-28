@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { VoteChoice, VoteType, VoteVisibility } from "@prisma/client";
-import { useHotkeys } from "@/lib/useHotkeys";
 
 type Option = { id: string; label: string; description: string | null };
 type Item = {
@@ -136,17 +135,11 @@ function StandardBallot({
   onCast: (c: VoteChoice) => void;
   pending: boolean;
 }) {
-  const buttons: { choice: VoteChoice; label: string; cls: string; hk: string }[] = [
-    { choice: "YES", label: "Za", cls: "btn-yes", hk: "Z" },
-    { choice: "NO", label: "Przeciw", cls: "btn-no", hk: "P" },
-    { choice: "ABSTAIN", label: "Wstrzymuję się", cls: "btn-abstain", hk: "W" },
+  const buttons: { choice: VoteChoice; label: string; cls: string }[] = [
+    { choice: "YES", label: "Za", cls: "btn-yes" },
+    { choice: "NO", label: "Przeciw", cls: "btn-no" },
+    { choice: "ABSTAIN", label: "Wstrzymuję się", cls: "btn-abstain" },
   ];
-  const canVote = !pending;
-  useHotkeys([
-    { key: "z", enabled: canVote, action: () => onCast("YES"), description: "Głos: Za" },
-    { key: "p", enabled: canVote, action: () => onCast("NO"), description: "Głos: Przeciw" },
-    { key: "w", enabled: canVote, action: () => onCast("ABSTAIN"), description: "Głos: Wstrzymuję się" },
-  ], [canVote]);
   return (
     <div className="grid grid-cols-1 gap-3">
       {buttons.map((b) => {
@@ -160,7 +153,7 @@ function StandardBallot({
             className={`btn ${b.cls} btn-xl`}
             style={{ outline: isMine ? "3px solid var(--color-ink)" : undefined, outlineOffset: 2, opacity: pending ? 0.7 : 1 }}
           >
-            {b.label} <span style={{ opacity: 0.6, fontSize: "0.8em" }}>({b.hk})</span>{isMine && " ✓"}
+            {b.label}{isMine && " ✓"}
           </button>
         );
       })}
@@ -191,34 +184,6 @@ function ListBallot({
   const remaining = max - selectedIds.length;
   const tooFew = selectedIds.length < min;
 
-  // Model "sejmowy": lista z aktywną pozycją, którą przesuwamy strzałkami.
-  // Domyślnie każda pozycja = "przeciw" (niezaznaczona). Z lub "+" zaznacza aktywną jako ZA, "-" kasuje.
-  const [activeIdx, setActiveIdx] = useState(0);
-  const canAct = !pending;
-  const markActive = () => {
-    const o = options[activeIdx];
-    if (!o) return;
-    if (!selectedIds.includes(o.id) && selectedIds.length >= max) return;
-    if (!selectedIds.includes(o.id)) {
-      setSelectedIds([...selectedIds, o.id]);
-      if (activeIdx < options.length - 1) setActiveIdx((i) => i + 1);
-    }
-  };
-  const unmarkActive = () => {
-    const o = options[activeIdx];
-    if (!o) return;
-    if (selectedIds.includes(o.id)) setSelectedIds(selectedIds.filter((s) => s !== o.id));
-  };
-  useHotkeys([
-    { key: "ArrowDown", enabled: canAct, action: () => setActiveIdx((i) => Math.min(options.length - 1, i + 1)), description: "Następna pozycja" },
-    { key: "ArrowUp", enabled: canAct, action: () => setActiveIdx((i) => Math.max(0, i - 1)), description: "Poprzednia pozycja" },
-    { key: "z", enabled: canAct, action: markActive, description: "ZA dla aktywnej pozycji" },
-    { key: "+", enabled: canAct, action: markActive, description: "ZA dla aktywnej pozycji" },
-    { key: "=", enabled: canAct, action: markActive, description: "ZA dla aktywnej pozycji" },
-    { key: "-", enabled: canAct, action: unmarkActive, description: "Kasuj wybór aktywnej pozycji" },
-    { key: "o", enabled: canAct && !tooFew, action: onCast, description: "Zatwierdź i wyślij głos" },
-  ], [canAct, tooFew, activeIdx, selectedIds.join(","), options.map((o) => o.id).join(",")]);
-
   return (
     <div>
       <p className="text-xs mb-3" style={{ color: "var(--color-ink-3)" }}>
@@ -228,13 +193,11 @@ function ListBallot({
         {options.map((o, i) => {
           const checked = selectedIds.includes(o.id);
           const disabled = !checked && selectedIds.length >= max;
-          const isActive = i === activeIdx;
           return (
-            <li key={o.id} style={{ outline: isActive ? "2px solid var(--color-brand-blue)" : "none", outlineOffset: -2 }}>
+            <li key={o.id}>
               <label
                 className={`flex items-center gap-3 px-4 py-3 cursor-pointer ${disabled ? "opacity-40" : "hover:bg-[var(--color-paper-2)]"}`}
                 style={{ background: checked ? "var(--color-yes-bg)" : undefined }}
-                onClick={() => setActiveIdx(i)}
               >
                 <input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggle(o.id)} style={{ width: 20, height: 20 }} />
                 <span className="mono text-xs" style={{ color: "var(--color-ink-3)", width: 24 }}>{i + 1}.</span>
@@ -289,26 +252,7 @@ function PackageBallot({
 
   const answered = Object.keys(choices).length;
   const canSend = answered === options.length;
-
-  // Nawigacja klawiaturą: aktywna pozycja (strzałki góra/dół), Z/P/W ustawia głos aktywnej pozycji
-  // i przechodzi do następnej; Enter wysyła cały pakiet.
-  const [activeIdx, setActiveIdx] = useState(0);
-  const setChoiceAndAdvance = (choice: VoteChoice) => {
-    const o = options[activeIdx];
-    if (!o) return;
-    set(o.id, choice);
-    if (activeIdx < options.length - 1) setActiveIdx((i) => i + 1);
-  };
   const send = () => onCast(Object.entries(choices).map(([optionId, choice]) => ({ optionId, choice })));
-  useHotkeys([
-    { key: "ArrowDown", enabled: !pending, action: () => setActiveIdx((i) => Math.min(options.length - 1, i + 1)), description: "Następna pozycja" },
-    { key: "ArrowUp", enabled: !pending, action: () => setActiveIdx((i) => Math.max(0, i - 1)), description: "Poprzednia pozycja" },
-    { key: "z", enabled: !pending, action: () => setChoiceAndAdvance("YES"), description: "Aktywna pozycja: Za" },
-    { key: "p", enabled: !pending, action: () => setChoiceAndAdvance("NO"), description: "Aktywna pozycja: Przeciw" },
-    { key: "w", enabled: !pending, action: () => setChoiceAndAdvance("ABSTAIN"), description: "Aktywna pozycja: Wstrzymuję się" },
-    { key: "o", enabled: !pending && canSend, action: send, description: "Zatwierdź i wyślij pakiet" },
-    { key: "Enter", enabled: !pending && canSend, action: send, description: "Wyślij pakiet" },
-  ], [pending, canSend, activeIdx, JSON.stringify(choices), options.map((o) => o.id).join(",")]);
 
   const CHOICE_META: { key: VoteChoice; label: string; color: string; bg: string }[] = [
     { key: "YES", label: "ZA", color: "var(--color-yes)", bg: "var(--color-yes-bg)" },
@@ -323,12 +267,7 @@ function PackageBallot({
           <div
             key={o.id}
             className="pb-3"
-            style={{
-              borderBottom: idx < options.length - 1 ? "1px solid var(--color-rule-soft)" : "none",
-              outline: idx === activeIdx ? "2px solid var(--color-brand-blue)" : "none",
-              outlineOffset: 4,
-              borderRadius: idx === activeIdx ? 4 : undefined,
-            }}
+            style={{ borderBottom: idx < options.length - 1 ? "1px solid var(--color-rule-soft)" : "none" }}
           >
             <div className="mb-2" style={{ fontWeight: 600 }}>{idx + 1}. {o.label}</div>
             {o.description && <div className="text-sm mb-2" style={{ color: "var(--color-ink-2)" }}>{o.description}</div>}
