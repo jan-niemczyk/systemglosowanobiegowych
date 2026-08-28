@@ -11,7 +11,6 @@ const schema = z.object({
   lastName: z.string().min(1).max(100),
   functionTitle: z.string().max(120).nullable().optional(),
   role: z.nativeEnum(Role).default(Role.PARTICIPANT),
-  groupId: z.string().nullable().optional(),
   password: z.string().min(6).max(200),
   active: z.boolean().optional().default(true),
 });
@@ -21,16 +20,13 @@ export async function GET() {
   if (!session || session.user.role !== "OPERATOR")
     return new NextResponse("Unauthorized", { status: 401 });
   const users = await prisma.user.findMany({
-    include: { group: true },
     orderBy: [{ role: "asc" }, { lastName: "asc" }],
   });
   return NextResponse.json(users.map((u) => ({
     id: u.id, email: u.email,
     firstName: u.firstName, lastName: u.lastName,
+    functionTitle: u.functionTitle,
     role: u.role, active: u.active,
-    groupId: u.groupId, groupName: u.group?.name ?? null,
-    groupShort: u.group?.shortName ?? null,
-    groupColor: u.group?.color ?? null,
   })));
 }
 
@@ -53,7 +49,6 @@ export async function POST(req: Request) {
       lastName: parsed.data.lastName,
       functionTitle: parsed.data.functionTitle ?? null,
       role: parsed.data.role,
-      groupId: parsed.data.groupId ?? null,
       passwordHash: await bcrypt.hash(parsed.data.password, 10),
       active: parsed.data.active ?? true,
     },

@@ -11,7 +11,7 @@ const EXT: Record<string, string> = {
   "image/png": "png", "image/jpeg": "jpg", "image/svg+xml": "svg", "image/webp": "webp",
 };
 
-/** POST /api/settings/logo - wgranie logo prezentacji (multipart/form-data, pole "file"). */
+/** POST /api/settings/logo - wgranie logo organizacji (multipart/form-data, pole "file"). */
 export async function POST(req: Request) {
   const session = await auth();
   if (!session || session.user.role !== "OPERATOR")
@@ -30,19 +30,18 @@ export async function POST(req: Request) {
   await writeFile(path.join(UPLOAD_DIR, filename), buffer);
   const url = `/api/uploads/${filename}`;
 
-  // Usuń poprzednie logo (jeśli było lokalnym plikiem), żeby nie zaśmiecać wolumenu.
   const prev = await prisma.settings.findUnique({ where: { id: "singleton" } });
-  if (prev?.presentationLogoUrl?.startsWith("/api/uploads/")) {
-    await unlink(path.join(UPLOAD_DIR, prev.presentationLogoUrl.replace("/api/uploads/", ""))).catch(() => {});
+  if (prev?.logoUrl?.startsWith("/api/uploads/")) {
+    await unlink(path.join(UPLOAD_DIR, prev.logoUrl.replace("/api/uploads/", ""))).catch(() => {});
   }
 
   await prisma.settings.upsert({
     where: { id: "singleton" },
-    create: { id: "singleton", presentationLogoUrl: url },
-    update: { presentationLogoUrl: url },
+    create: { id: "singleton", logoUrl: url },
+    update: { logoUrl: url },
   });
 
-  await audit({ action: "SETTINGS_CHANGED", description: "Wgrano logo prezentacji", userId: session.user.id });
+  await audit({ action: "SETTINGS_CHANGED", description: "Wgrano logo organizacji", userId: session.user.id });
   return NextResponse.json({ ok: true, url });
 }
 
@@ -53,9 +52,9 @@ export async function DELETE() {
     return new NextResponse("Unauthorized", { status: 401 });
 
   const prev = await prisma.settings.findUnique({ where: { id: "singleton" } });
-  if (prev?.presentationLogoUrl?.startsWith("/api/uploads/")) {
-    await unlink(path.join(UPLOAD_DIR, prev.presentationLogoUrl.replace("/api/uploads/", ""))).catch(() => {});
+  if (prev?.logoUrl?.startsWith("/api/uploads/")) {
+    await unlink(path.join(UPLOAD_DIR, prev.logoUrl.replace("/api/uploads/", ""))).catch(() => {});
   }
-  await prisma.settings.update({ where: { id: "singleton" }, data: { presentationLogoUrl: null } });
+  await prisma.settings.update({ where: { id: "singleton" }, data: { logoUrl: null } });
   return NextResponse.json({ ok: true });
 }

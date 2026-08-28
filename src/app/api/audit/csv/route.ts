@@ -10,16 +10,16 @@ export async function GET(req: Request) {
     return new NextResponse("Unauthorized", { status: 401 });
 
   const url = new URL(req.url);
-  const meetingId = url.searchParams.get("meeting");
+  const caseId = url.searchParams.get("case");
 
   const logs = await prisma.auditLog.findMany({
-    where: meetingId ? { meetingId } : {},
-    include: { user: true, meeting: true },
+    where: caseId ? { caseId } : {},
+    include: { user: true, case: true },
     orderBy: { createdAt: "asc" },
   });
 
   const rows: (string | number | null | undefined | boolean)[][] = [
-    ["Data", "Akcja", "Opis", "Posiedzenie", "Użytkownik"],
+    ["Data", "Akcja", "Opis", "Sprawa", "Użytkownik"],
   ];
 
   for (const l of logs) {
@@ -27,11 +27,11 @@ export async function GET(req: Request) {
       formatDateTime(l.createdAt),
       l.action,
       l.description,
-      l.meeting ? `${l.meeting.number} - ${l.meeting.name}` : "",
+      l.case ? `${l.case.number ? l.case.number + " - " : ""}${l.case.title}` : "",
       l.user ? `${l.user.firstName} ${l.user.lastName}` : "",
     ]);
   }
 
-  const fname = meetingId ? `rejestr_${meetingId.slice(-8)}.csv` : "rejestr_pelny.csv";
+  const fname = caseId ? `rejestr_${caseId.slice(-8)}.csv` : "rejestr_pelny.csv";
   return csvResponse(fname, toCsv(rows));
 }

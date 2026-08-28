@@ -7,22 +7,17 @@ import bcrypt from "bcryptjs";
 
 /**
  * POST /api/users/import
- * Body: { rows: [{ firstName, lastName, email, role?, groupName?, groupShort? }] }
+ * Body: { rows: [{ firstName, lastName, email, role? }] }
  *
  * Tworzy użytkowników z losowymi hasłami. Zwraca tabelę z hasłami (jednorazowo!)
- * - operator ma je przekazać użytkownikom.
- *
- * Pola obowiązkowe: firstName, lastName, email.
- * Opcjonalne: role (default PARTICIPANT), groupName + groupShort (klub).
+ * - operator ma je przekazać uczestnikom.
  */
 
 const rowSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   email: z.string().email(),
-  role: z.enum(["OPERATOR", "PARTICIPANT", "CHAIRPERSON"]).optional(),
-  groupName: z.string().optional(),
-  groupShort: z.string().optional(),
+  role: z.enum(["OPERATOR", "PARTICIPANT"]).optional(),
 });
 
 const schema = z.object({
@@ -30,7 +25,6 @@ const schema = z.object({
 });
 
 function randomPassword(): string {
-  // 10 znaków: cyfry + litery (bez 0/O/1/l/I aby ułatwić odczyt)
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
   let p = "";
   for (let i = 0; i < 10; i++) {
@@ -64,17 +58,6 @@ export async function POST(req: Request) {
         continue;
       }
 
-      // Obsługa grupy (klub) - utwórz jeśli podano
-      let groupId: string | null = null;
-      if (row.groupName) {
-        const group = await prisma.group.upsert({
-          where: { name: row.groupName },
-          update: { shortName: row.groupShort ?? row.groupName.slice(0, 5).toUpperCase() },
-          create: { name: row.groupName, shortName: row.groupShort ?? row.groupName.slice(0, 5).toUpperCase(), color: null },
-        });
-        groupId = group.id;
-      }
-
       const password = randomPassword();
       const passwordHash = await bcrypt.hash(password, 10);
 
@@ -85,7 +68,6 @@ export async function POST(req: Request) {
           lastName: row.lastName,
           passwordHash,
           role: row.role ?? "PARTICIPANT",
-          groupId,
           active: true,
         },
       });

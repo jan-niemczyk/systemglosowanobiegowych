@@ -22,8 +22,6 @@ function randomPassword(len = 8): string {
 /**
  * POST /api/users/reset-passwords
  * Nadaje NOWE hasła zaznaczonym kontom i zwraca je jednorazowo (do wydruku odcinków).
- * System przechowuje wyłącznie hash - starych haseł nie da się odczytać, dlatego przy
- * generowaniu odcinków dla istniejących kont trzeba hasła zresetować.
  */
 export async function POST(req: Request) {
   const session = await auth();
