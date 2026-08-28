@@ -4,7 +4,7 @@ import type { AuditAction } from "@prisma/client";
 export async function audit(params: {
   action: AuditAction;
   description: string;
-  meetingId?: string;
+  caseId?: string;
   userId?: string;
   metadata?: Record<string, unknown>;
 }) {
@@ -12,7 +12,7 @@ export async function audit(params: {
     data: {
       action: params.action,
       description: params.description,
-      meetingId: params.meetingId,
+      caseId: params.caseId,
       userId: params.userId,
       metadata: params.metadata as never,
     },

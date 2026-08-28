@@ -47,51 +47,40 @@ export interface ListVoteResult {
   options: ListOptionResult[]; // posortowane alfabetycznie po etykiecie
 }
 
+/** Próg poparcia (liczba głosów ZA) wymagany dla danej reguły większości w głosowaniu na listę. */
+export function listVoteThreshold(
+  majorityKind: MajorityKind,
+  majorityBase: MajorityBase,
+  voterCount: number,
+  eligibleCount: number,
+): { threshold: number; label: string } {
+  const baseValue = majorityBase === MB.OF_VOTERS ? voterCount : eligibleCount;
+  const baseLabel = majorityBase === MB.OF_VOTERS ? "głosujących" : "pełnego składu";
+  switch (majorityKind) {
+    case MK.SIMPLE:
+      return { threshold: Math.floor(voterCount / 2) + 1, label: "Zwykła (> 1/2 głosujących)" };
+    case MK.ABSOLUTE:
+      return { threshold: Math.floor(baseValue / 2) + 1, label: `Bezwzględna (> 1/2 ${baseLabel})` };
+    case MK.QUALIFIED_TWO_THIRDS:
+      return { threshold: Math.ceil((2 / 3) * baseValue), label: `2/3 ${baseLabel}` };
+    case MK.QUALIFIED_THREE_FIFTHS:
+      return { threshold: Math.ceil((3 / 5) * baseValue), label: `3/5 ${baseLabel}` };
+    default:
+      return { threshold: Math.floor(voterCount / 2) + 1, label: "Reguła własna" };
+  }
+}
+
 export function computeListVoteResult(args: {
   options: ListVoteOption[];
   ballots: ListBallot[];
   majorityKind: MajorityKind;
   majorityBase: MajorityBase;
-  /** liczba uprawnionych - dla większości od pełnego składu */
+  /** liczba uprawnionych w sprawie - dla większości od pełnego składu */
   eligibleCount: number;
-  /** liczba obecnych z prawem głosu - dla większości od obecnych */
-  presentCount: number;
 }): ListVoteResult {
-  const { options, ballots, majorityKind, majorityBase, eligibleCount, presentCount } = args;
+  const { options, ballots, majorityKind, majorityBase, eligibleCount } = args;
   const voterCount = ballots.length;
-
-  // Mianownik
-  const baseValue = majorityBase === MB.OF_VOTERS ? voterCount
-    : majorityBase === MB.OF_PRESENT ? presentCount
-    : eligibleCount;
-  const baseLabel = majorityBase === MB.OF_VOTERS ? "głosujących"
-    : majorityBase === MB.OF_PRESENT ? "obecnych"
-    : "pełnego składu";
-
-  // wyznacz próg poparcia
-  let threshold = 0;
-  let thresholdLabel = "";
-  switch (majorityKind) {
-    case MK.SIMPLE:
-      threshold = Math.floor(voterCount / 2) + 1;
-      thresholdLabel = "Zwykła (> 1/2 głosujących)";
-      break;
-    case MK.ABSOLUTE:
-      threshold = Math.floor(baseValue / 2) + 1;
-      thresholdLabel = `Bezwzględna (> 1/2 ${baseLabel})`;
-      break;
-    case MK.QUALIFIED_TWO_THIRDS:
-      threshold = Math.ceil((2 / 3) * baseValue);
-      thresholdLabel = `2/3 ${baseLabel}`;
-      break;
-    case MK.QUALIFIED_THREE_FIFTHS:
-      threshold = Math.ceil((3 / 5) * baseValue);
-      thresholdLabel = `3/5 ${baseLabel}`;
-      break;
-    default:
-      threshold = Math.floor(voterCount / 2) + 1;
-      thresholdLabel = "Reguła własna";
-  }
+  const { threshold, label: thresholdLabel } = listVoteThreshold(majorityKind, majorityBase, voterCount, eligibleCount);
 
   // liczymy "za" dla każdej opcji jako liczbę zaznaczeń
   const yesByOption = new Map<string, number>();
