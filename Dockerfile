@@ -42,6 +42,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 # Nadpisuje minimalistyczne node_modules z Next.js standalone, ale uzupełnia o CLI.
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
+# src/ i scripts/ - ten sam obraz obsługuje też usługę harmonogramu
+# (docker-compose uruchamia ją z command: npx tsx scripts/scheduler.ts).
+COPY --from=builder --chown=nextjs:nodejs /app/src ./src
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 
 USER nextjs
 EXPOSE 3000

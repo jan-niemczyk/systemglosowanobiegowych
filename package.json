@@ -1,5 +1,5 @@
 {
-  "name": "esog",
+  "name": "iglosowania",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,6 +10,7 @@
     "prisma:migrate": "prisma migrate deploy",
     "prisma:seed": "tsx prisma/seed.ts",
     "prisma:studio": "prisma studio",
+    "scheduler": "tsx scripts/scheduler.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {

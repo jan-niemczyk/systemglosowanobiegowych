@@ -13,12 +13,4 @@ glosowania.mswz.pl {
 	}
 
 	encode gzip zstd
-
-	# SSE (Server-Sent Events) dla widoku radnego/prezentacji - bez buforowania
-	@sse {
-		path /api/meetings/*/stream
-	}
-	reverse_proxy @sse app:3000 {
-		flush_interval -1
-	}
 }
