@@ -135,7 +135,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ itemId: string
     }
   }
 
-  if (item.case.closeMode === CloseMode.ALL_VOTED) {
+  if (item.case.closeMode === CloseMode.ALL_VOTED || item.case.closeMode === CloseMode.DEADLINE_OR_ALL_VOTED) {
     const allVoted = await haveAllVoted(item.caseId);
     if (allVoted) await closeCase(item.caseId, { reason: "wszyscy uprawnieni oddali głos" });
   }

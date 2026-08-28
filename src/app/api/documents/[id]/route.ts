@@ -40,20 +40,14 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   }
 }
 
-/** DELETE /api/documents/[id] - operator, tylko w oknie edycji odpowiadającym rodzajowi dokumentu. */
+/** DELETE /api/documents/[id] - operator może usunąć dokument w każdym momencie (bez logowania). */
 export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session || session.user.role !== "OPERATOR") return new NextResponse("Unauthorized", { status: 401 });
   const { id } = await ctx.params;
 
-  const doc = await prisma.caseDocument.findUnique({ where: { id }, include: { item: { include: { case: true } } } });
+  const doc = await prisma.caseDocument.findUnique({ where: { id } });
   if (!doc) return new NextResponse("Not found", { status: 404 });
-
-  const status = doc.item.case.status;
-  const editableNow = doc.kind === DocumentKind.RESULT
-    ? (status === CaseStatus.CLOSED || status === CaseStatus.RESULTS_PUBLISHED)
-    : (status === CaseStatus.DRAFT || status === CaseStatus.OPEN);
-  if (!editableNow) return new NextResponse("Nie można teraz usunąć tego dokumentu", { status: 400 });
 
   await prisma.caseDocument.delete({ where: { id } });
   await unlink(documentFilePath(doc.storedName)).catch(() => {});

@@ -2,20 +2,18 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { CaseStatus, DocumentKind } from "@prisma/client";
+import type { DocumentKind } from "@prisma/client";
 import { DOCUMENT_KIND_LABEL } from "@/lib/labels";
 
 type Doc = { id: string; kind: DocumentKind; fileName: string; sizeBytes: number; uploadedAt: string };
 
-/** Dokumenty przypięte do konkretnej pozycji głosowania (nie do całej sprawy). */
+/** Dokumenty przypięte do konkretnej pozycji głosowania (nie do całej sprawy). Swobodna wymiana w każdym czasie. */
 export function ItemDocumentsPanel({
-  caseId, itemId, caseStatus, documents,
-}: { caseId: string; itemId: string; caseStatus: CaseStatus; documents: Doc[] }) {
+  caseId, itemId, documents,
+}: { caseId: string; itemId: string; documents: Doc[] }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
-  const draftEditable = caseStatus === "DRAFT" || caseStatus === "OPEN";
-  const resultEditable = caseStatus === "CLOSED" || caseStatus === "RESULTS_PUBLISHED";
-  const [kind, setKind] = useState<DocumentKind>(draftEditable ? "DRAFT" : "RESULT");
+  const [kind, setKind] = useState<DocumentKind>("DRAFT");
   const [expanded, setExpanded] = useState(documents.length > 0);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -41,9 +39,6 @@ export function ItemDocumentsPanel({
       router.refresh();
     });
   }
-
-  const canEditKind = (k: DocumentKind) => (k === "RESULT" ? resultEditable : draftEditable);
-  const canUpload = draftEditable || resultEditable;
 
   if (!expanded) {
     return (
@@ -75,9 +70,7 @@ export function ItemDocumentsPanel({
                 <td className="py-1">{DOCUMENT_KIND_LABEL[d.kind]}</td>
                 <td className="py-1 num text-xs">{Math.round(d.sizeBytes / 1024)} KB</td>
                 <td className="py-1 text-right">
-                  {canEditKind(d.kind) && (
-                    <button className="btn btn-sm btn-danger" disabled={pending} onClick={() => remove(d.id)}>Usuń</button>
-                  )}
+                  <button className="btn btn-sm btn-danger" disabled={pending} onClick={() => remove(d.id)}>Usuń</button>
                 </td>
               </tr>
             ))}
@@ -85,24 +78,22 @@ export function ItemDocumentsPanel({
         </table>
       )}
 
-      {canUpload && (
-        <form onSubmit={upload} className="flex flex-wrap items-end gap-3">
-          <div>
-            <label className="label">Rodzaj</label>
-            <select className="input" value={kind} onChange={(e) => setKind(e.target.value as DocumentKind)}>
-              {draftEditable && <option value="DRAFT">{DOCUMENT_KIND_LABEL.DRAFT}</option>}
-              {draftEditable && <option value="ATTACHMENT">{DOCUMENT_KIND_LABEL.ATTACHMENT}</option>}
-              {resultEditable && <option value="RESULT">{DOCUMENT_KIND_LABEL.RESULT}</option>}
-            </select>
-          </div>
-          <div>
-            <label className="label">Plik</label>
-            <input ref={fileRef} type="file" className="input" />
-          </div>
-          <button type="submit" className="btn btn-sm" disabled={pending}>{pending ? "Wgrywanie…" : "Dodaj dokument"}</button>
-          {error && <div className="text-sm w-full" style={{ color: "var(--color-no)" }}>{error}</div>}
-        </form>
-      )}
+      <form onSubmit={upload} className="flex flex-wrap items-end gap-3">
+        <div>
+          <label className="label">Rodzaj</label>
+          <select className="input" value={kind} onChange={(e) => setKind(e.target.value as DocumentKind)}>
+            <option value="DRAFT">{DOCUMENT_KIND_LABEL.DRAFT}</option>
+            <option value="ATTACHMENT">{DOCUMENT_KIND_LABEL.ATTACHMENT}</option>
+            <option value="RESULT">{DOCUMENT_KIND_LABEL.RESULT}</option>
+          </select>
+        </div>
+        <div>
+          <label className="label">Plik</label>
+          <input ref={fileRef} type="file" className="input" />
+        </div>
+        <button type="submit" className="btn btn-sm" disabled={pending}>{pending ? "Wgrywanie…" : "Dodaj dokument"}</button>
+        {error && <div className="text-sm w-full" style={{ color: "var(--color-no)" }}>{error}</div>}
+      </form>
     </div>
   );
 }

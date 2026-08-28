@@ -72,7 +72,7 @@ export function NewCaseForm({ bodies, settings }: { bodies: { id: string; name: 
             {Object.entries(CLOSE_MODE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </div>
-        {closeMode === "DEADLINE" && (
+        {(closeMode === "DEADLINE" || closeMode === "DEADLINE_OR_ALL_VOTED") && (
           <div>
             <label className="label">Termin końcowy</label>
             <input type="datetime-local" className="input" value={deadlineAt} onChange={(e) => setDeadlineAt(e.target.value)} required />

@@ -30,6 +30,7 @@ export const CLOSE_MODE_LABEL: Record<CloseMode, string> = {
   MANUAL: "Ręczne (operator zamyka)",
   ALL_VOTED: "Po oddaniu głosów przez wszystkich uprawnionych",
   DEADLINE: "Z upływem terminu",
+  DEADLINE_OR_ALL_VOTED: "Z upływem terminu lub po oddaniu wszystkich głosów",
 };
 
 export const RESULTS_VISIBILITY_LABEL: Record<ResultsVisibility, string> = {
@@ -57,6 +58,21 @@ export function formatDateTime(d: Date | string | null | undefined): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Europe/Warsaw",
+  });
+}
+
+/** Jak formatDateTime, ale z sekundami - używane w nagłówku raportu głosowania (jak w iOBRADACH). */
+export function formatDateTimeSeconds(d: Date | string | null | undefined): string {
+  if (!d) return "-";
+  const date = typeof d === "string" ? new Date(d) : d;
+  return date.toLocaleString("pl-PL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
     timeZone: "Europe/Warsaw",
   });
 }

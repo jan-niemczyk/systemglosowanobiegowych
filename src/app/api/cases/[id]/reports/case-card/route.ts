@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { renderPdf, pdfResponse } from "@/lib/pdf";
 import { formatDateTime } from "@/lib/labels";
-import { buildItemReport } from "@/lib/voteReportData";
+import { buildItemReport, type ReportCaseInfo } from "@/lib/voteReportData";
 import { itemReportPdfContent } from "@/lib/voteReportPdf";
 import { NextResponse } from "next/server";
 
@@ -34,6 +34,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   });
   if (!kase) return new NextResponse("Not found", { status: 404 });
   const settings = await prisma.settings.upsert({ where: { id: "singleton" }, create: { id: "singleton" }, update: {} });
+  const caseInfo: ReportCaseInfo = { organizationName: settings.organizationName, caseTitle: kase.title, caseNumber: null, closedAt: kase.closedAt };
 
   const votedUserIds = new Set<string>();
   for (const item of kase.items) {
@@ -77,8 +78,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
 
   for (const item of kase.items) {
     if (item.status === "CLOSED") {
-      const block = buildItemReport(item, kase.participants);
-      content.push(itemReportPdfContent(block));
+      const block = buildItemReport(item, kase.participants, caseInfo);
+      content.push(itemReportPdfContent(block, { standalone: false }));
     } else {
       content.push({
         stack: [

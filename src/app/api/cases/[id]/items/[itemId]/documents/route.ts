@@ -57,12 +57,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string; it
   if (typeof kindRaw !== "string" || !(kindRaw in DocumentKind)) return new NextResponse("Nieprawidłowy rodzaj dokumentu", { status: 400 });
   const kind = kindRaw as DocumentKind;
 
-  const editableNow = kind === DocumentKind.RESULT
-    ? (item.case.status === CaseStatus.CLOSED || item.case.status === CaseStatus.RESULTS_PUBLISHED)
-    : (item.case.status === CaseStatus.DRAFT || item.case.status === CaseStatus.OPEN);
-  if (!editableNow) {
-    return new NextResponse("Tego rodzaju dokumentu nie można teraz dodać na obecnym etapie sprawy", { status: 400 });
-  }
+  // Operator może swobodnie wymieniać dokumenty w każdym momencie - bez ograniczeń
+  // na status sprawy i bez logowania w rejestrze zdarzeń (na wyraźne życzenie).
 
   const settings = await prisma.settings.upsert({ where: { id: "singleton" }, create: { id: "singleton" }, update: {} });
   const ext = (file.name.split(".").pop() ?? "").toLowerCase();

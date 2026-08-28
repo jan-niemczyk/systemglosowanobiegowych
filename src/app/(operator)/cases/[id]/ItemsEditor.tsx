@@ -51,7 +51,7 @@ export function ItemsEditor({ caseId, items }: { caseId: string; items: Item[] }
                 </div>
               )}
               <div className="mt-2">
-                <ItemDocumentsPanel caseId={caseId} itemId={item.id} caseStatus="DRAFT" documents={item.documents} />
+                <ItemDocumentsPanel caseId={caseId} itemId={item.id} documents={item.documents} />
               </div>
             </div>
             <div className="flex gap-2 shrink-0">

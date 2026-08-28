@@ -22,41 +22,42 @@ enum Role {
 
 /// Etapy cyklu życia sprawy obiegowej (sekcja 7 koncepcji).
 enum CaseStatus {
-  DRAFT              // projekt - w przygotowaniu przez operatora
-  OPEN               // otwarta - trwa oddawanie głosów
-  CLOSED             // zamknięta - głosowanie zakończone
-  RESULTS_PUBLISHED  // wyniki opublikowane i dostępne uczestnikom
-  CANCELLED          // anulowana przed otwarciem lub w trakcie
+  DRAFT // projekt - w przygotowaniu przez operatora
+  OPEN // otwarta - trwa oddawanie głosów
+  CLOSED // zamknięta - głosowanie zakończone
+  RESULTS_PUBLISHED // wyniki opublikowane i dostępne uczestnikom
+  CANCELLED // anulowana przed otwarciem lub w trakcie
 }
 
 /// Tryb zakończenia sprawy (sekcja 7.1).
 enum CloseMode {
-  MANUAL        // operator zamyka ręcznie po ocenie
-  ALL_VOTED     // automatycznie, gdy wszyscy uprawnieni oddadzą głos na wszystkich pozycjach
-  DEADLINE      // automatycznie z upływem terminu (obsługiwane przez harmonogram)
+  MANUAL // operator zamyka ręcznie po ocenie
+  ALL_VOTED // automatycznie, gdy wszyscy uprawnieni oddadzą głos na wszystkich pozycjach
+  DEADLINE // automatycznie z upływem terminu (obsługiwane przez harmonogram)
+  DEADLINE_OR_ALL_VOTED // automatycznie z upływem terminu LUB po oddaniu wszystkich głosów - co nastąpi pierwsze, jak DEADLINE
 }
 
 /// Sposób publikacji wyników (sekcja 7.3).
 enum ResultsVisibility {
-  AUTO_ON_CLOSE  // wyniki widoczne od razu po zamknięciu
-  MANUAL         // operator publikuje wyniki ręcznie po weryfikacji
+  AUTO_ON_CLOSE // wyniki widoczne od razu po zamknięciu
+  MANUAL // operator publikuje wyniki ręcznie po weryfikacji
 }
 
 enum VoteType {
-  STANDARD   // za / przeciw / wstrzymuję się
-  PACKAGE    // pakietowe - wiele pozycji, na każdą osobno za/przeciw/wstrzym.
-  LIST       // na kandydatów / listę - wybór dopuszczonych opcji
+  STANDARD // za / przeciw / wstrzymuję się
+  PACKAGE // pakietowe - wiele pozycji, na każdą osobno za/przeciw/wstrzym.
+  LIST // na kandydatów / listę - wybór dopuszczonych opcji
 }
 
 enum VoteVisibility {
-  OPEN     // jawne - z imienną historią
-  SECRET   // tajne - bez powiązania osoby z wyborem
+  OPEN // jawne - z imienną historią
+  SECRET // tajne - bez powiązania osoby z wyborem
 }
 
 enum ItemStatus {
-  PENDING   // przed otwarciem sprawy
-  OPEN      // trwa głosowanie nad pozycją
-  CLOSED    // zamknięta wraz ze sprawą
+  PENDING // przed otwarciem sprawy
+  OPEN // trwa głosowanie nad pozycją
+  CLOSED // zamknięta wraz ze sprawą
 }
 
 enum VoteChoice {
@@ -66,9 +67,9 @@ enum VoteChoice {
 }
 
 enum DocumentKind {
-  DRAFT       // projekt uchwały/decyzji - publikowany przed otwarciem
-  ATTACHMENT  // załącznik pomocniczy - publikowany przed otwarciem
-  RESULT      // dokument wynikowy - publikowany po zamknięciu
+  DRAFT // projekt uchwały/decyzji - publikowany przed otwarciem
+  ATTACHMENT // załącznik pomocniczy - publikowany przed otwarciem
+  RESULT // dokument wynikowy - publikowany po zamknięciu
 }
 
 enum AuditAction {
@@ -94,24 +95,24 @@ enum AuditAction {
 // ─────────────────────────────────────────────────────────────────
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  role         Role     @default(PARTICIPANT)
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  role          Role     @default(PARTICIPANT)
   /// Funkcja osoby (np. "Przewodniczący", "Wiceprzewodnicząca") - do wydruków.
   functionTitle String?
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  bodyMemberships BodyMembership[]
+  bodyMemberships    BodyMembership[]
   caseParticipations CaseParticipant[]
-  operatedCases    Case[]            @relation("CaseOperator")
-  ballots          Ballot[]
-  auditLogs        AuditLog[]
-  uploadedDocuments CaseDocument[]
+  operatedCases      Case[]            @relation("CaseOperator")
+  ballots            Ballot[]
+  auditLogs          AuditLog[]
+  uploadedDocuments  CaseDocument[]
 
   @@index([role])
   @@index([active])
@@ -119,18 +120,18 @@ model User {
 
 /// Globalne ustawienia organizacji (jeden rekord).
 model Settings {
-  id                    String             @id @default("singleton")
-  organizationName      String             @default("Organizacja")
-  logoUrl               String?
-  defaultVoteVisibility VoteVisibility     @default(OPEN)
-  defaultCloseMode      CloseMode          @default(MANUAL)
+  id                       String            @id @default("singleton")
+  organizationName         String            @default("Organizacja")
+  logoUrl                  String?
+  defaultVoteVisibility    VoteVisibility    @default(OPEN)
+  defaultCloseMode         CloseMode         @default(MANUAL)
   defaultResultsVisibility ResultsVisibility @default(MANUAL)
-  defaultAllowVoteChange Boolean           @default(true)
+  defaultAllowVoteChange   Boolean           @default(true)
   /// Limit wielkości pojedynczego pliku dokumentu (MB).
-  maxDocumentSizeMB     Int                @default(20)
+  maxDocumentSizeMB        Int               @default(20)
   /// Dopuszczalne rozszerzenia plików dokumentów (bez kropki, małe litery).
-  allowedDocumentTypes  String[]           @default(["pdf", "doc", "docx", "odt", "jpg", "jpeg", "png"])
-  updatedAt             DateTime           @updatedAt
+  allowedDocumentTypes     String[]          @default(["pdf", "doc", "docx", "odt", "jpg", "jpeg", "png"])
+  updatedAt                DateTime          @updatedAt
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -171,27 +172,27 @@ model BodyMembership {
 // ─────────────────────────────────────────────────────────────────
 
 model Case {
-  id          String     @id @default(cuid())
+  id          String  @id @default(cuid())
   /// Opcjonalny numer sprawy, np. "12/2026".
   number      String?
   title       String
   description String?
   bodyId      String?
-  body        Body?      @relation(fields: [bodyId], references: [id], onDelete: SetNull)
+  body        Body?   @relation(fields: [bodyId], references: [id], onDelete: SetNull)
   operatorId  String?
-  operator    User?      @relation("CaseOperator", fields: [operatorId], references: [id], onDelete: SetNull)
+  operator    User?   @relation("CaseOperator", fields: [operatorId], references: [id], onDelete: SetNull)
 
   status CaseStatus @default(DRAFT)
 
   // ── konfiguracja (osobno dla każdej sprawy - sekcja 3) ──
-  closeMode          CloseMode          @default(MANUAL)
-  resultsVisibility  ResultsVisibility  @default(MANUAL)
-  allowVoteChange    Boolean            @default(true)
+  closeMode         CloseMode         @default(MANUAL)
+  resultsVisibility ResultsVisibility @default(MANUAL)
+  allowVoteChange   Boolean           @default(true)
 
   // ── terminy ──
-  openedAt          DateTime?
-  deadlineAt        DateTime?   // termin końcowy (dla closeMode = DEADLINE)
-  closedAt          DateTime?
+  openedAt           DateTime?
+  deadlineAt         DateTime? // termin końcowy (dla closeMode = DEADLINE)
+  closedAt           DateTime?
   resultsPublishedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -230,9 +231,9 @@ model CaseParticipant {
 // ─────────────────────────────────────────────────────────────────
 
 model VotingItem {
-  id          String     @id @default(cuid())
+  id          String  @id @default(cuid())
   caseId      String
-  case        Case       @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  case        Case    @relation(fields: [caseId], references: [id], onDelete: Cascade)
   order       Int
   title       String
   description String?
@@ -269,20 +270,20 @@ model VotingItem {
 }
 
 model VoteOption {
-  id             String  @id @default(cuid())
-  itemId         String
-  item           VotingItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  order          Int
-  label          String  // nazwisko kandydata / nazwa pozycji pakietu
-  description    String?
+  id            String     @id @default(cuid())
+  itemId        String
+  item          VotingItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  order         Int
+  label         String // nazwisko kandydata / nazwa pozycji pakietu
+  description   String?
   // snapshot wyniku po zamknięciu (jawne)
-  resultYes      Int?
-  resultNo       Int?
-  resultAbstain  Int?
+  resultYes     Int?
+  resultNo      Int?
+  resultAbstain Int?
   // anonimowe liczniki (tajne)
-  secretYes      Int @default(0)
-  secretNo       Int @default(0)
-  secretAbstain  Int @default(0)
+  secretYes     Int        @default(0)
+  secretNo      Int        @default(0)
+  secretAbstain Int        @default(0)
 
   ballotSelections BallotSelection[]
 
@@ -297,8 +298,8 @@ model Ballot {
   userId String?
   user   User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  choice     VoteChoice?        // STANDARD
-  selections BallotSelection[]  // PACKAGE / LIST
+  choice     VoteChoice? // STANDARD
+  selections BallotSelection[] // PACKAGE / LIST
 
   // snapshot personaliów w chwili oddania głosu
   voterFirstName String?
@@ -312,11 +313,11 @@ model Ballot {
 }
 
 model BallotSelection {
-  id       String     @id @default(cuid())
+  id       String      @id @default(cuid())
   ballotId String
-  ballot   Ballot     @relation(fields: [ballotId], references: [id], onDelete: Cascade)
+  ballot   Ballot      @relation(fields: [ballotId], references: [id], onDelete: Cascade)
   optionId String
-  option   VoteOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  option   VoteOption  @relation(fields: [optionId], references: [id], onDelete: Cascade)
   /// Pakiet: głos oddany na tę pozycję. Lista: pozostaje null (zaznaczenie = ZA).
   choice   VoteChoice?
 
@@ -347,7 +348,7 @@ model CaseDocument {
   itemId       String
   item         VotingItem   @relation(fields: [itemId], references: [id], onDelete: Cascade)
   kind         DocumentKind
-  fileName     String       // nazwa wyświetlana
+  fileName     String // nazwa wyświetlana
   storedName   String       @unique // nazwa pliku na dysku (losowa)
   mimeType     String
   sizeBytes    Int

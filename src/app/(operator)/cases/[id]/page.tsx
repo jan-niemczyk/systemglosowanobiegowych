@@ -126,7 +126,6 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
                   <ItemDocumentsPanel
                     caseId={kase.id}
                     itemId={item.id}
-                    caseStatus={kase.status}
                     documents={item.documents.map((d) => ({ ...d, uploadedAt: d.uploadedAt.toISOString() }))}
                   />
                 </div>

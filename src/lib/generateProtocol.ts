@@ -5,7 +5,7 @@
  */
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, HeadingLevel } from "docx";
 import { formatDateTime } from "@/lib/labels";
-import { buildItemReport, type ReportItemInput, type ReportParticipant } from "@/lib/voteReportData";
+import { buildItemReport, type ReportItemInput, type ReportParticipant, type ReportCaseInfo } from "@/lib/voteReportData";
 import { itemReportDocxBlocks } from "@/lib/voteReportDocx";
 
 const FONT = "Arial";
@@ -33,6 +33,7 @@ function cell(text: string, header = false, width = 50): TableCell {
 }
 
 export async function generateProtocolDocx(kase: ProtocolCase, organizationName: string): Promise<Buffer> {
+  const caseInfo: ReportCaseInfo = { organizationName, caseTitle: kase.title, caseNumber: null, closedAt: kase.closedAt };
   const votedUserIds = new Set<string>();
   for (const item of kase.items) {
     for (const b of item.ballots) if (b.userId) votedUserIds.add(b.userId);
@@ -73,7 +74,7 @@ export async function generateProtocolDocx(kase: ProtocolCase, organizationName:
 
   for (const item of kase.items) {
     if (item.status === "CLOSED") {
-      const block = buildItemReport(item, kase.participants);
+      const block = buildItemReport(item, kase.participants, caseInfo);
       children.push(...itemReportDocxBlocks(block));
     } else {
       children.push(p(`${item.order}. ${item.title}`, { bold: true, size: 22 }));

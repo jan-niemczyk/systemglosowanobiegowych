@@ -1,5 +1,5 @@
 import type { ItemStatus, VoteChoice, VoteType, VoteVisibility } from "@prisma/client";
-import { VOTE_TYPE_LABEL, VOTE_VISIBILITY_LABEL, CHOICE_LABEL } from "@/lib/labels";
+import { VOTE_VISIBILITY_LABEL, CHOICE_LABEL } from "@/lib/labels";
 
 type OptionResult = { id: string; label: string; resultYes: number | null; resultNo: number | null; resultAbstain: number | null };
 type BallotResult = {
@@ -24,6 +24,9 @@ export function ItemResult({ item }: { item: Item; showVoting?: boolean }) {
   const namedRows = item.visibility === "OPEN" && item.ballots
     ? [...item.ballots].sort((a, b) => (a.voterLastName ?? "").localeCompare(b.voterLastName ?? "", "pl"))
     : null;
+  const againstAllCount = item.type === "LIST" && namedRows
+    ? namedRows.filter((b) => b.selections.length === 0).length
+    : 0;
 
   return (
     <div className="card-soft p-4">
@@ -31,7 +34,7 @@ export function ItemResult({ item }: { item: Item; showVoting?: boolean }) {
         <div>
           <div className="font-medium text-sm">{item.order}. {item.title}</div>
           <div className="text-xs mt-1" style={{ color: "var(--color-ink-3)" }}>
-            {VOTE_TYPE_LABEL[item.type]} {VOTE_VISIBILITY_LABEL[item.visibility]}
+            {VOTE_VISIBILITY_LABEL[item.visibility]}
           </div>
         </div>
         {!closed && <span className="pill pill-live">Trwa głosowanie</span>}
@@ -95,12 +98,17 @@ export function ItemResult({ item }: { item: Item; showVoting?: boolean }) {
                           ? (b.choice ? CHOICE_LABEL[b.choice] : "-")
                           : item.type === "PACKAGE"
                             ? b.selections.map((s) => `${item.options.find((o) => o.id === s.optionId)?.label ?? ""}: ${s.choice ? CHOICE_LABEL[s.choice] : "-"}`).join("; ")
-                            : (b.selections.map((s) => item.options.find((o) => o.id === s.optionId)?.label).filter(Boolean).join(", ") || "(brak zaznaczeń)")}
+                            : item.options.map((o) => `${o.label}: ${b.selections.some((s) => s.optionId === o.id) ? "za" : "pr."}`).join("; ")}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              {item.type === "LIST" && againstAllCount > 0 && (
+                <div className="text-xs mt-1" style={{ color: "var(--color-ink-3)" }}>
+                  Żadnej kandydatury nie poparło: {againstAllCount}
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -30,7 +30,10 @@ export function CaseActions({
   }
 
   function remove() {
-    if (!confirm("Usunąć projekt sprawy? Tej operacji nie można cofnąć.")) return;
+    const msg = status === "DRAFT"
+      ? "Usunąć projekt sprawy? Tej operacji nie można cofnąć."
+      : "Usunąć sprawę? To BEZPOWROTNIE skasuje wszystkie oddane głosy, skład uprawnionych i dokumenty. Tej operacji nie można cofnąć.";
+    if (!confirm(msg)) return;
     startTransition(async () => {
       const r = await fetch(`/api/cases/${caseId}`, { method: "DELETE" });
       if (r.ok) router.push("/cases");
@@ -45,7 +48,6 @@ export function CaseActions({
       <div className="flex gap-2">
         {status === "DRAFT" && (
           <>
-            <button className="btn btn-danger btn-sm" disabled={pending} onClick={remove}>Usuń projekt</button>
             <button className="btn btn-danger btn-sm" disabled={pending} onClick={() => call("/cancel", "Anulować sprawę?")}>Anuluj</button>
             <button className="btn btn-primary" disabled={pending || !canOpen} onClick={() => call("/open")}>Otwórz sprawę</button>
           </>
@@ -59,6 +61,9 @@ export function CaseActions({
         {status === "CLOSED" && (
           <button className="btn btn-primary" disabled={pending} onClick={() => call("/publish-results")}>Opublikuj wyniki</button>
         )}
+        <button className="btn btn-danger btn-sm" disabled={pending} onClick={remove}>
+          {status === "DRAFT" ? "Usuń projekt" : "Usuń sprawę"}
+        </button>
       </div>
       {errors.length > 0 && (
         <div className="text-sm text-right" style={{ color: "var(--color-no)" }}>

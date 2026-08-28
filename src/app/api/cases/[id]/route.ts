@@ -1,7 +1,9 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { audit } from "@/lib/audit";
+import { documentFilePath } from "@/lib/documentStorage";
 import { NextResponse } from "next/server";
+import { unlink } from "fs/promises";
 import { z } from "zod";
 import { CloseMode, ResultsVisibility, CaseStatus } from "@prisma/client";
 
@@ -69,16 +71,32 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   return NextResponse.json({ ok: true });
 }
 
+/**
+ * DELETE /api/cases/[id] - operator może usunąć sprawę w KAŻDYM statusie (na wyraźne
+ * życzenie), także zamkniętą z oddanymi głosami - to nieodwracalne kasuje głosy, skład i
+ * dokumenty (kaskada w schemacie). Wpis w rejestrze zdarzeń zostaje (caseId -> null),
+ * z metadanymi identyfikującymi usuniętą sprawę, bo po usunięciu to jedyny ślad.
+ */
 export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session || session.user.role !== "OPERATOR") return new NextResponse("Unauthorized", { status: 401 });
   const { id } = await ctx.params;
-  const kase = await prisma.case.findUnique({ where: { id } });
+  const kase = await prisma.case.findUnique({ where: { id }, include: { participants: true, items: true } });
   if (!kase) return new NextResponse("Not found", { status: 404 });
-  if (kase.status !== CaseStatus.DRAFT) {
-    return new NextResponse("Usuwać można wyłącznie sprawy w statusie „projekt”", { status: 400 });
-  }
+
+  const docs = await prisma.caseDocument.findMany({ where: { item: { caseId: id } }, select: { storedName: true } });
+
   await prisma.case.delete({ where: { id } });
-  await audit({ action: "CASE_DELETED", description: `Usunięto sprawę „${kase.title}”`, userId: session.user.id });
+  await Promise.all(docs.map((d) => unlink(documentFilePath(d.storedName)).catch(() => {})));
+
+  await audit({
+    action: "CASE_DELETED",
+    description: `Usunięto sprawę „${kase.title}”`,
+    userId: session.user.id,
+    metadata: {
+      number: kase.number, title: kase.title, status: kase.status,
+      participantsCount: kase.participants.length, itemsCount: kase.items.length,
+    },
+  });
   return NextResponse.json({ ok: true });
 }
