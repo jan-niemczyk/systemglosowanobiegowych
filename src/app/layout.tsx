@@ -3,8 +3,8 @@ import "./globals.css";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "iOBRADY - system obsługi posiedzeń",
-  description: "Webowa aplikacja do obsługi posiedzeń, obecności i głosowań organów kolegialnych.",
+  title: "iGŁOSOWANIA - System Głosowań Obiegowych",
+  description: "Platforma do przygotowywania, przeprowadzania i dokumentowania głosowań obiegowych organów kolegialnych.",
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
   },

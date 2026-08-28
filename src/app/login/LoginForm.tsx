@@ -32,12 +32,12 @@ export default function LoginForm() {
       <div className="w-full max-w-[440px]">
         {/* nagłówek z pieczęcią */}
         <header className="mb-10">
-          <div className="eyebrow mb-3">System obsługi posiedzeń</div>
+          <div className="eyebrow mb-3">System Głosowań Obiegowych</div>
           <h1 style={{ fontSize: 44, lineHeight: 1.05, fontWeight: 500 }}>
-            iOBRADY.
+            iGŁOSOWANIA.
           </h1>
           <p className="mt-3 text-sm" style={{ color: "var(--color-ink-2)" }}>
-            Zaloguj się, aby przejść do panelu posiedzenia.
+            Zaloguj się, aby przejść do swoich spraw.
           </p>
         </header>
 

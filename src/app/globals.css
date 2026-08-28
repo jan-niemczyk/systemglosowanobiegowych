@@ -22,8 +22,23 @@
   --color-abstain-bg:   #FEF9C3;
 
   --color-live:         #E11D48;   /* "live" / głosowanie trwa */
-  --color-quorum-ok:    #15803D;
-  --color-quorum-bad:   #DC2626;
+
+  /* ─── paleta marki (granat / błękit / turkus) ──────────────────── */
+  --color-brand-navy:   #0B2A4A;
+  --color-brand-blue:   #2563EB;
+  --color-brand-teal:   #0D9C8F;
+
+  /* ─── statusy sprawy (kolor wspiera tekst, nie zastępuje) ──────── */
+  --color-status-draft:     #64748B;
+  --color-status-draft-bg:  #F1F5F9;
+  --color-status-open:      #2563EB;
+  --color-status-open-bg:   #DBEAFE;
+  --color-status-closed:    #0F172A;
+  --color-status-closed-bg: #E2E8F0;
+  --color-status-published: #0D9C8F;
+  --color-status-published-bg: #CCFBF1;
+  --color-status-cancelled:     #B91C1C;
+  --color-status-cancelled-bg:  #FEE2E2;
 
   /* ─── typografia ────────────────────────────────────────────── */
   --font-serif: "Inter", -apple-system, system-ui, sans-serif;
@@ -123,6 +138,15 @@
   .pill-ok { border-color: var(--color-yes); color: var(--color-yes); background: var(--color-yes-bg); }
   .pill-bad { border-color: var(--color-no); color: var(--color-no); background: var(--color-no-bg); }
   .pill-neutral { border-color: var(--color-rule-soft); color: var(--color-ink-2); }
+
+  .pill-status-draft { border-color: var(--color-status-draft); color: var(--color-status-draft); background: var(--color-status-draft-bg); }
+  .pill-status-open { border-color: var(--color-status-open); color: var(--color-status-open); background: var(--color-status-open-bg); }
+  .pill-status-closed { border-color: var(--color-status-closed); color: var(--color-status-closed); background: var(--color-status-closed-bg); }
+  .pill-status-published { border-color: var(--color-status-published); color: var(--color-status-published); background: var(--color-status-published-bg); }
+  .pill-status-cancelled { border-color: var(--color-status-cancelled); color: var(--color-status-cancelled); background: var(--color-status-cancelled-bg); }
+
+  .btn-brand { background: var(--color-brand-teal); color: #FFFFFF; border-color: var(--color-brand-teal); }
+  @media (hover: hover) { .btn-brand:hover { background: #0B7F74; border-color: #0B7F74; } }
 
   .btn {
     display: inline-flex;

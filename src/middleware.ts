@@ -7,10 +7,9 @@ export default auth((req) => {
   const role = req.auth?.user?.role;
   const path = nextUrl.pathname;
 
-  // strony publiczne (display - widok prezentacyjny dla sali)
-  if (path === "/login" || path.startsWith("/api/auth") || path.startsWith("/display") || path.startsWith("/api/display")) {
+  if (path === "/login" || path.startsWith("/api/auth")) {
     if (isLoggedIn && path === "/login") {
-      const target = role === "OPERATOR" ? "/dashboard" : "/session";
+      const target = role === "OPERATOR" ? "/dashboard" : "/my-cases";
       return NextResponse.redirect(new URL(target, nextUrl));
     }
     return NextResponse.next();
@@ -22,25 +21,18 @@ export default auth((req) => {
     return NextResponse.redirect(url);
   }
 
-  // ochrona zakresów po roli
-  const operatorOnly = ["/dashboard", "/meetings", "/participants", "/archive", "/settings", "/votes", "/audit"];
-  const participantOnly = ["/session"];
+  const operatorOnly = ["/dashboard", "/cases", "/bodies", "/users", "/audit", "/settings"];
+  const participantOnly = ["/my-cases"];
 
   if (operatorOnly.some((p) => path.startsWith(p)) && role !== "OPERATOR") {
-    return NextResponse.redirect(new URL("/session", nextUrl));
+    return NextResponse.redirect(new URL("/my-cases", nextUrl));
   }
   if (participantOnly.some((p) => path.startsWith(p)) && role === "OPERATOR") {
     return NextResponse.redirect(new URL("/dashboard", nextUrl));
   }
-  // Widok przewodniczącego: operator zawsze; uczestnik-przewodniczący danego posiedzenia
-  // (weryfikacja per-posiedzenie po stronie strony/API na podstawie flagi isChairperson).
-  if (path.startsWith("/chairperson") && role !== "OPERATOR" && role !== "PARTICIPANT") {
-    return NextResponse.redirect(new URL("/session", nextUrl));
-  }
 
-  // strona główna -> redirect po roli
   if (path === "/") {
-    const target = role === "OPERATOR" ? "/dashboard" : "/session";
+    const target = role === "OPERATOR" ? "/dashboard" : "/my-cases";
     return NextResponse.redirect(new URL(target, nextUrl));
   }
 
