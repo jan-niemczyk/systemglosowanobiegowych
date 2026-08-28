@@ -1,0 +1,89 @@
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { newStoredFileName } from "@/lib/ids";
+import { DOCUMENT_STORAGE_DIR, documentFilePath } from "@/lib/documentStorage";
+import { NextResponse } from "next/server";
+import { mkdir, writeFile } from "fs/promises";
+import { DocumentKind, CaseStatus } from "@prisma/client";
+
+/** Dokumenty widoczne uczestnikowi zależnie od etapu sprawy (sekcja 8). */
+function visibleKindsForStatus(status: CaseStatus): DocumentKind[] {
+  if (status === CaseStatus.DRAFT) return [];
+  if (status === CaseStatus.OPEN) return [DocumentKind.DRAFT, DocumentKind.ATTACHMENT];
+  if (status === CaseStatus.CLOSED || status === CaseStatus.RESULTS_PUBLISHED) {
+    return [DocumentKind.DRAFT, DocumentKind.ATTACHMENT, DocumentKind.RESULT];
+  }
+  return [];
+}
+
+export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const session = await auth();
+  if (!session) return new NextResponse("Unauthorized", { status: 401 });
+  const { id } = await ctx.params;
+
+  const kase = await prisma.case.findUnique({ where: { id }, select: { status: true } });
+  if (!kase) return new NextResponse("Not found", { status: 404 });
+
+  let allowedKinds: DocumentKind[] | null = null;
+  if (session.user.role !== "OPERATOR") {
+    const participant = await prisma.caseParticipant.findUnique({ where: { caseId_userId: { caseId: id, userId: session.user.id } } });
+    if (!participant) return new NextResponse("Not found", { status: 404 });
+    allowedKinds = visibleKindsForStatus(kase.status);
+  }
+
+  const docs = await prisma.caseDocument.findMany({
+    where: { caseId: id, ...(allowedKinds ? { kind: { in: allowedKinds } } : {}) },
+    orderBy: { uploadedAt: "asc" },
+  });
+  return NextResponse.json(docs.map((d) => ({
+    id: d.id, kind: d.kind, fileName: d.fileName, mimeType: d.mimeType, sizeBytes: d.sizeBytes, uploadedAt: d.uploadedAt,
+  })));
+}
+
+/** POST /api/cases/[id]/documents - wgranie dokumentu (multipart/form-data: file, kind). */
+export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const session = await auth();
+  if (!session || session.user.role !== "OPERATOR") return new NextResponse("Unauthorized", { status: 401 });
+  const { id } = await ctx.params;
+
+  const kase = await prisma.case.findUnique({ where: { id } });
+  if (!kase) return new NextResponse("Not found", { status: 404 });
+
+  const form = await req.formData().catch(() => null);
+  const file = form?.get("file");
+  const kindRaw = form?.get("kind");
+  if (!(file instanceof File)) return new NextResponse("Brak pliku", { status: 400 });
+  if (typeof kindRaw !== "string" || !(kindRaw in DocumentKind)) return new NextResponse("Nieprawidłowy rodzaj dokumentu", { status: 400 });
+  const kind = kindRaw as DocumentKind;
+
+  const editableNow = kind === DocumentKind.RESULT
+    ? (kase.status === CaseStatus.CLOSED || kase.status === CaseStatus.RESULTS_PUBLISHED)
+    : (kase.status === CaseStatus.DRAFT || kase.status === CaseStatus.OPEN);
+  if (!editableNow) {
+    return new NextResponse("Tego rodzaju dokumentu nie można teraz dodać na obecnym etapie sprawy", { status: 400 });
+  }
+
+  const settings = await prisma.settings.upsert({ where: { id: "singleton" }, create: { id: "singleton" }, update: {} });
+  const ext = (file.name.split(".").pop() ?? "").toLowerCase();
+  if (!settings.allowedDocumentTypes.includes(ext)) {
+    return new NextResponse(`Niedozwolony typ pliku. Dozwolone: ${settings.allowedDocumentTypes.join(", ")}`, { status: 400 });
+  }
+  if (file.size > settings.maxDocumentSizeMB * 1024 * 1024) {
+    return new NextResponse(`Plik przekracza limit ${settings.maxDocumentSizeMB} MB`, { status: 400 });
+  }
+
+  await mkdir(DOCUMENT_STORAGE_DIR, { recursive: true });
+  const storedName = `${newStoredFileName()}.${ext}`;
+  const buffer = Buffer.from(await file.arrayBuffer());
+  await writeFile(documentFilePath(storedName), buffer);
+
+  const doc = await prisma.caseDocument.create({
+    data: {
+      caseId: id, kind, fileName: file.name, storedName,
+      mimeType: file.type || "application/octet-stream", sizeBytes: file.size,
+      uploadedById: session.user.id,
+    },
+  });
+
+  return NextResponse.json({ ok: true, id: doc.id });
+}
