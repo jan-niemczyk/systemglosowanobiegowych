@@ -15,8 +15,10 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     include: {
       body: true, operator: true,
       participants: { orderBy: [{ lastName: "asc" }, { firstName: "asc" }] },
-      documents: { orderBy: { uploadedAt: "asc" } },
-      items: { orderBy: { order: "asc" }, include: { options: { orderBy: { order: "asc" } } } },
+      items: {
+        orderBy: { order: "asc" },
+        include: { options: { orderBy: { order: "asc" } }, documents: { orderBy: { uploadedAt: "asc" } } },
+      },
     },
   });
   if (!kase) return new NextResponse("Not found", { status: 404 });
@@ -59,21 +61,16 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     margin: [0, 0, 0, 12],
   });
 
-  content.push({ text: "Dokumenty", fontSize: 12, bold: true, margin: [0, 8, 0, 4] });
-  content.push(
-    kase.documents.length === 0
-      ? { text: "Brak dokumentów.", fontSize: 10 }
-      : {
-          table: { widths: ["*", "auto"], body: [["Plik", "Rodzaj"], ...kase.documents.map((d) => [d.fileName, DOCUMENT_KIND_LABEL[d.kind]])] },
-          layout: "lightHorizontalLines",
-          margin: [0, 0, 0, 12],
-        },
-  );
-
   content.push({ text: "Pozycje głosowania", fontSize: 12, bold: true, margin: [0, 8, 0, 4] });
   for (const item of kase.items) {
     content.push({ text: `${item.order}. ${item.title}`, fontSize: 11, bold: true, margin: [0, 6, 0, 2] });
     content.push({ text: `${VOTE_TYPE_LABEL[item.type]} · ${VOTE_VISIBILITY_LABEL[item.visibility]} · ${formatMajority(item.majorityKind, item.majorityBase)}`, fontSize: 9, color: "#555" });
+    if (item.documents.length > 0) {
+      content.push({
+        text: `Dokumenty: ${item.documents.map((d) => `${d.fileName} (${DOCUMENT_KIND_LABEL[d.kind]})`).join(", ")}`,
+        fontSize: 9, color: "#555", margin: [0, 2, 0, 0],
+      });
+    }
     if (item.status === "CLOSED") {
       content.push({
         text: `Uprawnionych: ${item.resultEligibleCount ?? "-"}  ·  Oddano głosów: ${item.resultCastCount ?? "-"}`,

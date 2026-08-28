@@ -17,13 +17,13 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
   const { id } = await ctx.params;
 
-  const doc = await prisma.caseDocument.findUnique({ where: { id }, include: { case: true } });
+  const doc = await prisma.caseDocument.findUnique({ where: { id }, include: { item: { include: { case: true } } } });
   if (!doc) return new NextResponse("Not found", { status: 404 });
 
   if (session.user.role !== "OPERATOR") {
-    const participant = await prisma.caseParticipant.findUnique({ where: { caseId_userId: { caseId: doc.caseId, userId: session.user.id } } });
+    const participant = await prisma.caseParticipant.findUnique({ where: { caseId_userId: { caseId: doc.item.caseId, userId: session.user.id } } });
     if (!participant) return new NextResponse("Not found", { status: 404 });
-    if (!isVisibleNow(doc.kind, doc.case.status)) return new NextResponse("Not found", { status: 404 });
+    if (!isVisibleNow(doc.kind, doc.item.case.status)) return new NextResponse("Not found", { status: 404 });
   }
 
   try {
@@ -46,12 +46,13 @@ export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string 
   if (!session || session.user.role !== "OPERATOR") return new NextResponse("Unauthorized", { status: 401 });
   const { id } = await ctx.params;
 
-  const doc = await prisma.caseDocument.findUnique({ where: { id }, include: { case: true } });
+  const doc = await prisma.caseDocument.findUnique({ where: { id }, include: { item: { include: { case: true } } } });
   if (!doc) return new NextResponse("Not found", { status: 404 });
 
+  const status = doc.item.case.status;
   const editableNow = doc.kind === DocumentKind.RESULT
-    ? (doc.case.status === CaseStatus.CLOSED || doc.case.status === CaseStatus.RESULTS_PUBLISHED)
-    : (doc.case.status === CaseStatus.DRAFT || doc.case.status === CaseStatus.OPEN);
+    ? (status === CaseStatus.CLOSED || status === CaseStatus.RESULTS_PUBLISHED)
+    : (status === CaseStatus.DRAFT || status === CaseStatus.OPEN);
   if (!editableNow) return new NextResponse("Nie można teraz usunąć tego dokumentu", { status: 400 });
 
   await prisma.caseDocument.delete({ where: { id } });

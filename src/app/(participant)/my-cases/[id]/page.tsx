@@ -2,9 +2,11 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { StatusPill } from "@/components/StatusPill";
-import { formatDateTime, DOCUMENT_KIND_LABEL } from "@/lib/labels";
+import { formatDateTime } from "@/lib/labels";
 import { VotingItemCard } from "./VotingItemCard";
 import { ItemResult } from "@/components/ItemResult";
+import { ItemDocuments } from "@/components/ItemDocuments";
+import type { DocumentKind } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -21,16 +23,16 @@ export default async function MyCaseDetailPage({ params }: { params: Promise<{ i
     where: { id },
     include: {
       body: true,
-      items: { orderBy: { order: "asc" }, include: { options: { orderBy: { order: "asc" } } } },
-      documents: { orderBy: { uploadedAt: "asc" } },
+      items: {
+        orderBy: { order: "asc" },
+        include: { options: { orderBy: { order: "asc" } }, documents: { orderBy: { uploadedAt: "asc" } } },
+      },
     },
   });
   if (!kase || kase.status === "DRAFT") notFound();
 
-  const visibleDocs = kase.documents.filter((d) => {
-    if (d.kind === "RESULT") return kase.status === "CLOSED" || kase.status === "RESULTS_PUBLISHED";
-    return true;
-  });
+  const visibleDocsFor = (docs: { id: string; kind: DocumentKind; fileName: string }[]) =>
+    docs.filter((d) => d.kind !== "RESULT" || kase.status === "CLOSED" || kase.status === "RESULTS_PUBLISHED");
 
   const [ballots, markers] = await Promise.all([
     prisma.ballot.findMany({ where: { itemId: { in: kase.items.map((i) => i.id) }, userId }, include: { selections: true } }),
@@ -55,44 +57,38 @@ export default async function MyCaseDetailPage({ params }: { params: Promise<{ i
         </div>
       </header>
 
-      {visibleDocs.length > 0 && (
-        <section>
-          <h2 className="text-sm font-medium mb-3">Dokumenty</h2>
-          <ul className="space-y-1 text-sm">
-            {visibleDocs.map((d) => (
-              <li key={d.id}>
-                <a className="underline" href={`/api/documents/${d.id}`}>{d.fileName}</a>
-                <span className="ml-2 text-xs" style={{ color: "var(--color-ink-3)" }}>({DOCUMENT_KIND_LABEL[d.kind]})</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
       <section className="space-y-4">
         <h2 className="text-sm font-medium">Pozycje głosowania</h2>
         {kase.items.map((item) => {
+          const docs = visibleDocsFor(item.documents);
           if (kase.status === "OPEN" && item.status === "OPEN" && participant.hasVotingRight) {
             const ballot = ballotByItem.get(item.id);
             return (
-              <VotingItemCard
-                key={item.id}
-                item={{
-                  id: item.id, order: item.order, title: item.title, description: item.description,
-                  type: item.type, visibility: item.visibility,
-                  minSelections: item.minSelections, maxSelections: item.maxSelections,
-                  options: item.options.map((o) => ({ id: o.id, label: o.label, description: o.description })),
-                }}
-                allowVoteChange={kase.allowVoteChange}
-                alreadyVoted={item.visibility === "SECRET" ? votedSecretItemIds.has(item.id) : !!ballot}
-                myChoice={ballot?.choice ?? null}
-                mySelectedOptionIds={ballot ? ballot.selections.map((s) => s.optionId) : []}
-                myPackageChoices={ballot ? ballot.selections.filter((s) => s.choice != null).map((s) => ({ optionId: s.optionId, choice: s.choice! })) : []}
-              />
+              <div key={item.id}>
+                <VotingItemCard
+                  item={{
+                    id: item.id, order: item.order, title: item.title, description: item.description,
+                    type: item.type, visibility: item.visibility,
+                    minSelections: item.minSelections, maxSelections: item.maxSelections,
+                    options: item.options.map((o) => ({ id: o.id, label: o.label, description: o.description })),
+                  }}
+                  allowVoteChange={kase.allowVoteChange}
+                  alreadyVoted={item.visibility === "SECRET" ? votedSecretItemIds.has(item.id) : !!ballot}
+                  myChoice={ballot?.choice ?? null}
+                  mySelectedOptionIds={ballot ? ballot.selections.map((s) => s.optionId) : []}
+                  myPackageChoices={ballot ? ballot.selections.filter((s) => s.choice != null).map((s) => ({ optionId: s.optionId, choice: s.choice! })) : []}
+                />
+                <ItemDocuments documents={docs} />
+              </div>
             );
           }
           if (resultsVisible) {
-            return <ItemResult key={item.id} item={item} />;
+            return (
+              <div key={item.id}>
+                <ItemResult item={item} />
+                <ItemDocuments documents={docs} />
+              </div>
+            );
           }
           // zamknięte, wyniki jeszcze nieopublikowane albo brak prawa głosu - tylko potwierdzenie własnego udziału
           const voted = item.visibility === "SECRET" ? votedSecretItemIds.has(item.id) : !!ballotByItem.get(item.id);
@@ -103,6 +99,7 @@ export default async function MyCaseDetailPage({ params }: { params: Promise<{ i
                 {item.status !== "OPEN" && kase.status !== "OPEN" && !resultsVisible && "Głosowanie zakończone, oczekuje na publikację wyników. "}
                 {participant.hasVotingRight ? (voted ? "Twój głos został oddany." : "Nie oddano głosu.") : ""}
               </div>
+              <ItemDocuments documents={docs} />
             </div>
           );
         })}

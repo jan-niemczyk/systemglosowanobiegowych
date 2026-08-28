@@ -2,16 +2,19 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { MajorityBase, MajorityKind, VoteType, VoteVisibility } from "@prisma/client";
+import type { DocumentKind, MajorityBase, MajorityKind, VoteType, VoteVisibility } from "@prisma/client";
 import { VOTE_TYPE_LABEL, VOTE_VISIBILITY_LABEL } from "@/lib/labels";
 import { KIND_LABELS, BASE_LABELS } from "@/lib/majority";
+import { ItemDocumentsPanel } from "./ItemDocumentsPanel";
 
 type Option = { id?: string; label: string; description?: string | null };
+type ItemDoc = { id: string; kind: DocumentKind; fileName: string; sizeBytes: number; uploadedAt: string };
 type Item = {
   id: string; order: number; title: string; description: string | null;
   type: VoteType; visibility: VoteVisibility; majorityKind: MajorityKind; majorityBase: MajorityBase;
   minSelections: number | null; maxSelections: number | null;
   options: Option[];
+  documents: ItemDoc[];
 };
 
 export function ItemsEditor({ caseId, items }: { caseId: string; items: Item[] }) {
@@ -48,6 +51,9 @@ export function ItemsEditor({ caseId, items }: { caseId: string; items: Item[] }
                   Opcje: {item.options.map((o) => o.label).join(", ")}
                 </div>
               )}
+              <div className="mt-2">
+                <ItemDocumentsPanel caseId={caseId} itemId={item.id} caseStatus="DRAFT" documents={item.documents} />
+              </div>
             </div>
             <div className="flex gap-2 shrink-0">
               <button className="btn btn-sm" disabled={pending} onClick={() => setEditingId(item.id)}>Edytuj</button>

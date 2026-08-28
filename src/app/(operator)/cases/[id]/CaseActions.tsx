@@ -9,7 +9,7 @@ export function CaseActions({
 }: {
   caseId: string;
   status: CaseStatus;
-  readiness: { hasParticipants: boolean; hasItems: boolean; hasDraftDocument: boolean };
+  readiness: { hasParticipants: boolean; hasItems: boolean };
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -38,7 +38,7 @@ export function CaseActions({
     });
   }
 
-  const canOpen = readiness.hasParticipants && readiness.hasItems && readiness.hasDraftDocument;
+  const canOpen = readiness.hasParticipants && readiness.hasItems;
 
   return (
     <div className="flex flex-col items-end gap-2">

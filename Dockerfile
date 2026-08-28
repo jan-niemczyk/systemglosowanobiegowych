@@ -48,6 +48,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
 COPY --from=builder --chown=nextjs:nodejs /app/src ./src
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 
+# Katalogi na wgrywane pliki - tworzone i chownowane TU (przed przełączeniem na
+# użytkownika nextjs), bo są punktami montowania wolumenów danych. Docker kopiuje
+# istniejącą zawartość obrazu (w tym właściciela) do nowego, pustego wolumenu przy
+# pierwszym uruchomieniu, więc bez tego zapis jako nextjs kończyłby się EACCES/500.
+RUN mkdir -p public/uploads storage/documents && chown -R nextjs:nodejs public/uploads storage/documents
+
 USER nextjs
 EXPOSE 3000
 CMD ["node", "server.js"]

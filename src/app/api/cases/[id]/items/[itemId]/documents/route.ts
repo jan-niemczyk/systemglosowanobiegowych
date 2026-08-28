@@ -16,23 +16,24 @@ function visibleKindsForStatus(status: CaseStatus): DocumentKind[] {
   return [];
 }
 
-export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+/** GET .../items/[itemId]/documents - lista dokumentów pozycji głosowania. */
+export async function GET(_req: Request, ctx: { params: Promise<{ id: string; itemId: string }> }) {
   const session = await auth();
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
-  const { id } = await ctx.params;
+  const { id, itemId } = await ctx.params;
 
-  const kase = await prisma.case.findUnique({ where: { id }, select: { status: true } });
-  if (!kase) return new NextResponse("Not found", { status: 404 });
+  const item = await prisma.votingItem.findUnique({ where: { id: itemId }, include: { case: true } });
+  if (!item || item.caseId !== id) return new NextResponse("Not found", { status: 404 });
 
   let allowedKinds: DocumentKind[] | null = null;
   if (session.user.role !== "OPERATOR") {
     const participant = await prisma.caseParticipant.findUnique({ where: { caseId_userId: { caseId: id, userId: session.user.id } } });
     if (!participant) return new NextResponse("Not found", { status: 404 });
-    allowedKinds = visibleKindsForStatus(kase.status);
+    allowedKinds = visibleKindsForStatus(item.case.status);
   }
 
   const docs = await prisma.caseDocument.findMany({
-    where: { caseId: id, ...(allowedKinds ? { kind: { in: allowedKinds } } : {}) },
+    where: { itemId, ...(allowedKinds ? { kind: { in: allowedKinds } } : {}) },
     orderBy: { uploadedAt: "asc" },
   });
   return NextResponse.json(docs.map((d) => ({
@@ -40,14 +41,14 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   })));
 }
 
-/** POST /api/cases/[id]/documents - wgranie dokumentu (multipart/form-data: file, kind). */
-export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
+/** POST .../items/[itemId]/documents - wgranie dokumentu do pozycji głosowania (multipart/form-data: file, kind). */
+export async function POST(req: Request, ctx: { params: Promise<{ id: string; itemId: string }> }) {
   const session = await auth();
   if (!session || session.user.role !== "OPERATOR") return new NextResponse("Unauthorized", { status: 401 });
-  const { id } = await ctx.params;
+  const { id, itemId } = await ctx.params;
 
-  const kase = await prisma.case.findUnique({ where: { id } });
-  if (!kase) return new NextResponse("Not found", { status: 404 });
+  const item = await prisma.votingItem.findUnique({ where: { id: itemId }, include: { case: true } });
+  if (!item || item.caseId !== id) return new NextResponse("Not found", { status: 404 });
 
   const form = await req.formData().catch(() => null);
   const file = form?.get("file");
@@ -57,8 +58,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   const kind = kindRaw as DocumentKind;
 
   const editableNow = kind === DocumentKind.RESULT
-    ? (kase.status === CaseStatus.CLOSED || kase.status === CaseStatus.RESULTS_PUBLISHED)
-    : (kase.status === CaseStatus.DRAFT || kase.status === CaseStatus.OPEN);
+    ? (item.case.status === CaseStatus.CLOSED || item.case.status === CaseStatus.RESULTS_PUBLISHED)
+    : (item.case.status === CaseStatus.DRAFT || item.case.status === CaseStatus.OPEN);
   if (!editableNow) {
     return new NextResponse("Tego rodzaju dokumentu nie można teraz dodać na obecnym etapie sprawy", { status: 400 });
   }
@@ -72,18 +73,23 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     return new NextResponse(`Plik przekracza limit ${settings.maxDocumentSizeMB} MB`, { status: 400 });
   }
 
-  await mkdir(DOCUMENT_STORAGE_DIR, { recursive: true });
-  const storedName = `${newStoredFileName()}.${ext}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(documentFilePath(storedName), buffer);
+  try {
+    await mkdir(DOCUMENT_STORAGE_DIR, { recursive: true });
+    const storedName = `${newStoredFileName()}.${ext}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await writeFile(documentFilePath(storedName), buffer);
 
-  const doc = await prisma.caseDocument.create({
-    data: {
-      caseId: id, kind, fileName: file.name, storedName,
-      mimeType: file.type || "application/octet-stream", sizeBytes: file.size,
-      uploadedById: session.user.id,
-    },
-  });
+    const doc = await prisma.caseDocument.create({
+      data: {
+        itemId, kind, fileName: file.name, storedName,
+        mimeType: file.type || "application/octet-stream", sizeBytes: file.size,
+        uploadedById: session.user.id,
+      },
+    });
 
-  return NextResponse.json({ ok: true, id: doc.id });
+    return NextResponse.json({ ok: true, id: doc.id });
+  } catch (err) {
+    console.error("Błąd zapisu dokumentu:", err);
+    return new NextResponse("Nie udało się zapisać pliku na serwerze", { status: 500 });
+  }
 }

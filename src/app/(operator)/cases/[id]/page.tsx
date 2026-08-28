@@ -5,7 +5,7 @@ import { formatDateTime, CLOSE_MODE_LABEL, RESULTS_VISIBILITY_LABEL } from "@/li
 import { CaseActions } from "./CaseActions";
 import { ParticipantsEditor } from "./ParticipantsEditor";
 import { ItemsEditor } from "./ItemsEditor";
-import { DocumentsPanel } from "./DocumentsPanel";
+import { ItemDocumentsPanel } from "./ItemDocumentsPanel";
 import { ItemResult } from "@/components/ItemResult";
 import { ReportsPanel } from "./ReportsPanel";
 
@@ -21,8 +21,10 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
         body: true,
         operator: true,
         participants: { include: { user: true }, orderBy: [{ lastName: "asc" }, { firstName: "asc" }] },
-        items: { orderBy: { order: "asc" }, include: { options: { orderBy: { order: "asc" } } } },
-        documents: { orderBy: { uploadedAt: "asc" } },
+        items: {
+          orderBy: { order: "asc" },
+          include: { options: { orderBy: { order: "asc" } }, documents: { orderBy: { uploadedAt: "asc" } } },
+        },
       },
     }),
     prisma.body.findMany({ orderBy: { name: "asc" } }),
@@ -36,7 +38,6 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
   const readiness = {
     hasParticipants: kase.participants.length > 0,
     hasItems: kase.items.length > 0,
-    hasDraftDocument: kase.documents.some((d) => d.kind === "DRAFT"),
   };
 
   return (
@@ -63,13 +64,12 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
         <Info label="Zamknięto" value={formatDateTime(kase.closedAt)} />
       </section>
 
-      {isDraft && (!readiness.hasParticipants || !readiness.hasItems || !readiness.hasDraftDocument) && (
+      {isDraft && (!readiness.hasParticipants || !readiness.hasItems) && (
         <div className="card-soft p-4 text-sm" style={{ borderColor: "var(--color-abstain)" }}>
           <div className="font-medium mb-1">Warunki otwarcia sprawy</div>
           <ul className="list-disc pl-5 space-y-0.5">
             <li style={{ color: readiness.hasParticipants ? "var(--color-yes)" : "var(--color-ink)" }}>Co najmniej jeden uczestnik składu {readiness.hasParticipants ? "✓" : ""}</li>
             <li style={{ color: readiness.hasItems ? "var(--color-yes)" : "var(--color-ink)" }}>Co najmniej jedna pozycja głosowania {readiness.hasItems ? "✓" : ""}</li>
-            <li style={{ color: readiness.hasDraftDocument ? "var(--color-yes)" : "var(--color-ink)" }}>Co najmniej jeden dokument projektu {readiness.hasDraftDocument ? "✓" : ""}</li>
           </ul>
         </div>
       )}
@@ -91,21 +91,28 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
       <section>
         <h2 className="text-sm font-medium mb-3">Pozycje głosowania ({kase.items.length})</h2>
         {isDraft ? (
-          <ItemsEditor caseId={kase.id} items={kase.items} />
+          <ItemsEditor
+            caseId={kase.id}
+            items={kase.items.map((i) => ({
+              ...i,
+              documents: i.documents.map((d) => ({ ...d, uploadedAt: d.uploadedAt.toISOString() })),
+            }))}
+          />
         ) : (
           <div className="space-y-3">
             {kase.items.map((item) => (
-              <ItemResult key={item.id} item={item} showVoting={isOpen} />
+              <div key={item.id} className="space-y-2">
+                <ItemResult item={item} showVoting={isOpen} />
+                <ItemDocumentsPanel
+                  caseId={kase.id}
+                  itemId={item.id}
+                  caseStatus={kase.status}
+                  documents={item.documents.map((d) => ({ ...d, uploadedAt: d.uploadedAt.toISOString() }))}
+                />
+              </div>
             ))}
           </div>
         )}
-      </section>
-
-      <section>
-        <h2 className="text-sm font-medium mb-3">Dokumenty</h2>
-        <DocumentsPanel caseId={kase.id} caseStatus={kase.status} documents={kase.documents.map((d) => ({
-          id: d.id, kind: d.kind, fileName: d.fileName, sizeBytes: d.sizeBytes, uploadedAt: d.uploadedAt.toISOString(),
-        }))} />
       </section>
 
       {isClosedOrPublished && (

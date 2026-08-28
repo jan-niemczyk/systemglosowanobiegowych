@@ -23,8 +23,10 @@ async function loadForOperator(id: string) {
       body: true,
       operator: true,
       participants: { include: { user: true }, orderBy: [{ lastName: "asc" }, { firstName: "asc" }] },
-      items: { orderBy: { order: "asc" }, include: { options: { orderBy: { order: "asc" } } } },
-      documents: { orderBy: { uploadedAt: "asc" } },
+      items: {
+        orderBy: { order: "asc" },
+        include: { options: { orderBy: { order: "asc" } }, documents: { orderBy: { uploadedAt: "asc" } } },
+      },
     },
   });
 }

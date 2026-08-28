@@ -7,12 +7,16 @@ import { DOCUMENT_KIND_LABEL } from "@/lib/labels";
 
 type Doc = { id: string; kind: DocumentKind; fileName: string; sizeBytes: number; uploadedAt: string };
 
-export function DocumentsPanel({ caseId, caseStatus, documents }: { caseId: string; caseStatus: CaseStatus; documents: Doc[] }) {
+/** Dokumenty przypięte do konkretnej pozycji głosowania (nie do całej sprawy). */
+export function ItemDocumentsPanel({
+  caseId, itemId, caseStatus, documents,
+}: { caseId: string; itemId: string; caseStatus: CaseStatus; documents: Doc[] }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const draftEditable = caseStatus === "DRAFT" || caseStatus === "OPEN";
   const resultEditable = caseStatus === "CLOSED" || caseStatus === "RESULTS_PUBLISHED";
   const [kind, setKind] = useState<DocumentKind>(draftEditable ? "DRAFT" : "RESULT");
+  const [expanded, setExpanded] = useState(documents.length > 0);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -25,7 +29,7 @@ export function DocumentsPanel({ caseId, caseStatus, documents }: { caseId: stri
     form.set("file", file);
     form.set("kind", kind);
     startTransition(async () => {
-      const r = await fetch(`/api/cases/${caseId}/documents`, { method: "POST", body: form });
+      const r = await fetch(`/api/cases/${caseId}/items/${itemId}/documents`, { method: "POST", body: form });
       if (r.ok) { if (fileRef.current) fileRef.current.value = ""; router.refresh(); } else setError(await r.text());
     });
   }
@@ -39,9 +43,19 @@ export function DocumentsPanel({ caseId, caseStatus, documents }: { caseId: stri
   }
 
   const canEditKind = (k: DocumentKind) => (k === "RESULT" ? resultEditable : draftEditable);
+  const canUpload = draftEditable || resultEditable;
+
+  if (!expanded) {
+    return (
+      <button type="button" className="btn btn-sm" onClick={() => setExpanded(true)}>
+        Dokumenty pozycji ({documents.length})
+      </button>
+    );
+  }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
+      <div className="eyebrow">Dokumenty pozycji</div>
       {documents.length === 0 ? (
         <p className="text-sm" style={{ color: "var(--color-ink-3)" }}>Brak dokumentów.</p>
       ) : (
@@ -71,8 +85,8 @@ export function DocumentsPanel({ caseId, caseStatus, documents }: { caseId: stri
         </table>
       )}
 
-      {(draftEditable || resultEditable) && (
-        <form onSubmit={upload} className="card-soft p-4 flex flex-wrap items-end gap-3">
+      {canUpload && (
+        <form onSubmit={upload} className="flex flex-wrap items-end gap-3">
           <div>
             <label className="label">Rodzaj</label>
             <select className="input" value={kind} onChange={(e) => setKind(e.target.value as DocumentKind)}>

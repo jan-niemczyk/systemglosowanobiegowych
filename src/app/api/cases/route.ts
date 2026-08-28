@@ -25,12 +25,12 @@ export async function GET(req: Request) {
   const cases = await prisma.case.findMany({
     where: status ? { status: status as never } : undefined,
     orderBy: [{ createdAt: "desc" }],
-    include: { body: true, _count: { select: { items: true, participants: true, documents: true } } },
+    include: { body: true, _count: { select: { items: true, participants: true } } },
   });
   return NextResponse.json(cases.map((c) => ({
     id: c.id, number: c.number, title: c.title, status: c.status,
     bodyName: c.body?.name ?? null,
-    itemCount: c._count.items, participantCount: c._count.participants, documentCount: c._count.documents,
+    itemCount: c._count.items, participantCount: c._count.participants,
     deadlineAt: c.deadlineAt, openedAt: c.openedAt, closedAt: c.closedAt, resultsPublishedAt: c.resultsPublishedAt,
     createdAt: c.createdAt,
   })));

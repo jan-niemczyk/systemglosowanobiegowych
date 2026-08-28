@@ -215,7 +215,6 @@ model Case {
 
   participants CaseParticipant[]
   items        VotingItem[]
-  documents    CaseDocument[]
   auditLogs    AuditLog[]
 
   @@index([status])
@@ -283,6 +282,7 @@ model VotingItem {
   options       VoteOption[]
   ballots       Ballot[]
   secretMarkers SecretBallotMarker[]
+  documents     CaseDocument[]
 
   @@unique([caseId, order])
   @@index([caseId, status])
@@ -360,12 +360,13 @@ model SecretBallotMarker {
 //  DOKUMENTY (sekcja 8)
 // ─────────────────────────────────────────────────────────────────
 
-/// Plik przechowywany poza katalogiem publicznym, udostępniany wyłącznie
-/// po sprawdzeniu uprawnień (operator lub uczestnik danej sprawy).
+/// Plik przypięty do konkretnej pozycji głosowania (nie do sprawy jako całości),
+/// przechowywany poza katalogiem publicznym, udostępniany wyłącznie po sprawdzeniu
+/// uprawnień (operator lub uczestnik sprawy, do której należy pozycja).
 model CaseDocument {
   id           String       @id @default(cuid())
-  caseId       String
-  case         Case         @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  itemId       String
+  item         VotingItem   @relation(fields: [itemId], references: [id], onDelete: Cascade)
   kind         DocumentKind
   fileName     String       // nazwa wyświetlana
   storedName   String       @unique // nazwa pliku na dysku (losowa)
@@ -375,7 +376,7 @@ model CaseDocument {
   uploadedBy   User?        @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
   uploadedAt   DateTime     @default(now())
 
-  @@index([caseId, kind])
+  @@index([itemId, kind])
 }
 
 // ─────────────────────────────────────────────────────────────────
