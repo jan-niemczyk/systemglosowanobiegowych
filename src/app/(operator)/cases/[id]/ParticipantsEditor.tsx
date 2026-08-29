@@ -2,6 +2,8 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/Toast";
+import { readApiError } from "@/lib/apiError";
 
 type Participant = { id: string; userId: string; hasVotingRight: boolean; firstName: string; lastName: string; active: boolean };
 type UserOpt = { id: string; firstName: string; lastName: string; email: string };
@@ -13,10 +15,10 @@ export function ParticipantsEditor({
   caseId: string; editable: boolean; bodies: BodyOpt[]; users: UserOpt[]; participants: Participant[];
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [pending, startTransition] = useTransition();
   const [bodyId, setBodyId] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
 
   const addedIds = useMemo(() => new Set(participants.map((p) => p.userId)), [participants]);
   const available = users.filter((u) => !addedIds.has(u.id));
@@ -25,39 +27,41 @@ export function ParticipantsEditor({
 
   function addFromBody() {
     if (!bodyId) return;
-    setError(null);
     startTransition(async () => {
       const r = await fetch(`/api/cases/${caseId}/participants`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ bodyId }),
       });
-      if (r.ok) { setBodyId(""); refresh(); } else setError(await r.text());
+      if (r.ok) { toast.success("Skład organu został dodany do sprawy."); setBodyId(""); refresh(); }
+      else toast.error(await readApiError(r));
     });
   }
 
   function addManual() {
     if (selectedUserIds.length === 0) return;
-    setError(null);
     startTransition(async () => {
       const r = await fetch(`/api/cases/${caseId}/participants`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userIds: selectedUserIds }),
       });
-      if (r.ok) { setSelectedUserIds([]); refresh(); } else setError(await r.text());
+      if (r.ok) { toast.success("Wybrane osoby zostały dodane do składu."); setSelectedUserIds([]); refresh(); }
+      else toast.error(await readApiError(r));
     });
   }
 
   function toggleRight(p: Participant) {
     startTransition(async () => {
-      await fetch(`/api/cases/${caseId}/participants/${p.id}`, {
+      const r = await fetch(`/api/cases/${caseId}/participants/${p.id}`, {
         method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hasVotingRight: !p.hasVotingRight }),
       });
-      refresh();
+      if (r.ok) { toast.success("Prawo głosu zostało zaktualizowane."); refresh(); }
+      else toast.error(await readApiError(r));
     });
   }
 
   function remove(p: Participant) {
     startTransition(async () => {
-      await fetch(`/api/cases/${caseId}/participants/${p.id}`, { method: "DELETE" });
-      refresh();
+      const r = await fetch(`/api/cases/${caseId}/participants/${p.id}`, { method: "DELETE" });
+      if (r.ok) { toast.success("Osoba została usunięta ze składu."); refresh(); }
+      else toast.error(await readApiError(r));
     });
   }
 
@@ -124,7 +128,6 @@ export function ParticipantsEditor({
             </div>
             <button className="btn btn-sm btn-outline-secondary" disabled={selectedUserIds.length === 0 || pending} onClick={addManual}>Dodaj zaznaczone</button>
           </div>
-          {error && <div className="alert alert-danger py-2 mb-0">{error}</div>}
         </div>
       )}
     </div>

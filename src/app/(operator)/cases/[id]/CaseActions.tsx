@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { CaseStatus } from "@prisma/client";
+import { useToast } from "@/components/Toast";
+import { readApiError } from "@/lib/apiError";
 
 export function CaseActions({
   caseId, status, readiness,
@@ -12,19 +14,18 @@ export function CaseActions({
   readiness: { hasParticipants: boolean; hasItems: boolean };
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [pending, startTransition] = useTransition();
-  const [errors, setErrors] = useState<string[]>([]);
 
-  function call(path: string, confirmMsg?: string) {
+  function call(path: string, successMsg: string, confirmMsg?: string) {
     if (confirmMsg && !confirm(confirmMsg)) return;
-    setErrors([]);
     startTransition(async () => {
       const r = await fetch(`/api/cases/${caseId}${path}`, { method: "POST" });
       if (r.ok) {
+        toast.success(successMsg);
         router.refresh();
       } else {
-        const d = await r.json().catch(() => null);
-        setErrors(d?.errors ?? [await r.text()]);
+        toast.error(await readApiError(r));
       }
     });
   }
@@ -36,40 +37,37 @@ export function CaseActions({
     if (!confirm(msg)) return;
     startTransition(async () => {
       const r = await fetch(`/api/cases/${caseId}`, { method: "DELETE" });
-      if (r.ok) router.push("/cases");
-      else setErrors([await r.text()]);
+      if (r.ok) {
+        toast.success(status === "DRAFT" ? "Projekt sprawy został usunięty." : "Sprawa została usunięta.");
+        router.push("/cases");
+      } else {
+        toast.error(await readApiError(r));
+      }
     });
   }
 
   const canOpen = readiness.hasParticipants && readiness.hasItems;
 
   return (
-    <div className="d-flex flex-column align-items-end gap-2">
-      <div className="d-flex gap-2">
-        {status === "DRAFT" && (
-          <>
-            <button className="btn btn-outline-danger btn-sm" disabled={pending} onClick={() => call("/cancel", "Anulować sprawę?")}>Anuluj</button>
-            <button className="btn btn-primary" disabled={pending || !canOpen} onClick={() => call("/open")}>Otwórz sprawę</button>
-          </>
-        )}
-        {status === "OPEN" && (
-          <>
-            <button className="btn btn-outline-danger btn-sm" disabled={pending} onClick={() => call("/cancel", "Anulować otwartą sprawę?")}>Anuluj</button>
-            <button className="btn btn-primary" disabled={pending} onClick={() => call("/close", "Zamknąć głosowanie ręcznie? Tej operacji nie można cofnąć.")}>Zamknij sprawę</button>
-          </>
-        )}
-        {status === "CLOSED" && (
-          <button className="btn btn-primary" disabled={pending} onClick={() => call("/publish-results")}>Opublikuj wyniki</button>
-        )}
-        <button className="btn btn-outline-danger btn-sm" disabled={pending} onClick={remove}>
-          {status === "DRAFT" ? "Usuń projekt" : "Usuń sprawę"}
-        </button>
-      </div>
-      {errors.length > 0 && (
-        <div className="text-end small text-vote-no">
-          {errors.map((e, i) => <div key={i}>{e}</div>)}
-        </div>
+    <div className="d-flex gap-2">
+      {status === "DRAFT" && (
+        <>
+          <button className="btn btn-outline-danger btn-sm" disabled={pending} onClick={() => call("/cancel", "Sprawa została anulowana.", "Anulować sprawę?")}>Anuluj</button>
+          <button className="btn btn-primary" disabled={pending || !canOpen} onClick={() => call("/open", "Sprawa została otwarta.")}>Otwórz sprawę</button>
+        </>
       )}
+      {status === "OPEN" && (
+        <>
+          <button className="btn btn-outline-danger btn-sm" disabled={pending} onClick={() => call("/cancel", "Sprawa została anulowana.", "Anulować otwartą sprawę?")}>Anuluj</button>
+          <button className="btn btn-primary" disabled={pending} onClick={() => call("/close", "Sprawa została zamknięta.", "Zamknąć głosowanie ręcznie? Tej operacji nie można cofnąć.")}>Zamknij sprawę</button>
+        </>
+      )}
+      {status === "CLOSED" && (
+        <button className="btn btn-primary" disabled={pending} onClick={() => call("/publish-results", "Wyniki zostały opublikowane.")}>Opublikuj wyniki</button>
+      )}
+      <button className="btn btn-outline-danger btn-sm" disabled={pending} onClick={remove}>
+        {status === "DRAFT" ? "Usuń projekt" : "Usuń sprawę"}
+      </button>
     </div>
   );
 }

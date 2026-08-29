@@ -2,12 +2,15 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/Toast";
+import { readApiError } from "@/lib/apiError";
 
 type Member = { userId: string; hasVotingRight: boolean; firstName: string; lastName: string; email: string };
 type UserOpt = { id: string; firstName: string; lastName: string; email: string };
 
 export function BodyMembersEditor({ bodyId, members, users }: { bodyId: string; members: Member[]; users: UserOpt[] }) {
   const router = useRouter();
+  const toast = useToast();
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
 
@@ -17,27 +20,29 @@ export function BodyMembersEditor({ bodyId, members, users }: { bodyId: string; 
   function add() {
     if (selectedUserIds.length === 0) return;
     startTransition(async () => {
-      await fetch(`/api/bodies/${bodyId}/members`, {
+      const r = await fetch(`/api/bodies/${bodyId}/members`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userIds: selectedUserIds }),
       });
-      setSelectedUserIds([]);
-      router.refresh();
+      if (r.ok) { toast.success("Wybrane osoby zostały dodane do składu organu."); setSelectedUserIds([]); router.refresh(); }
+      else toast.error(await readApiError(r));
     });
   }
 
   function toggleRight(m: Member) {
     startTransition(async () => {
-      await fetch(`/api/bodies/${bodyId}/members/${m.userId}`, {
+      const r = await fetch(`/api/bodies/${bodyId}/members/${m.userId}`, {
         method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hasVotingRight: !m.hasVotingRight }),
       });
-      router.refresh();
+      if (r.ok) { toast.success("Prawo głosu zostało zaktualizowane."); router.refresh(); }
+      else toast.error(await readApiError(r));
     });
   }
 
   function remove(m: Member) {
     startTransition(async () => {
-      await fetch(`/api/bodies/${bodyId}/members/${m.userId}`, { method: "DELETE" });
-      router.refresh();
+      const r = await fetch(`/api/bodies/${bodyId}/members/${m.userId}`, { method: "DELETE" });
+      if (r.ok) { toast.success("Osoba została usunięta ze składu organu."); router.refresh(); }
+      else toast.error(await readApiError(r));
     });
   }
 

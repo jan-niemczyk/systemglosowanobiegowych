@@ -4,9 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { CloseMode, ResultsVisibility, Settings } from "@prisma/client";
 import { CLOSE_MODE_LABEL, RESULTS_VISIBILITY_LABEL } from "@/lib/labels";
+import { useToast } from "@/components/Toast";
+import { readApiError } from "@/lib/apiError";
 
 export function NewCaseForm({ bodies, settings }: { bodies: { id: string; name: string }[]; settings: Settings }) {
   const router = useRouter();
+  const toast = useToast();
   const [title, setTitle] = useState("");
   const [number, setNumber] = useState("");
   const [description, setDescription] = useState("");
@@ -15,12 +18,10 @@ export function NewCaseForm({ bodies, settings }: { bodies: { id: string; name: 
   const [resultsVisibility, setResultsVisibility] = useState<ResultsVisibility>(settings.defaultResultsVisibility);
   const [allowVoteChange, setAllowVoteChange] = useState(settings.defaultAllowVoteChange);
   const [deadlineAt, setDeadlineAt] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
     startTransition(async () => {
       const r = await fetch("/api/cases", {
         method: "POST",
@@ -33,9 +34,10 @@ export function NewCaseForm({ bodies, settings }: { bodies: { id: string; name: 
       });
       if (r.ok) {
         const d = await r.json();
+        toast.success("Projekt sprawy został utworzony.");
         router.push(`/cases/${d.id}`);
       } else {
-        setError(await r.text());
+        toast.error(await readApiError(r));
       }
     });
   }
@@ -92,7 +94,6 @@ export function NewCaseForm({ bodies, settings }: { bodies: { id: string; name: 
         </div>
       </div>
 
-      {error && <div className="alert alert-danger py-2 mb-0">{error}</div>}
       <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? "Tworzenie…" : "Utwórz projekt sprawy"}</button>
     </form>
   );

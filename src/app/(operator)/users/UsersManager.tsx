@@ -4,16 +4,18 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Role } from "@prisma/client";
 import { downloadLoginCards } from "@/lib/loginCards";
+import { useToast } from "@/components/Toast";
+import { readApiError } from "@/lib/apiError";
 
 type UserRow = { id: string; email: string; firstName: string; lastName: string; functionTitle: string | null; role: Role; active: boolean };
 
 export function UsersManager({ users }: { users: UserRow[] }) {
   const router = useRouter();
+  const toast = useToast();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, startTransition] = useTransition();
   const [showAdd, setShowAdd] = useState(false);
   const [showImport, setShowImport] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const loginUrl = typeof window !== "undefined" ? `${window.location.origin}/login` : "";
 
   function toggle(id: string) {
@@ -22,17 +24,18 @@ export function UsersManager({ users }: { users: UserRow[] }) {
 
   function updateUser(id: string, data: Record<string, unknown>) {
     startTransition(async () => {
-      await fetch(`/api/users/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
-      router.refresh();
+      const r = await fetch(`/api/users/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      if (r.ok) { toast.success("Dane osoby zostały zaktualizowane."); router.refresh(); }
+      else toast.error(await readApiError(r));
     });
   }
 
   function bulkDelete() {
     if (selected.size === 0 || !confirm(`Usunąć/dezaktywować ${selected.size} kont?`)) return;
     startTransition(async () => {
-      await fetch("/api/users/bulk-delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userIds: Array.from(selected) }) });
-      setSelected(new Set());
-      router.refresh();
+      const r = await fetch("/api/users/bulk-delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userIds: Array.from(selected) }) });
+      if (r.ok) { toast.success("Wybrane konta zostały usunięte/dezaktywowane."); setSelected(new Set()); router.refresh(); }
+      else toast.error(await readApiError(r));
     });
   }
 
@@ -43,7 +46,10 @@ export function UsersManager({ users }: { users: UserRow[] }) {
       if (r.ok) {
         const d = await r.json();
         await downloadLoginCards(d.cards, loginUrl, "odcinki-logowania");
+        toast.success("Hasła zostały zresetowane - pobrano odcinki logowania.");
         router.refresh();
+      } else {
+        toast.error(await readApiError(r));
       }
     });
   }
@@ -59,7 +65,6 @@ export function UsersManager({ users }: { users: UserRow[] }) {
 
       {showAdd && <AddUserForm onDone={() => { setShowAdd(false); router.refresh(); }} />}
       {showImport && <ImportUsersForm loginUrl={loginUrl} onDone={() => { setShowImport(false); router.refresh(); }} />}
-      {error && <div className="alert alert-danger py-2 mb-0">{error}</div>}
 
       <div className="card shadow-sm">
         <div className="table-responsive">
@@ -101,24 +106,24 @@ export function UsersManager({ users }: { users: UserRow[] }) {
 }
 
 function AddUserForm({ onDone }: { onDone: () => void }) {
+  const toast = useToast();
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [functionTitle, setFunctionTitle] = useState("");
   const [role, setRole] = useState<Role>("PARTICIPANT" as Role);
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
     startTransition(async () => {
       const r = await fetch("/api/users", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, firstName, lastName, functionTitle: functionTitle || null, role, password }),
       });
-      if (r.ok) onDone(); else setError(await r.text());
+      if (r.ok) { toast.success("Konto zostało utworzone."); onDone(); }
+      else toast.error(await readApiError(r));
     });
   }
 
@@ -136,13 +141,13 @@ function AddUserForm({ onDone }: { onDone: () => void }) {
         </select>
       </div>
       <div className="col"><label className="form-label eyebrow">Hasło początkowe</label><input className="form-control" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
-      {error && <div className="col-12"><div className="alert alert-danger py-2 mb-0">{error}</div></div>}
       <div className="col-12"><button type="submit" className="btn btn-primary btn-sm" disabled={pending}>{pending ? "Dodawanie…" : "Utwórz konto"}</button></div>
     </form>
   );
 }
 
 function ImportUsersForm({ loginUrl, onDone }: { loginUrl: string; onDone: () => void }) {
+  const toast = useToast();
   const [text, setText] = useState("");
   const [results, setResults] = useState<{ email: string; name: string; password: string | null; status: string; error?: string }[] | null>(null);
   const [pending, startTransition] = useTransition();
@@ -155,14 +160,14 @@ function ImportUsersForm({ loginUrl, onDone }: { loginUrl: string; onDone: () =>
     });
     startTransition(async () => {
       const r = await fetch("/api/users/import", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rows }) });
-      if (r.ok) {
-        const d = await r.json();
-        setResults(d.results);
-        const created = d.results.filter((x: { status: string }) => x.status === "created");
-        if (created.length > 0) {
-          await downloadLoginCards(created.map((c: { name: string; email: string; password: string }) => ({ name: c.name, email: c.email, password: c.password })), loginUrl, "odcinki-logowania-import");
-        }
+      if (!r.ok) { toast.error(await readApiError(r)); return; }
+      const d = await r.json();
+      setResults(d.results);
+      const created = d.results.filter((x: { status: string }) => x.status === "created");
+      if (created.length > 0) {
+        await downloadLoginCards(created.map((c: { name: string; email: string; password: string }) => ({ name: c.name, email: c.email, password: c.password })), loginUrl, "odcinki-logowania-import");
       }
+      toast.success(`Zaimportowano ${created.length} z ${d.results.length} osób.`);
     });
   }
 

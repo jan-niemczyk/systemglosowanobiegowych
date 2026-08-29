@@ -2,6 +2,7 @@ import { auth, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { ToastProvider } from "@/components/Toast";
 
 export default async function OperatorLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -9,14 +10,16 @@ export default async function OperatorLayout({ children }: { children: React.Rea
   const settings = await prisma.settings.upsert({ where: { id: "singleton" }, create: { id: "singleton" }, update: {} });
 
   return (
-    <div className="min-vh-100 d-flex flex-column">
-      <TopBar
-        userName={`${session.user.firstName} ${session.user.lastName}`}
-        organizationName={settings.organizationName}
-        logoUrl={settings.logoUrl}
-      />
-      <main className="flex-grow-1">{children}</main>
-    </div>
+    <ToastProvider>
+      <div className="min-vh-100 d-flex flex-column">
+        <TopBar
+          userName={`${session.user.firstName} ${session.user.lastName}`}
+          organizationName={settings.organizationName}
+          logoUrl={settings.logoUrl}
+        />
+        <main className="flex-grow-1">{children}</main>
+      </div>
+    </ToastProvider>
   );
 }
 

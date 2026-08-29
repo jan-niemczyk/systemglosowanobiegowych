@@ -4,6 +4,8 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { DocumentKind } from "@prisma/client";
 import { DOCUMENT_KIND_LABEL } from "@/lib/labels";
+import { useToast } from "@/components/Toast";
+import { readApiError } from "@/lib/apiError";
 
 type Doc = { id: string; kind: DocumentKind; fileName: string; sizeBytes: number; uploadedAt: string };
 
@@ -12,6 +14,7 @@ export function ItemDocumentsPanel({
   caseId, itemId, documents,
 }: { caseId: string; itemId: string; documents: Doc[] }) {
   const router = useRouter();
+  const toast = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [kind, setKind] = useState<DocumentKind>("DRAFT");
   const [expanded, setExpanded] = useState(documents.length > 0);
@@ -28,15 +31,22 @@ export function ItemDocumentsPanel({
     form.set("kind", kind);
     startTransition(async () => {
       const r = await fetch(`/api/cases/${caseId}/items/${itemId}/documents`, { method: "POST", body: form });
-      if (r.ok) { if (fileRef.current) fileRef.current.value = ""; router.refresh(); } else setError(await r.text());
+      if (r.ok) {
+        toast.success("Dokument został dodany.");
+        if (fileRef.current) fileRef.current.value = "";
+        router.refresh();
+      } else {
+        toast.error(await readApiError(r));
+      }
     });
   }
 
   function remove(docId: string) {
     if (!confirm("Usunąć dokument?")) return;
     startTransition(async () => {
-      await fetch(`/api/documents/${docId}`, { method: "DELETE" });
-      router.refresh();
+      const r = await fetch(`/api/documents/${docId}`, { method: "DELETE" });
+      if (r.ok) { toast.success("Dokument został usunięty."); router.refresh(); }
+      else toast.error(await readApiError(r));
     });
   }
 

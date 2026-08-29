@@ -2,23 +2,29 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/Toast";
+import { readApiError } from "@/lib/apiError";
 
 export function NewBodyForm() {
   const router = useRouter();
+  const toast = useToast();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
     startTransition(async () => {
       const r = await fetch("/api/bodies", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, description: description || null }),
       });
-      if (r.ok) { setName(""); setDescription(""); router.refresh(); } else setError(await r.text());
+      if (r.ok) {
+        toast.success("Organ został dodany.");
+        setName(""); setDescription(""); router.refresh();
+      } else {
+        toast.error(await readApiError(r));
+      }
     });
   }
 
@@ -33,7 +39,6 @@ export function NewBodyForm() {
         <input className="form-control" value={description} onChange={(e) => setDescription(e.target.value)} />
       </div>
       <button type="submit" className="btn btn-primary btn-sm" disabled={pending}>{pending ? "Dodawanie…" : "Dodaj organ"}</button>
-      {error && <div className="alert alert-danger py-2 mb-0 w-100">{error}</div>}
     </form>
   );
 }

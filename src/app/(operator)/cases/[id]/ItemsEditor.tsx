@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { DocumentKind, VoteType, VoteVisibility } from "@prisma/client";
 import { VOTE_TYPE_LABEL, VOTE_VISIBILITY_LABEL } from "@/lib/labels";
+import { useToast } from "@/components/Toast";
+import { readApiError } from "@/lib/apiError";
 import { ItemDocumentsPanel } from "./ItemDocumentsPanel";
 
 type Option = { id?: string; label: string; description?: string | null };
@@ -18,6 +20,7 @@ type Item = {
 
 export function ItemsEditor({ caseId, items }: { caseId: string; items: Item[] }) {
   const router = useRouter();
+  const toast = useToast();
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -25,8 +28,9 @@ export function ItemsEditor({ caseId, items }: { caseId: string; items: Item[] }
   function remove(itemId: string) {
     if (!confirm("Usunąć pozycję głosowania?")) return;
     startTransition(async () => {
-      await fetch(`/api/cases/${caseId}/items/${itemId}`, { method: "DELETE" });
-      router.refresh();
+      const r = await fetch(`/api/cases/${caseId}/items/${itemId}`, { method: "DELETE" });
+      if (r.ok) { toast.success("Pozycja głosowania została usunięta."); router.refresh(); }
+      else toast.error(await readApiError(r));
     });
   }
 
@@ -74,6 +78,7 @@ export function ItemsEditor({ caseId, items }: { caseId: string; items: Item[] }
 function ItemForm({
   caseId, item, onDone, onCancel,
 }: { caseId: string; item?: Item; onDone: () => void; onCancel: () => void }) {
+  const toast = useToast();
   const [title, setTitle] = useState(item?.title ?? "");
   const [description, setDescription] = useState(item?.description ?? "");
   const [type, setType] = useState<VoteType>(item?.type ?? "STANDARD");
@@ -102,7 +107,12 @@ function ItemForm({
     startTransition(async () => {
       const url = item ? `/api/cases/${caseId}/items/${item.id}` : `/api/cases/${caseId}/items`;
       const r = await fetch(url, { method: item ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      if (r.ok) onDone(); else setError(await r.text());
+      if (r.ok) {
+        toast.success(item ? "Zmiany w pozycji głosowania zostały zapisane." : "Pozycja głosowania została dodana.");
+        onDone();
+      } else {
+        toast.error(await readApiError(r));
+      }
     });
   }
 
