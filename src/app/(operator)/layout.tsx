@@ -50,14 +50,14 @@ function TopBar({ userName, organizationName, logoUrl }: { userName: string; org
             <div className="small text-secondary-emphasis" style={{ fontSize: 11 }}>Zalogowano jako</div>
             <div className="small fw-medium">{userName}</div>
           </div>
-          <Link href="/account" className="btn btn-outline-secondary btn-sm rounded-pill">Konto</Link>
+          <Link href="/account" className="btn btn-outline-secondary btn-sm">Konto</Link>
           <form
             action={async () => {
               "use server";
               await signOut({ redirectTo: "/login" });
             }}
           >
-            <button className="btn btn-outline-secondary btn-sm rounded-pill" type="submit">Wyloguj</button>
+            <button className="btn btn-outline-secondary btn-sm" type="submit">Wyloguj</button>
           </form>
         </div>
       </div>
@@ -67,7 +67,7 @@ function TopBar({ userName, organizationName, logoUrl }: { userName: string; org
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className="nav-link-pill px-3 py-2 rounded-pill text-decoration-none text-body small fw-medium">
+    <Link href={href} className="nav-link-hover px-3 py-2 text-decoration-none text-body small fw-medium">
       {children}
     </Link>
   );

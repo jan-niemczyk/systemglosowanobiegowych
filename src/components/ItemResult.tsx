@@ -37,7 +37,7 @@ export function ItemResult({ item }: { item: Item; showVoting?: boolean }) {
             {VOTE_VISIBILITY_LABEL[item.visibility]}
           </div>
         </div>
-        {!closed && <span className="badge rounded-pill badge-live">Trwa głosowanie</span>}
+        {!closed && <span className="badge badge-live">Trwa głosowanie</span>}
       </div>
 
       {closed && (

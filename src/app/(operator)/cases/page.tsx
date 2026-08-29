@@ -29,7 +29,7 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
           <div className="eyebrow mb-2">Sprawy obiegowe</div>
           <h1 className="h3 mb-0">Sprawy</h1>
         </div>
-        <Link href="/cases/new" className="btn btn-primary rounded-pill">Nowa sprawa</Link>
+        <Link href="/cases/new" className="btn btn-primary">Nowa sprawa</Link>
       </header>
 
       <ul className="nav nav-pills gap-1 small">
@@ -37,7 +37,7 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
           <li key={t.label} className="nav-item">
             <Link
               href={t.value ? `/cases?status=${t.value}` : "/cases"}
-              className={`nav-link rounded-pill ${(status ?? undefined) === t.value ? "active" : "text-body"}`}
+              className={`nav-link ${(status ?? undefined) === t.value ? "active" : "text-body"}`}
             >
               {t.label}
             </Link>

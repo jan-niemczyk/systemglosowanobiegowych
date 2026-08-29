@@ -48,20 +48,20 @@ export function CaseActions({
       <div className="d-flex gap-2">
         {status === "DRAFT" && (
           <>
-            <button className="btn btn-outline-danger btn-sm rounded-pill" disabled={pending} onClick={() => call("/cancel", "Anulować sprawę?")}>Anuluj</button>
-            <button className="btn btn-primary rounded-pill" disabled={pending || !canOpen} onClick={() => call("/open")}>Otwórz sprawę</button>
+            <button className="btn btn-outline-danger btn-sm" disabled={pending} onClick={() => call("/cancel", "Anulować sprawę?")}>Anuluj</button>
+            <button className="btn btn-primary" disabled={pending || !canOpen} onClick={() => call("/open")}>Otwórz sprawę</button>
           </>
         )}
         {status === "OPEN" && (
           <>
-            <button className="btn btn-outline-danger btn-sm rounded-pill" disabled={pending} onClick={() => call("/cancel", "Anulować otwartą sprawę?")}>Anuluj</button>
-            <button className="btn btn-primary rounded-pill" disabled={pending} onClick={() => call("/close", "Zamknąć głosowanie ręcznie? Tej operacji nie można cofnąć.")}>Zamknij sprawę</button>
+            <button className="btn btn-outline-danger btn-sm" disabled={pending} onClick={() => call("/cancel", "Anulować otwartą sprawę?")}>Anuluj</button>
+            <button className="btn btn-primary" disabled={pending} onClick={() => call("/close", "Zamknąć głosowanie ręcznie? Tej operacji nie można cofnąć.")}>Zamknij sprawę</button>
           </>
         )}
         {status === "CLOSED" && (
-          <button className="btn btn-primary rounded-pill" disabled={pending} onClick={() => call("/publish-results")}>Opublikuj wyniki</button>
+          <button className="btn btn-primary" disabled={pending} onClick={() => call("/publish-results")}>Opublikuj wyniki</button>
         )}
-        <button className="btn btn-outline-danger btn-sm rounded-pill" disabled={pending} onClick={remove}>
+        <button className="btn btn-outline-danger btn-sm" disabled={pending} onClick={remove}>
           {status === "DRAFT" ? "Usuń projekt" : "Usuń sprawę"}
         </button>
       </div>

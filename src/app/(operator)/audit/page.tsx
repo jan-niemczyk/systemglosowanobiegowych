@@ -17,7 +17,7 @@ export default async function AuditPage() {
           <div className="eyebrow mb-2">Rozliczalność</div>
           <h1 className="h3 mb-0">Rejestr czynności</h1>
         </div>
-        <a className="btn btn-sm btn-outline-secondary rounded-pill" href="/api/audit/csv">Eksport CSV</a>
+        <a className="btn btn-sm btn-outline-secondary" href="/api/audit/csv">Eksport CSV</a>
       </header>
 
       <div className="card shadow-sm">

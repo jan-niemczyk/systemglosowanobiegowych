@@ -51,10 +51,10 @@ export function UsersManager({ users }: { users: UserRow[] }) {
   return (
     <div className="d-flex flex-column gap-4">
       <div className="d-flex flex-wrap gap-2">
-        <button className="btn btn-primary btn-sm rounded-pill" onClick={() => setShowAdd((v) => !v)}>+ Dodaj osobę</button>
-        <button className="btn btn-sm btn-outline-secondary rounded-pill" onClick={() => setShowImport((v) => !v)}>Import listy</button>
-        <button className="btn btn-sm btn-outline-secondary rounded-pill" disabled={selected.size === 0 || pending} onClick={bulkResetPasswords}>Resetuj hasła zaznaczonych (odcinki)</button>
-        <button className="btn btn-sm btn-outline-danger rounded-pill" disabled={selected.size === 0 || pending} onClick={bulkDelete}>Usuń zaznaczone</button>
+        <button className="btn btn-primary btn-sm" onClick={() => setShowAdd((v) => !v)}>+ Dodaj osobę</button>
+        <button className="btn btn-sm btn-outline-secondary" onClick={() => setShowImport((v) => !v)}>Import listy</button>
+        <button className="btn btn-sm btn-outline-secondary" disabled={selected.size === 0 || pending} onClick={bulkResetPasswords}>Resetuj hasła zaznaczonych (odcinki)</button>
+        <button className="btn btn-sm btn-outline-danger" disabled={selected.size === 0 || pending} onClick={bulkDelete}>Usuń zaznaczone</button>
       </div>
 
       {showAdd && <AddUserForm onDone={() => { setShowAdd(false); router.refresh(); }} />}
@@ -137,7 +137,7 @@ function AddUserForm({ onDone }: { onDone: () => void }) {
       </div>
       <div className="col"><label className="form-label eyebrow">Hasło początkowe</label><input className="form-control" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
       {error && <div className="col-12"><div className="alert alert-danger py-2 mb-0">{error}</div></div>}
-      <div className="col-12"><button type="submit" className="btn btn-primary btn-sm rounded-pill" disabled={pending}>{pending ? "Dodawanie…" : "Utwórz konto"}</button></div>
+      <div className="col-12"><button type="submit" className="btn btn-primary btn-sm" disabled={pending}>{pending ? "Dodawanie…" : "Utwórz konto"}</button></div>
     </form>
   );
 }
@@ -174,8 +174,8 @@ function ImportUsersForm({ loginUrl, onDone }: { loginUrl: string; onDone: () =>
       <form onSubmit={submit} className="d-flex flex-column gap-3">
         <textarea className="form-control" rows={6} value={text} onChange={(e) => setText(e.target.value)} placeholder={"Kowalski;Jan;jan.kowalski@przyklad.pl\nNowak;Anna;anna.nowak@przyklad.pl"} />
         <div className="d-flex gap-2">
-          <button type="submit" className="btn btn-primary btn-sm rounded-pill" disabled={pending || !text.trim()}>{pending ? "Importowanie…" : "Importuj"}</button>
-          <button type="button" className="btn btn-sm btn-outline-secondary rounded-pill" onClick={onDone}>Zamknij</button>
+          <button type="submit" className="btn btn-primary btn-sm" disabled={pending || !text.trim()}>{pending ? "Importowanie…" : "Importuj"}</button>
+          <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onDone}>Zamknij</button>
         </div>
       </form>
       {results && (

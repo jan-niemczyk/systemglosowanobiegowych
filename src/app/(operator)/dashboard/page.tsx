@@ -71,7 +71,7 @@ export default async function DashboardPage() {
             ))}
           </ul>
           <div className="mt-3">
-            <Link href="/audit" className="btn btn-outline-secondary btn-sm rounded-pill">Pełny rejestr czynności</Link>
+            <Link href="/audit" className="btn btn-outline-secondary btn-sm">Pełny rejestr czynności</Link>
           </div>
         </div>
       </section>

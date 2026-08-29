@@ -16,8 +16,13 @@
 // ─────────────────────────────────────────────────────────────────
 
 // Same funkcje (shade-color, tint-color…) - bez CSS, potrzebne niżej. Bootstrap
-// importuje ten plik ponownie przy właściwym imporcie (nieszkodliwe - same funkcje).
+// importuje te pliki ponownie przy właściwym imporcie niżej (nieszkodliwe - to
+// czysta konfiguracja/zmienne `!default`, bez żadnego CSS - taki sam plik jak w
+// oficjalnym wzorcu customizacji Bootstrapa: functions → variables → maps →
+// nadpisania własne → reszta Bootstrapa).
 @import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
 
 // Fonty (ładowane przez next/font w layout.tsx jako zmienne CSS na <html>).
 $font-family-sans-serif: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -86,12 +91,50 @@ $theme-colors: (
   "status-cancelled": $status-cancelled,
 );
 
-// "Miększy", nowocześniejszy wygląd — zaokrąglenia. Card/badge/input/button
-// dziedziczą z $border-radius, więc jedna zmiana niesie się przez całą bibliotekę.
-$border-radius: 0.6rem;
-$border-radius-sm: 0.4rem;
-$border-radius-lg: 0.9rem;
-$border-radius-xl: 1.25rem;
+// Zaokrąglenie: domyślna skala Bootstrapa (.375rem/.25rem/.5rem/1rem) - żadnych
+// autorskich nadpisań i żadnych rounded-pill w aplikacji. Card/badge/input/button
+// dziedziczą z $border-radius przez zmienne CSS Bootstrapa (--bs-border-radius…).
+
+// Warianty "subtelne" (tło/obramowanie/kolor tekstu) dla naszych własnych kolorów
+// motywu (vote-yes/no/abstain, live, status-*) — Bootstrap generuje takie warianty
+// automatycznie tylko dla wbudowanej ósemki (primary…dark), więc bez tego
+// rozszerzenia np. .alert-vote-yes czy .list-group-item-vote-no odwoływałyby się do
+// niezdefiniowanych zmiennych CSS (czyli wychodziłyby bez koloru). Ten sam wzór
+// (tint-color/shade-color), którego Bootstrap używa dla swoich własnych kolorów.
+@import "bootstrap/scss/maps";
+$theme-colors-text: map-merge($theme-colors-text, (
+  "vote-yes": shade-color($vote-yes, 60%),
+  "vote-no": shade-color($vote-no, 60%),
+  "vote-abstain": shade-color($vote-abstain, 60%),
+  "live": shade-color($live, 60%),
+  "status-draft": shade-color($status-draft, 60%),
+  "status-open": shade-color($status-open, 60%),
+  "status-closed": shade-color($status-closed, 60%),
+  "status-published": shade-color($status-published, 60%),
+  "status-cancelled": shade-color($status-cancelled, 60%),
+));
+$theme-colors-bg-subtle: map-merge($theme-colors-bg-subtle, (
+  "vote-yes": tint-color($vote-yes, 80%),
+  "vote-no": tint-color($vote-no, 80%),
+  "vote-abstain": tint-color($vote-abstain, 80%),
+  "live": tint-color($live, 80%),
+  "status-draft": tint-color($status-draft, 80%),
+  "status-open": tint-color($status-open, 80%),
+  "status-closed": tint-color($status-closed, 80%),
+  "status-published": tint-color($status-published, 80%),
+  "status-cancelled": tint-color($status-cancelled, 80%),
+));
+$theme-colors-border-subtle: map-merge($theme-colors-border-subtle, (
+  "vote-yes": tint-color($vote-yes, 60%),
+  "vote-no": tint-color($vote-no, 60%),
+  "vote-abstain": tint-color($vote-abstain, 60%),
+  "live": tint-color($live, 60%),
+  "status-draft": tint-color($status-draft, 60%),
+  "status-open": tint-color($status-open, 60%),
+  "status-closed": tint-color($status-closed, 60%),
+  "status-published": tint-color($status-published, 60%),
+  "status-cancelled": tint-color($status-cancelled, 60%),
+));
 
 $box-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.04);
 $box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
@@ -228,8 +271,8 @@ body {
   animation: slide-in 180ms ease-out;
 }
 
-// Link nawigacji w nagłówkach (operator/uczestnik) - pigułkowe podświetlenie na hover.
-.nav-link-pill {
+// Link nawigacji w nagłówkach (operator/uczestnik) - podświetlenie tła na hover.
+.nav-link-hover {
   transition: background-color 120ms ease;
   &:hover {
     background-color: var(--bs-tertiary-bg);
@@ -244,156 +287,3 @@ body {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────
-//  WYŁĄCZNIE dla VotingItemCard.tsx — zamrożony wygląd aktywnych pól
-//  głosowania u głosującego (na wyraźne życzenie użytkownika). Odtwarza
-//  dawny system (.card/.btn/.pill i zmienne --color-*) 1:1, niezależnie
-//  od reszty motywu Bootstrapa poniżej, żeby ten jeden ekran wyglądał
-//  dokładnie tak samo jak przed migracją na Bootstrapa. Wartości = dawne
-//  --color-* z pierwotnego globals.css (te same zmienne Sass co reszta
-//  motywu, więc nie ma dwóch źródeł prawdy dla samych kolorów).
-// ─────────────────────────────────────────────────────────────────
-:root {
-  --color-live: #{$live};
-  --color-ink: #{$ink};
-  --color-ink-2: #{$ink-2};
-  --color-ink-3: #{$ink-3};
-  --color-paper-2: #{$paper-2};
-  --color-rule: #{$ink};
-  --color-rule-soft: #e2e8f0;
-  --color-yes: #{$vote-yes};
-  --color-yes-bg: #dcfce7;
-  --color-no: #{$vote-no};
-  --color-no-bg: #fee2e2;
-  --color-abstain: #{$vote-abstain};
-  --color-abstain-bg: #fef9c3;
-}
-
-.legacy-card {
-  background: #fff;
-  border: 1px solid var(--color-rule);
-  border-radius: 2px;
-}
-
-.legacy-eyebrow {
-  font-family: var(--font-sans);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--color-ink-3);
-}
-
-.legacy-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 8px;
-  border: 1px solid var(--color-rule);
-  border-radius: 999px;
-  font-size: 11px;
-  line-height: 18px;
-  background: #fff;
-}
-.legacy-pill-live {
-  border-color: var(--color-live);
-  color: var(--color-live);
-}
-.legacy-pill-live::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-live);
-  animation: pulse 1.4s ease-in-out infinite;
-}
-
-.legacy-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
-  font-family: var(--font-sans);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1;
-  border: 1px solid var(--color-rule);
-  border-radius: 2px;
-  background: #fff;
-  color: var(--color-ink);
-  cursor: pointer;
-  transition: background 80ms ease, transform 60ms ease;
-  user-select: none;
-}
-@media (hover: hover) {
-  .legacy-btn:hover {
-    background: var(--color-paper-2);
-  }
-}
-.legacy-btn:active {
-  transform: translateY(1px);
-}
-.legacy-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.legacy-btn-primary {
-  background: var(--color-ink);
-  color: #fff;
-  border-color: var(--color-ink);
-}
-@media (hover: hover) {
-  .legacy-btn-primary:hover {
-    background: #1a1f2e;
-  }
-}
-
-.legacy-btn-yes {
-  background: var(--color-yes);
-  color: #fff;
-  border-color: var(--color-yes);
-}
-.legacy-btn-no {
-  background: var(--color-no);
-  color: #fff;
-  border-color: var(--color-no);
-}
-.legacy-btn-abstain {
-  background: var(--color-abstain);
-  color: #fff;
-  border-color: var(--color-abstain);
-}
-@media (hover: hover) {
-  .legacy-btn-yes:hover {
-    background: #18632f;
-    border-color: #18632f;
-  }
-  .legacy-btn-no:hover {
-    background: #a40d26;
-    border-color: #a40d26;
-  }
-  .legacy-btn-abstain:hover {
-    background: #9c720a;
-    border-color: #9c720a;
-  }
-}
-
-.legacy-btn-lg {
-  padding: 18px 24px;
-  font-size: 15px;
-}
-.legacy-btn-xl {
-  padding: 28px 32px;
-  font-size: 18px;
-}
-
-// Wiersz opcji na liście kandydatów - podświetlenie na hover (tylko myszka).
-.legacy-option-row {
-  cursor: pointer;
-}
-@media (hover: hover) {
-  .legacy-option-row:hover {
-    background: var(--color-paper-2);
-  }
-}

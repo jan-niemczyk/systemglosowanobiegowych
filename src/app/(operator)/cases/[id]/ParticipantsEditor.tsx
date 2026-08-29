@@ -78,7 +78,7 @@ export function ParticipantsEditor({
             <tbody>
               {participants.map((p) => (
                 <tr key={p.id}>
-                  <td>{p.lastName} {p.firstName}{!p.active && <span className="ms-2 badge rounded-pill text-bg-light border">nieaktywne konto</span>}</td>
+                  <td>{p.lastName} {p.firstName}{!p.active && <span className="ms-2 badge text-bg-light border">nieaktywne konto</span>}</td>
                   <td>
                     {editable ? (
                       <div className="form-check mb-0">
@@ -111,7 +111,7 @@ export function ParticipantsEditor({
                   {bodies.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
               </div>
-              <button className="btn btn-sm btn-outline-secondary rounded-pill" disabled={!bodyId || pending} onClick={addFromBody}>Dodaj skład</button>
+              <button className="btn btn-sm btn-outline-secondary" disabled={!bodyId || pending} onClick={addFromBody}>Dodaj skład</button>
             </div>
           )}
           <div className="d-flex gap-2 align-items-end">
@@ -122,7 +122,7 @@ export function ParticipantsEditor({
                 {available.map((u) => <option key={u.id} value={u.id}>{u.lastName} {u.firstName} ({u.email})</option>)}
               </select>
             </div>
-            <button className="btn btn-sm btn-outline-secondary rounded-pill" disabled={selectedUserIds.length === 0 || pending} onClick={addManual}>Dodaj zaznaczone</button>
+            <button className="btn btn-sm btn-outline-secondary" disabled={selectedUserIds.length === 0 || pending} onClick={addManual}>Dodaj zaznaczone</button>
           </div>
           {error && <div className="alert alert-danger py-2 mb-0">{error}</div>}
         </div>

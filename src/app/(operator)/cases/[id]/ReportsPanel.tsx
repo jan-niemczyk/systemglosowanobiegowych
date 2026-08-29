@@ -2,8 +2,8 @@ export function ReportsPanel({ caseId, items }: { caseId: string; items: { id: s
   return (
     <div className="d-flex flex-column gap-4 small">
       <div className="d-flex flex-wrap gap-2">
-        <a className="btn btn-sm btn-outline-secondary rounded-pill" href={`/api/cases/${caseId}/reports/case-card`}>Protokół (PDF)</a>
-        <a className="btn btn-sm btn-outline-secondary rounded-pill" href={`/api/cases/${caseId}/reports/protocol`}>Protokół (Word)</a>
+        <a className="btn btn-sm btn-outline-secondary" href={`/api/cases/${caseId}/reports/case-card`}>Protokół (PDF)</a>
+        <a className="btn btn-sm btn-outline-secondary" href={`/api/cases/${caseId}/reports/protocol`}>Protokół (Word)</a>
       </div>
       <div>
         <div className="eyebrow mb-2">Raporty pozycji głosowania</div>
@@ -11,8 +11,8 @@ export function ReportsPanel({ caseId, items }: { caseId: string; items: { id: s
           {items.map((item) => (
             <li key={item.id} className="d-flex align-items-center gap-2">
               <span className="text-truncate">{item.title}</span>
-              <a className="btn btn-sm btn-outline-secondary rounded-pill" href={`/api/cases/${caseId}/items/${item.id}/reports/vote-report`}>Raport głosowania</a>
-              <a className="btn btn-sm btn-outline-secondary rounded-pill" href={`/api/cases/${caseId}/items/${item.id}/reports/vote-report?format=csv`}>CSV</a>
+              <a className="btn btn-sm btn-outline-secondary" href={`/api/cases/${caseId}/items/${item.id}/reports/vote-report`}>Raport głosowania</a>
+              <a className="btn btn-sm btn-outline-secondary" href={`/api/cases/${caseId}/items/${item.id}/reports/vote-report?format=csv`}>CSV</a>
             </li>
           ))}
         </ul>

@@ -77,7 +77,7 @@ export default function LoginForm({ organizationName, logoUrl }: { organizationN
             </div>
           )}
 
-          <button type="submit" className="btn btn-primary w-100 rounded-pill" disabled={pending}>
+          <button type="submit" className="btn btn-primary w-100" disabled={pending}>
             {pending ? "Logowanie…" : "Zaloguj się"}
           </button>
         </form>

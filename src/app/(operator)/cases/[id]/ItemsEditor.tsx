@@ -55,8 +55,8 @@ export function ItemsEditor({ caseId, items }: { caseId: string; items: Item[] }
               </div>
             </div>
             <div className="d-flex gap-2 flex-shrink-0">
-              <button className="btn btn-sm btn-outline-secondary rounded-pill" disabled={pending} onClick={() => setEditingId(item.id)}>Edytuj</button>
-              <button className="btn btn-sm btn-outline-danger rounded-pill" disabled={pending} onClick={() => remove(item.id)}>Usuń</button>
+              <button className="btn btn-sm btn-outline-secondary" disabled={pending} onClick={() => setEditingId(item.id)}>Edytuj</button>
+              <button className="btn btn-sm btn-outline-danger" disabled={pending} onClick={() => remove(item.id)}>Usuń</button>
             </div>
           </div>
         )
@@ -65,7 +65,7 @@ export function ItemsEditor({ caseId, items }: { caseId: string; items: Item[] }
       {adding ? (
         <ItemForm caseId={caseId} onDone={() => { setAdding(false); router.refresh(); }} onCancel={() => setAdding(false)} />
       ) : (
-        <button className="btn btn-sm btn-outline-secondary rounded-pill align-self-start" onClick={() => setAdding(true)}>+ Dodaj pozycję głosowania</button>
+        <button className="btn btn-sm btn-outline-secondary align-self-start" onClick={() => setAdding(true)}>+ Dodaj pozycję głosowania</button>
       )}
     </div>
   );
@@ -150,8 +150,8 @@ function ItemForm({
       )}
       {error && <div className="alert alert-danger py-2 mb-0">{error}</div>}
       <div className="d-flex gap-2">
-        <button type="submit" className="btn btn-primary btn-sm rounded-pill" disabled={pending}>{pending ? "Zapisywanie…" : "Zapisz"}</button>
-        <button type="button" className="btn btn-sm btn-outline-secondary rounded-pill" onClick={onCancel} disabled={pending}>Anuluj</button>
+        <button type="submit" className="btn btn-primary btn-sm" disabled={pending}>{pending ? "Zapisywanie…" : "Zapisz"}</button>
+        <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onCancel} disabled={pending}>Anuluj</button>
       </div>
     </form>
   );

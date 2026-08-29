@@ -10,5 +10,5 @@ const CLASS: Record<CaseStatus, string> = {
 };
 
 export function StatusPill({ status }: { status: CaseStatus }) {
-  return <span className={`badge rounded-pill fw-medium ${CLASS[status]}`}>{CASE_STATUS_LABEL[status]}</span>;
+  return <span className={`badge fw-medium ${CLASS[status]}`}>{CASE_STATUS_LABEL[status]}</span>;
 }

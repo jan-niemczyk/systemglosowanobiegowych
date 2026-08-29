@@ -19,7 +19,7 @@ export default async function AccountPage() {
       </header>
       <ChangePasswordForm />
       <div className="mt-4">
-        <a href="/" className="btn btn-outline-secondary btn-sm rounded-pill">Powrót</a>
+        <a href="/" className="btn btn-outline-secondary btn-sm">Powrót</a>
       </div>
     </div>
   );

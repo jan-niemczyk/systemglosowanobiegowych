@@ -29,7 +29,7 @@ export function LiveItemPanel({
             {VOTE_TYPE_LABEL[item.type]} {VOTE_VISIBILITY_LABEL[item.visibility]}
           </div>
         </div>
-        <span className="badge rounded-pill badge-live">Trwa głosowanie</span>
+        <span className="badge badge-live">Trwa głosowanie</span>
       </div>
 
       <div className="mt-3 small d-flex flex-column gap-3">

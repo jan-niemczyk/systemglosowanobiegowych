@@ -83,7 +83,7 @@ export function BodyMembersEditor({ bodyId, members, users }: { bodyId: string; 
             {available.map((u) => <option key={u.id} value={u.id}>{u.lastName} {u.firstName} ({u.email})</option>)}
           </select>
         </div>
-        <button className="btn btn-sm btn-outline-secondary rounded-pill" disabled={selectedUserIds.length === 0 || pending} onClick={add}>Dodaj zaznaczone</button>
+        <button className="btn btn-sm btn-outline-secondary" disabled={selectedUserIds.length === 0 || pending} onClick={add}>Dodaj zaznaczone</button>
       </div>
     </div>
   );

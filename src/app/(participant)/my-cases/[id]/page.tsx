@@ -57,7 +57,7 @@ export default async function MyCaseDetailPage({ params }: { params: Promise<{ i
           <StatusPill status={kase.status} />
           {kase.body && <span className="small text-secondary-emphasis">{kase.body.name}</span>}
           {kase.deadlineAt && <span className="small text-secondary-emphasis">Termin: {formatDateTime(kase.deadlineAt)}</span>}
-          {!participant.hasVotingRight && <span className="badge rounded-pill text-bg-light border">Bez prawa głosu w tej sprawie</span>}
+          {!participant.hasVotingRight && <span className="badge text-bg-light border">Bez prawa głosu w tej sprawie</span>}
         </div>
       </header>
 
@@ -111,7 +111,7 @@ export default async function MyCaseDetailPage({ params }: { params: Promise<{ i
 
       {(kase.status === "CLOSED" || kase.status === "RESULTS_PUBLISHED") && (
         <section>
-          <a className="btn btn-sm btn-outline-secondary rounded-pill" href={`/api/cases/${kase.id}/confirmation`}>Pobierz potwierdzenie udziału (PDF)</a>
+          <a className="btn btn-sm btn-outline-secondary" href={`/api/cases/${kase.id}/confirmation`}>Pobierz potwierdzenie udziału (PDF)</a>
         </section>
       )}
     </div>

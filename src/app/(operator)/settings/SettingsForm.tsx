@@ -63,7 +63,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         )}
         <div className="d-flex gap-2">
           <input ref={fileRef} type="file" accept="image/*" className="form-control" />
-          <button type="button" className="btn btn-sm btn-outline-secondary rounded-pill text-nowrap" onClick={uploadLogo} disabled={pending}>Wgraj</button>
+          <button type="button" className="btn btn-sm btn-outline-secondary text-nowrap" onClick={uploadLogo} disabled={pending}>Wgraj</button>
         </div>
         <div className="form-text">Widoczne w nagłówku panelu operatora, panelu uczestnika i na ekranie logowania.</div>
       </div>
@@ -111,7 +111,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
       </div>
 
       {msg && <div className={`alert ${msg.ok ? "alert-success" : "alert-danger"} py-2 mb-0`}>{msg.text}</div>}
-      <button type="submit" className="btn btn-primary rounded-pill" disabled={pending}>{pending ? "Zapisywanie…" : "Zapisz ustawienia"}</button>
+      <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? "Zapisywanie…" : "Zapisz ustawienia"}</button>
     </form>
   );
 }

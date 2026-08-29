@@ -42,7 +42,7 @@ export function ItemDocumentsPanel({
 
   if (!expanded) {
     return (
-      <button type="button" className="btn btn-sm btn-outline-secondary rounded-pill align-self-start" onClick={() => setExpanded(true)}>
+      <button type="button" className="btn btn-sm btn-outline-secondary align-self-start" onClick={() => setExpanded(true)}>
         Dokumenty pozycji ({documents.length})
       </button>
     );
@@ -93,7 +93,7 @@ export function ItemDocumentsPanel({
           <label className="form-label eyebrow">Plik</label>
           <input ref={fileRef} type="file" className="form-control" />
         </div>
-        <button type="submit" className="btn btn-sm btn-outline-secondary rounded-pill" disabled={pending}>{pending ? "Wgrywanie…" : "Dodaj dokument"}</button>
+        <button type="submit" className="btn btn-sm btn-outline-secondary" disabled={pending}>{pending ? "Wgrywanie…" : "Dodaj dokument"}</button>
         {error && <div className="alert alert-danger py-2 mb-0 w-100">{error}</div>}
       </form>
     </div>

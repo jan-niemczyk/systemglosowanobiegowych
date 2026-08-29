@@ -4,13 +4,6 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { VoteChoice, VoteType, VoteVisibility } from "@prisma/client";
 
-// UWAGA: ten plik ma zamrożony wygląd 1:1 z pierwotną wersją (na wyraźne życzenie -
-// "aktywne pola głosowania u głosującego" nie mogą zmienić wyglądu). Tailwind zniknął
-// z całej aplikacji (przejście na Bootstrap), więc poniższa migracja jest WYŁĄCZNIE
-// mechaniczna: dawne klasy Tailwind/`.btn`/`.pill`/`.card` zastąpione inline-stylami
-// i klasami `.legacy-*` (patrz globals.scss) reprodukującymi te same wartości co
-// dawniej - żadnych nowych rozmiarów, kolorów ani układu.
-
 type Option = { id: string; label: string; description: string | null };
 type Item = {
   id: string; order: number; title: string; description: string | null;
@@ -49,13 +42,13 @@ export function VotingItemCard({
   }
 
   return (
-    <div className="legacy-card slide-in" style={{ borderColor: "var(--color-live)", borderWidth: 2 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 20px", borderBottom: "1px solid var(--color-live)", background: "var(--color-no-bg)" }}>
-        <span className="legacy-pill legacy-pill-live">Trwa głosowanie - {secret ? "tajne" : "jawne"}</span>
+    <div className="card shadow-sm border border-2 slide-in" style={{ borderColor: "var(--bs-live)" }}>
+      <div className="card-header bg-danger-subtle" style={{ borderBottomColor: "var(--bs-live)" }}>
+        <span className="badge badge-live">Trwa głosowanie - {secret ? "tajne" : "jawne"}</span>
       </div>
-      <div style={{ padding: 24 }}>
-        <h2 style={{ fontSize: 22, lineHeight: 1.2, marginBottom: 8 }}>{item.order}. {item.title}</h2>
-        {item.description && <p style={{ fontSize: 14, marginBottom: 20, color: "var(--color-ink-2)" }}>{item.description}</p>}
+      <div className="card-body">
+        <h2 className="h4 mb-2">{item.order}. {item.title}</h2>
+        {item.description && <p className="small text-secondary-emphasis mb-4">{item.description}</p>}
 
         {!locked && (
           item.type === "PACKAGE" ? (
@@ -88,45 +81,35 @@ export function VotingItemCard({
           )
         )}
 
-        {error && (
-          <div style={{ marginTop: 16, padding: "8px 12px", fontSize: 14, background: "var(--color-no-bg)", border: "1px solid var(--color-no)", color: "var(--color-no)" }}>
-            {error}
-          </div>
-        )}
+        {error && <div className="alert alert-danger mt-4 mb-0">{error}</div>}
 
         {alreadyVoted && !secret && item.type === "STANDARD" && myChoice && (
-          <div
-            style={{
-              marginTop: 20, padding: "12px 16px", textAlign: "center",
-              border: "2px solid var(--color-ink)",
-              background: myChoice === "YES" ? "var(--color-yes-bg)" : myChoice === "NO" ? "var(--color-no-bg)" : "var(--color-abstain-bg)",
-            }}
-          >
-            <div className="legacy-eyebrow">Twój głos</div>
-            <div style={{ fontSize: 18, fontWeight: 500, color: myChoice === "YES" ? "var(--color-yes)" : myChoice === "NO" ? "var(--color-no)" : "var(--color-abstain)" }}>
+          <div className={`alert text-center mt-4 mb-0 ${myChoice === "YES" ? "alert-vote-yes" : myChoice === "NO" ? "alert-vote-no" : "alert-vote-abstain"}`}>
+            <div className="eyebrow">Twój głos</div>
+            <div className="fs-5 fw-medium">
               {myChoice === "YES" ? "ZA" : myChoice === "NO" ? "PRZECIW" : "WSTRZYMAŁEŚ SIĘ"}
             </div>
-            <p style={{ fontSize: 12, marginTop: 4, color: "var(--color-ink-3)" }}>
+            <p className="small mb-0 mt-1">
               {locked ? "Głos jest ostateczny - nie można go zmienić." : "Możesz zmienić swój głos do czasu zamknięcia sprawy."}
             </p>
           </div>
         )}
 
         {alreadyVoted && !secret && (isList || item.type === "PACKAGE") && (
-          <div style={{ marginTop: 20, padding: "12px 16px", textAlign: "center", border: "2px solid var(--color-ink)", background: "var(--color-yes-bg)" }}>
-            <div className="legacy-eyebrow">Twój głos</div>
-            <div style={{ fontSize: 18, fontWeight: 500, color: "var(--color-yes)" }}>Głos został oddany</div>
-            <p style={{ fontSize: 12, marginTop: 4, color: "var(--color-ink-3)" }}>
+          <div className="alert alert-vote-yes text-center mt-4 mb-0">
+            <div className="eyebrow">Twój głos</div>
+            <div className="fs-5 fw-medium">Głos został oddany</div>
+            <p className="small mb-0 mt-1">
               {locked ? "Głos jest ostateczny - nie można go zmienić." : "Możesz zmienić swój wybór do czasu zamknięcia sprawy."}
             </p>
           </div>
         )}
 
         {alreadyVoted && secret && (
-          <div style={{ marginTop: 20, padding: "12px 16px", textAlign: "center", border: "2px solid var(--color-ink)", background: "var(--color-paper-2)" }}>
-            <div className="legacy-eyebrow">Głosowanie tajne</div>
-            <div style={{ fontSize: 18, fontWeight: 500, color: "var(--color-ink)" }}>Twój głos został oddany</div>
-            <p style={{ fontSize: 12, marginTop: 4, color: "var(--color-ink-3)" }}>Wybór pozostaje anonimowy i nie jest nigdzie zapisywany.</p>
+          <div className="alert alert-secondary text-center mt-4 mb-0">
+            <div className="eyebrow">Głosowanie tajne</div>
+            <div className="fs-5 fw-medium">Twój głos został oddany</div>
+            <p className="small mb-0 mt-1">Wybór pozostaje anonimowy i nie jest nigdzie zapisywany.</p>
           </div>
         )}
       </div>
@@ -143,22 +126,23 @@ function StandardBallot({
   pending: boolean;
 }) {
   const buttons: { choice: VoteChoice; label: string; cls: string }[] = [
-    { choice: "YES", label: "Za", cls: "legacy-btn-yes" },
-    { choice: "NO", label: "Przeciw", cls: "legacy-btn-no" },
-    { choice: "ABSTAIN", label: "Wstrzymuję się", cls: "legacy-btn-abstain" },
+    { choice: "YES", label: "Za", cls: "btn-vote-yes" },
+    { choice: "NO", label: "Przeciw", cls: "btn-vote-no" },
+    { choice: "ABSTAIN", label: "Wstrzymuję się", cls: "btn-vote-abstain" },
   ];
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div className="d-grid gap-2">
       {buttons.map((b) => {
         // W głosowaniu TAJNYM nigdy nie pokazujemy który przycisk został wybrany.
         const isMine = !secret && myChoice === b.choice;
         return (
           <button
             key={b.choice}
+            type="button"
             disabled={pending}
             onClick={() => onCast(b.choice)}
-            className={`legacy-btn ${b.cls} legacy-btn-xl`}
-            style={{ outline: isMine ? "3px solid var(--color-ink)" : undefined, outlineOffset: 2, opacity: pending ? 0.7 : 1 }}
+            className={`btn btn-lg ${b.cls}`}
+            style={{ outline: isMine ? "3px solid var(--bs-dark)" : undefined, outlineOffset: 2, opacity: pending ? 0.7 : 1 }}
           >
             {b.label}{isMine && " ✓"}
           </button>
@@ -193,44 +177,44 @@ function ListBallot({
 
   return (
     <div>
-      <p style={{ fontSize: 12, marginBottom: 12, color: "var(--color-ink-3)" }}>
+      <p className="small text-secondary-emphasis mb-3">
         Wybierz {min === max ? `dokładnie ${min}` : `od ${min} do ${max}`} opcji. <strong>Niezaznaczenie = głos przeciw danemu kandydatowi.</strong>
       </p>
-      <ul style={{ border: "1px solid var(--color-rule)", listStyle: "none", margin: 0, padding: 0 }}>
+      <div className="list-group">
         {options.map((o, i) => {
           const checked = selectedIds.includes(o.id);
           const disabled = !checked && selectedIds.length >= max;
           return (
-            <li key={o.id} style={{ borderTop: i > 0 ? "1px solid var(--color-rule-soft)" : undefined }}>
-              <label
-                className={disabled ? undefined : "legacy-option-row"}
-                style={{
-                  display: "flex", alignItems: "center", gap: 12, padding: "12px 16px",
-                  cursor: disabled ? "default" : "pointer",
-                  opacity: disabled ? 0.4 : 1,
-                  background: checked ? "var(--color-yes-bg)" : undefined,
-                }}
-              >
-                <input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggle(o.id)} style={{ width: 20, height: 20 }} />
-                <span className="num" style={{ fontSize: 12, color: "var(--color-ink-3)", width: 24 }}>{i + 1}.</span>
-                <span style={{ fontSize: 16, flex: 1 }}>{o.label}</span>
-                {checked && <span className="legacy-pill" style={{ fontSize: 10, borderColor: "var(--color-yes)", color: "var(--color-yes)", background: "var(--color-yes-bg)" }}>ZA</span>}
-                {!checked && <span className="legacy-pill" style={{ fontSize: 10, borderColor: "var(--color-no)", color: "var(--color-no)", background: "var(--color-no-bg)" }}>PRZECIW</span>}
-              </label>
-            </li>
+            <label
+              key={o.id}
+              className={`list-group-item list-group-item-action d-flex align-items-center gap-3${checked ? " list-group-item-vote-yes" : ""}${disabled ? " disabled" : ""}`}
+              style={{ cursor: disabled ? "default" : "pointer" }}
+            >
+              <input
+                type="checkbox"
+                className="form-check-input mt-0 flex-shrink-0"
+                style={{ width: 20, height: 20 }}
+                checked={checked}
+                disabled={disabled}
+                onChange={() => toggle(o.id)}
+              />
+              <span className="num small text-secondary-emphasis" style={{ width: 24 }}>{i + 1}.</span>
+              <span className="flex-grow-1">{o.label}</span>
+              <span className={`badge ${checked ? "badge-vote-yes" : "badge-vote-no"}`}>{checked ? "ZA" : "PRZECIW"}</span>
+            </label>
           );
         })}
-      </ul>
+      </div>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16, fontSize: 12, color: "var(--color-ink-3)" }}>
+      <div className="d-flex align-items-center justify-content-between mt-3 small text-secondary-emphasis">
         <span>
           Zaznaczono: <span className="num">{selectedIds.length}</span> / {max}
           {remaining > 0 && ` (pozostało ${remaining})`}
         </span>
-        {tooFew && <span style={{ color: "var(--color-no)" }}>Wymagane co najmniej {min}</span>}
+        {tooFew && <span className="text-vote-no">Wymagane co najmniej {min}</span>}
       </div>
 
-      <button className="legacy-btn legacy-btn-primary legacy-btn-lg" style={{ width: "100%", marginTop: 16 }} disabled={pending || tooFew} onClick={onCast}>
+      <button type="button" className="btn btn-primary btn-lg w-100 mt-3" disabled={pending || tooFew} onClick={onCast}>
         {pending ? "Wysyłam…" : alreadyVoted ? "Aktualizuj głos" : "Zatwierdź i wyślij głos"}
       </button>
     </div>
@@ -266,41 +250,33 @@ function PackageBallot({
   const canSend = answered === options.length;
   const send = () => onCast(Object.entries(choices).map(([optionId, choice]) => ({ optionId, choice })));
 
-  const CHOICE_META: { key: VoteChoice; label: string; color: string; bg: string }[] = [
-    { key: "YES", label: "ZA", color: "var(--color-yes)", bg: "var(--color-yes-bg)" },
-    { key: "NO", label: "PRZECIW", color: "var(--color-no)", bg: "var(--color-no-bg)" },
-    { key: "ABSTAIN", label: "WSTRZYMUJĘ SIĘ", color: "var(--color-abstain)", bg: "var(--color-abstain-bg)" },
+  const CHOICE_META: { key: VoteChoice; label: string; cls: string }[] = [
+    { key: "YES", label: "ZA", cls: "vote-yes" },
+    { key: "NO", label: "PRZECIW", cls: "vote-no" },
+    { key: "ABSTAIN", label: "WSTRZYMUJĘ SIĘ", cls: "vote-abstain" },
   ];
 
   return (
     <div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="d-flex flex-column gap-4">
         {options.map((o, idx) => (
-          <div
-            key={o.id}
-            style={{ paddingBottom: 12, borderBottom: idx < options.length - 1 ? "1px solid var(--color-rule-soft)" : "none" }}
-          >
-            <div style={{ marginBottom: 8, fontWeight: 600 }}>{idx + 1}. {o.label}</div>
-            {o.description && <div style={{ fontSize: 14, marginBottom: 8, color: "var(--color-ink-2)" }}>{o.description}</div>}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+          <div key={o.id} className={idx < options.length - 1 ? "pb-3 border-bottom" : undefined}>
+            <div className="fw-semibold mb-1">{idx + 1}. {o.label}</div>
+            {o.description && <div className="small text-secondary-emphasis mb-2">{o.description}</div>}
+            <div className="row row-cols-3 g-2">
               {CHOICE_META.map((m) => {
                 const active = choices[o.id] === m.key;
                 return (
-                  <button
-                    key={m.key}
-                    type="button"
-                    disabled={pending}
-                    onClick={() => set(o.id, m.key)}
-                    className="legacy-btn"
-                    style={{
-                      padding: "12px 4px", fontSize: 12, fontWeight: 700,
-                      border: `2px solid ${m.color}`,
-                      background: active ? m.color : m.bg,
-                      color: active ? "#fff" : m.color,
-                    }}
-                  >
-                    {m.label}
-                  </button>
+                  <div className="col" key={m.key}>
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => set(o.id, m.key)}
+                      className={`btn w-100 fw-semibold ${active ? `btn-${m.cls}` : `btn-outline-${m.cls}`}`}
+                    >
+                      {m.label}
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -308,16 +284,16 @@ function PackageBallot({
         ))}
       </div>
 
-      <button className="legacy-btn legacy-btn-primary legacy-btn-lg" style={{ width: "100%", marginTop: 20 }} disabled={pending || !canSend} onClick={send}>
+      <button type="button" className="btn btn-primary btn-lg w-100 mt-4" disabled={pending || !canSend} onClick={send}>
         {pending ? "Wysyłam…" : alreadyVoted ? "Aktualizuj głosy" : "Zatwierdź i wyślij głosy"}
       </button>
       {!canSend && (
-        <p style={{ fontSize: 12, marginTop: 8, textAlign: "center", color: "var(--color-ink-3)" }}>
+        <p className="small text-secondary-emphasis text-center mt-2 mb-0">
           Oddaj głos na wszystkie pozycje ({answered}/{options.length}).
         </p>
       )}
       {secret && (
-        <p style={{ fontSize: 12, marginTop: 8, textAlign: "center", color: "var(--color-ink-3)" }}>
+        <p className="small text-secondary-emphasis text-center mt-2 mb-0">
           Głosowanie tajne - wybór nie jest nigdzie zapisywany z powiązaniem do Twojego konta.
         </p>
       )}

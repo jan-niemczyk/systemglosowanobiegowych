@@ -25,9 +25,9 @@ export default async function ParticipantLayout({ children }: { children: React.
             <div className="small fw-medium text-truncate d-none d-sm-block">
               {session.user.firstName} {session.user.lastName}
             </div>
-            <Link href="/account" className="btn btn-outline-secondary btn-sm rounded-pill">Konto</Link>
+            <Link href="/account" className="btn btn-outline-secondary btn-sm">Konto</Link>
             <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }}>
-              <button className="btn btn-outline-secondary btn-sm rounded-pill text-nowrap" type="submit">Wyloguj</button>
+              <button className="btn btn-outline-secondary btn-sm text-nowrap" type="submit">Wyloguj</button>
             </form>
           </div>
         </div>

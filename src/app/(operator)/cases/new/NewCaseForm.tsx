@@ -93,7 +93,7 @@ export function NewCaseForm({ bodies, settings }: { bodies: { id: string; name: 
       </div>
 
       {error && <div className="alert alert-danger py-2 mb-0">{error}</div>}
-      <button type="submit" className="btn btn-primary rounded-pill" disabled={pending}>{pending ? "Tworzenie…" : "Utwórz projekt sprawy"}</button>
+      <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? "Tworzenie…" : "Utwórz projekt sprawy"}</button>
     </form>
   );
 }

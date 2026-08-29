@@ -32,7 +32,7 @@ export function NewBodyForm() {
         <label className="form-label eyebrow">Opis (opcjonalnie)</label>
         <input className="form-control" value={description} onChange={(e) => setDescription(e.target.value)} />
       </div>
-      <button type="submit" className="btn btn-primary btn-sm rounded-pill" disabled={pending}>{pending ? "Dodawanie…" : "Dodaj organ"}</button>
+      <button type="submit" className="btn btn-primary btn-sm" disabled={pending}>{pending ? "Dodawanie…" : "Dodaj organ"}</button>
       {error && <div className="alert alert-danger py-2 mb-0 w-100">{error}</div>}
     </form>
   );
