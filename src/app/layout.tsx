@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import { Inter, Manrope } from "next/font/google";
+import "./globals.scss";
 import Providers from "./providers";
+
+// next/font: self-hosting automatyczny (bez blokującego requestu do Google Fonts).
+// latin-ext wymagany dla polskich znaków diakrytycznych (ą, ć, ę, ł, ń, ó, ś, ź, ż).
+// Inter zostaje jako font treści; Manrope (cieplejsze, zaokrąglone kroje) - nagłówki,
+// zgodnie z kierunkiem "miększego", bardziej nowoczesnego wyglądu.
+const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-sans", display: "swap" });
+const manrope = Manrope({ subsets: ["latin", "latin-ext"], variable: "--font-heading", display: "swap" });
 
 export const metadata: Metadata = {
   title: "iGŁOSOWANIA - System Głosowań Obiegowych",
@@ -12,15 +20,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pl">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-        />
-      </head>
+    <html lang="pl" className={`${inter.variable} ${manrope.variable}`}>
       <body><Providers>{children}</Providers></body>
     </html>
   );

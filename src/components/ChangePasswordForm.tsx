@@ -30,22 +30,22 @@ export function ChangePasswordForm() {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3 max-w-[420px]">
+    <form onSubmit={submit} className="d-flex flex-column gap-3" style={{ maxWidth: 420 }}>
       <div>
-        <label className="label">Obecne hasło</label>
-        <input type="password" className="input" value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="current-password" required />
+        <label className="form-label eyebrow">Obecne hasło</label>
+        <input type="password" className="form-control" value={current} onChange={(e) => setCurrent(e.target.value)} autoComplete="current-password" required />
       </div>
       <div>
-        <label className="label">Nowe hasło</label>
-        <input type="password" className="input" value={next} onChange={(e) => setNext(e.target.value)} autoComplete="new-password" required />
-        <div className="text-xs mt-1" style={{ color: "var(--color-ink-3)" }}>Co najmniej 8 znaków.</div>
+        <label className="form-label eyebrow">Nowe hasło</label>
+        <input type="password" className="form-control" value={next} onChange={(e) => setNext(e.target.value)} autoComplete="new-password" required />
+        <div className="form-text">Co najmniej 8 znaków.</div>
       </div>
       <div>
-        <label className="label">Powtórz nowe hasło</label>
-        <input type="password" className="input" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" required />
+        <label className="form-label eyebrow">Powtórz nowe hasło</label>
+        <input type="password" className="form-control" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" required />
       </div>
       {msg && (
-        <div className="text-sm" style={{ color: msg.ok ? "var(--color-yes)" : "var(--color-no)" }}>{msg.text}</div>
+        <div className={`alert ${msg.ok ? "alert-success" : "alert-danger"} py-2 mb-0`}>{msg.text}</div>
       )}
       <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? "Zapisywanie…" : "Zmień hasło"}</button>
     </form>

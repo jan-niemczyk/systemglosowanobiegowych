@@ -11,36 +11,42 @@ export default async function BodiesPage() {
   });
 
   return (
-    <div className="px-6 py-8 max-w-[800px] mx-auto space-y-6">
+    <div className="container py-4 py-md-5 d-flex flex-column gap-4" style={{ maxWidth: 800 }}>
       <header>
         <div className="eyebrow mb-2">Rejestr organów</div>
-        <h1 style={{ fontSize: 28 }}>Organy i zespoły</h1>
+        <h1 className="h3 mb-0">Organy i zespoły</h1>
       </header>
 
-      {bodies.length === 0 ? (
-        <p className="text-sm" style={{ color: "var(--color-ink-3)" }}>Brak zdefiniowanych organów.</p>
-      ) : (
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="text-left" style={{ color: "var(--color-ink-3)" }}>
-              <th className="pb-2 font-normal">Nazwa</th>
-              <th className="pb-2 font-normal">Skład</th>
-              <th className="pb-2 font-normal">Sprawy</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bodies.map((b) => (
-              <tr key={b.id} className="border-t" style={{ borderColor: "var(--color-rule-soft)" }}>
-                <td className="py-2">
-                  <Link href={`/bodies/${b.id}`} className="font-medium" style={{ textDecoration: "none", color: "inherit" }}>{b.name}</Link>
-                </td>
-                <td className="py-2 num">{b._count.members}</td>
-                <td className="py-2 num">{b._count.cases}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <div className="card shadow-sm">
+        {bodies.length === 0 ? (
+          <div className="card-body">
+            <p className="small text-secondary-emphasis mb-0">Brak zdefiniowanych organów.</p>
+          </div>
+        ) : (
+          <div className="table-responsive">
+            <table className="table table-hover align-middle mb-0">
+              <thead>
+                <tr className="text-secondary-emphasis small">
+                  <th className="fw-normal ps-3">Nazwa</th>
+                  <th className="fw-normal">Skład</th>
+                  <th className="fw-normal pe-3">Sprawy</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bodies.map((b) => (
+                  <tr key={b.id}>
+                    <td className="ps-3">
+                      <Link href={`/bodies/${b.id}`} className="fw-medium text-decoration-none text-body">{b.name}</Link>
+                    </td>
+                    <td className="num">{b._count.members}</td>
+                    <td className="num pe-3">{b._count.cases}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       <NewBodyForm />
     </div>

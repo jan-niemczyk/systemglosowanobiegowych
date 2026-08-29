@@ -1,55 +1,65 @@
 import { auth, signOut } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
 export default async function OperatorLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session || session.user.role !== "OPERATOR") redirect("/login");
+  const settings = await prisma.settings.upsert({ where: { id: "singleton" }, create: { id: "singleton" }, update: {} });
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <TopBar userName={`${session.user.firstName} ${session.user.lastName}`} />
-      <main className="flex-1">{children}</main>
+    <div className="min-vh-100 d-flex flex-column">
+      <TopBar
+        userName={`${session.user.firstName} ${session.user.lastName}`}
+        organizationName={settings.organizationName}
+        logoUrl={settings.logoUrl}
+      />
+      <main className="flex-grow-1">{children}</main>
     </div>
   );
 }
 
-function TopBar({ userName }: { userName: string }) {
+function TopBar({ userName, organizationName, logoUrl }: { userName: string; organizationName: string; logoUrl: string | null }) {
   return (
-    <header
-      className="no-print sticky top-0 z-30 flex items-center justify-between px-6 h-14"
-      style={{ background: "var(--color-paper)", borderBottom: "1px solid var(--color-rule)" }}
-    >
-      <div className="flex items-center gap-8 min-w-0">
-        <Link href="/dashboard" className="flex items-baseline gap-2 shrink-0">
-          <span style={{ fontFamily: "var(--font-serif)", fontSize: 22, fontWeight: 500, letterSpacing: "-0.01em" }}>
-            iGŁOSOWANIA
-          </span>
-          <span className="eyebrow">Panel operatora</span>
-        </Link>
-        <nav className="flex items-center gap-1 text-sm overflow-x-auto">
-          <NavLink href="/dashboard">Pulpit</NavLink>
-          <NavLink href="/cases">Sprawy</NavLink>
-          <NavLink href="/bodies">Organy</NavLink>
-          <NavLink href="/users">Osoby</NavLink>
-          <NavLink href="/audit">Rejestr czynności</NavLink>
-          <NavLink href="/settings">Ustawienia</NavLink>
-        </nav>
-      </div>
-      <div className="flex items-center gap-4 shrink-0">
-        <div className="text-right hidden sm:block">
-          <div className="text-xs" style={{ color: "var(--color-ink-3)" }}>Zalogowano jako</div>
-          <div className="text-sm font-medium">{userName}</div>
+    <header className="no-print sticky-top bg-white border-bottom shadow-sm">
+      <div className="d-flex align-items-center justify-content-between px-4 gap-3" style={{ height: 64 }}>
+        <div className="d-flex align-items-center gap-4 min-w-0">
+          <Link href="/dashboard" className="d-flex align-items-baseline gap-2 text-decoration-none text-body flex-shrink-0">
+            {logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logoUrl} alt={organizationName} style={{ height: 32, width: "auto" }} />
+            ) : (
+              <span style={{ fontFamily: "var(--font-heading)", fontSize: 22, fontWeight: 600, letterSpacing: "-0.01em" }}>
+                iGŁOSOWANIA
+              </span>
+            )}
+            <span className="eyebrow d-none d-sm-inline">Panel operatora</span>
+          </Link>
+          <nav className="d-flex align-items-center gap-1 overflow-auto">
+            <NavLink href="/dashboard">Pulpit</NavLink>
+            <NavLink href="/cases">Sprawy</NavLink>
+            <NavLink href="/bodies">Organy</NavLink>
+            <NavLink href="/users">Osoby</NavLink>
+            <NavLink href="/audit">Rejestr czynności</NavLink>
+            <NavLink href="/settings">Ustawienia</NavLink>
+          </nav>
         </div>
-        <Link href="/account" className="btn btn-sm">Konto</Link>
-        <form
-          action={async () => {
-            "use server";
-            await signOut({ redirectTo: "/login" });
-          }}
-        >
-          <button className="btn btn-sm" type="submit">Wyloguj</button>
-        </form>
+        <div className="d-flex align-items-center gap-3 flex-shrink-0">
+          <div className="text-end d-none d-sm-block">
+            <div className="small text-secondary-emphasis" style={{ fontSize: 11 }}>Zalogowano jako</div>
+            <div className="small fw-medium">{userName}</div>
+          </div>
+          <Link href="/account" className="btn btn-outline-secondary btn-sm rounded-pill">Konto</Link>
+          <form
+            action={async () => {
+              "use server";
+              await signOut({ redirectTo: "/login" });
+            }}
+          >
+            <button className="btn btn-outline-secondary btn-sm rounded-pill" type="submit">Wyloguj</button>
+          </form>
+        </div>
       </div>
     </header>
   );
@@ -57,7 +67,7 @@ function TopBar({ userName }: { userName: string }) {
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className="px-3 py-1.5 rounded-sm hover:bg-[var(--color-paper-2)]" style={{ textDecoration: "none" }}>
+    <Link href={href} className="nav-link-pill px-3 py-2 rounded-pill text-decoration-none text-body small fw-medium">
       {children}
     </Link>
   );

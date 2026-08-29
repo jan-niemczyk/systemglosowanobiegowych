@@ -42,57 +42,59 @@ export function ItemDocumentsPanel({
 
   if (!expanded) {
     return (
-      <button type="button" className="btn btn-sm" onClick={() => setExpanded(true)}>
+      <button type="button" className="btn btn-sm btn-outline-secondary rounded-pill align-self-start" onClick={() => setExpanded(true)}>
         Dokumenty pozycji ({documents.length})
       </button>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="card card-soft p-3 d-flex flex-column gap-3">
       <div className="eyebrow">Dokumenty pozycji</div>
       {documents.length === 0 ? (
-        <p className="text-sm" style={{ color: "var(--color-ink-3)" }}>Brak dokumentów.</p>
+        <p className="small text-secondary-emphasis mb-0">Brak dokumentów.</p>
       ) : (
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="text-left" style={{ color: "var(--color-ink-3)" }}>
-              <th className="pb-1 font-normal">Plik</th>
-              <th className="pb-1 font-normal">Rodzaj</th>
-              <th className="pb-1 font-normal">Rozmiar</th>
-              <th className="pb-1 font-normal"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {documents.map((d) => (
-              <tr key={d.id} className="border-t" style={{ borderColor: "var(--color-rule-soft)" }}>
-                <td className="py-1"><a href={`/api/documents/${d.id}`} className="underline">{d.fileName}</a></td>
-                <td className="py-1">{DOCUMENT_KIND_LABEL[d.kind]}</td>
-                <td className="py-1 num text-xs">{Math.round(d.sizeBytes / 1024)} KB</td>
-                <td className="py-1 text-right">
-                  <button className="btn btn-sm btn-danger" disabled={pending} onClick={() => remove(d.id)}>Usuń</button>
-                </td>
+        <div className="table-responsive">
+          <table className="table table-sm align-middle mb-0">
+            <thead>
+              <tr className="text-secondary-emphasis">
+                <th className="fw-normal">Plik</th>
+                <th className="fw-normal">Rodzaj</th>
+                <th className="fw-normal">Rozmiar</th>
+                <th className="fw-normal"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {documents.map((d) => (
+                <tr key={d.id}>
+                  <td><a href={`/api/documents/${d.id}`} className="link-primary">{d.fileName}</a></td>
+                  <td>{DOCUMENT_KIND_LABEL[d.kind]}</td>
+                  <td className="num" style={{ fontSize: 12 }}>{Math.round(d.sizeBytes / 1024)} KB</td>
+                  <td className="text-end">
+                    <button className="btn btn-sm btn-outline-danger" disabled={pending} onClick={() => remove(d.id)}>Usuń</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
-      <form onSubmit={upload} className="flex flex-wrap items-end gap-3">
+      <form onSubmit={upload} className="d-flex flex-wrap align-items-end gap-3">
         <div>
-          <label className="label">Rodzaj</label>
-          <select className="input" value={kind} onChange={(e) => setKind(e.target.value as DocumentKind)}>
+          <label className="form-label eyebrow">Rodzaj</label>
+          <select className="form-select" value={kind} onChange={(e) => setKind(e.target.value as DocumentKind)}>
             <option value="DRAFT">{DOCUMENT_KIND_LABEL.DRAFT}</option>
             <option value="ATTACHMENT">{DOCUMENT_KIND_LABEL.ATTACHMENT}</option>
             <option value="RESULT">{DOCUMENT_KIND_LABEL.RESULT}</option>
           </select>
         </div>
         <div>
-          <label className="label">Plik</label>
-          <input ref={fileRef} type="file" className="input" />
+          <label className="form-label eyebrow">Plik</label>
+          <input ref={fileRef} type="file" className="form-control" />
         </div>
-        <button type="submit" className="btn btn-sm" disabled={pending}>{pending ? "Wgrywanie…" : "Dodaj dokument"}</button>
-        {error && <div className="text-sm w-full" style={{ color: "var(--color-no)" }}>{error}</div>}
+        <button type="submit" className="btn btn-sm btn-outline-secondary rounded-pill" disabled={pending}>{pending ? "Wgrywanie…" : "Dodaj dokument"}</button>
+        {error && <div className="alert alert-danger py-2 mb-0 w-100">{error}</div>}
       </form>
     </div>
   );

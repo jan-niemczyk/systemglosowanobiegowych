@@ -11,35 +11,39 @@ export default async function AuditPage() {
   });
 
   return (
-    <div className="px-6 py-8 max-w-[1100px] mx-auto space-y-6">
-      <header className="flex items-center justify-between">
+    <div className="container py-4 py-md-5 d-flex flex-column gap-4" style={{ maxWidth: 1100 }}>
+      <header className="d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div>
           <div className="eyebrow mb-2">Rozliczalność</div>
-          <h1 style={{ fontSize: 28 }}>Rejestr czynności</h1>
+          <h1 className="h3 mb-0">Rejestr czynności</h1>
         </div>
-        <a className="btn btn-sm" href="/api/audit/csv">Eksport CSV</a>
+        <a className="btn btn-sm btn-outline-secondary rounded-pill" href="/api/audit/csv">Eksport CSV</a>
       </header>
 
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="text-left" style={{ color: "var(--color-ink-3)" }}>
-            <th className="pb-2 font-normal">Data</th>
-            <th className="pb-2 font-normal">Zdarzenie</th>
-            <th className="pb-2 font-normal">Sprawa</th>
-            <th className="pb-2 font-normal">Użytkownik</th>
-          </tr>
-        </thead>
-        <tbody>
-          {logs.map((l) => (
-            <tr key={l.id} className="border-t" style={{ borderColor: "var(--color-rule-soft)" }}>
-              <td className="py-1 num text-xs">{formatDateTime(l.createdAt)}</td>
-              <td className="py-1">{l.description}</td>
-              <td className="py-1">{l.case ? (l.case.number ? `${l.case.number} - ` : "") + l.case.title : "-"}</td>
-              <td className="py-1">{l.user ? `${l.user.firstName} ${l.user.lastName}` : "-"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="card shadow-sm">
+        <div className="table-responsive">
+          <table className="table table-hover align-middle mb-0">
+            <thead>
+              <tr className="text-secondary-emphasis small">
+                <th className="fw-normal ps-3">Data</th>
+                <th className="fw-normal">Zdarzenie</th>
+                <th className="fw-normal">Sprawa</th>
+                <th className="fw-normal pe-3">Użytkownik</th>
+              </tr>
+            </thead>
+            <tbody>
+              {logs.map((l) => (
+                <tr key={l.id}>
+                  <td className="num ps-3" style={{ fontSize: 12 }}>{formatDateTime(l.createdAt)}</td>
+                  <td>{l.description}</td>
+                  <td>{l.case ? (l.case.number ? `${l.case.number} - ` : "") + l.case.title : "-"}</td>
+                  <td className="pe-3">{l.user ? `${l.user.firstName} ${l.user.lastName}` : "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

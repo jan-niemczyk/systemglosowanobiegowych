@@ -1,32 +1,38 @@
 import { auth, signOut } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
 export default async function ParticipantLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session || session.user.role !== "PARTICIPANT") redirect("/login");
+  const settings = await prisma.settings.upsert({ where: { id: "singleton" }, create: { id: "singleton" }, update: {} });
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header
-        className="no-print sticky top-0 z-30 flex items-center justify-between px-4 h-14 gap-2"
-        style={{ background: "var(--color-paper)", borderBottom: "1px solid var(--color-rule)" }}
-      >
-        <Link href="/my-cases" className="flex items-baseline gap-2 min-w-0" style={{ textDecoration: "none", color: "inherit" }}>
-          <span style={{ fontSize: 20, fontWeight: 600 }}>iGŁOSOWANIA</span>
-          <span className="eyebrow hidden sm:inline">Moje sprawy</span>
-        </Link>
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="text-sm font-medium truncate hidden sm:block">
-            {session.user.firstName} {session.user.lastName}
+    <div className="min-vh-100 d-flex flex-column">
+      <header className="no-print sticky-top bg-white border-bottom shadow-sm">
+        <div className="d-flex align-items-center justify-content-between px-3 gap-2" style={{ height: 64 }}>
+          <Link href="/my-cases" className="d-flex align-items-baseline gap-2 min-w-0 text-decoration-none text-body">
+            {settings.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={settings.logoUrl} alt={settings.organizationName} style={{ height: 28, width: "auto" }} />
+            ) : (
+              <span style={{ fontFamily: "var(--font-heading)", fontSize: 20, fontWeight: 600 }}>iGŁOSOWANIA</span>
+            )}
+            <span className="eyebrow d-none d-sm-inline">Moje sprawy</span>
+          </Link>
+          <div className="d-flex align-items-center gap-2 min-w-0">
+            <div className="small fw-medium text-truncate d-none d-sm-block">
+              {session.user.firstName} {session.user.lastName}
+            </div>
+            <Link href="/account" className="btn btn-outline-secondary btn-sm rounded-pill">Konto</Link>
+            <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }}>
+              <button className="btn btn-outline-secondary btn-sm rounded-pill text-nowrap" type="submit">Wyloguj</button>
+            </form>
           </div>
-          <Link href="/account" className="btn btn-sm">Konto</Link>
-          <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }}>
-            <button className="btn btn-sm" type="submit" style={{ whiteSpace: "nowrap" }}>Wyloguj</button>
-          </form>
         </div>
       </header>
-      <main className="flex-1">{children}</main>
+      <main className="flex-grow-1">{children}</main>
     </div>
   );
 }

@@ -9,17 +9,17 @@ export default async function AccountPage() {
   if (!session?.user?.id) redirect("/");
 
   return (
-    <div className="px-6 py-10 max-w-[520px] mx-auto">
-      <header className="border-b border-[var(--color-rule)] pb-6 mb-8">
+    <div className="container py-5" style={{ maxWidth: 520 }}>
+      <header className="border-bottom pb-4 mb-4">
         <div className="eyebrow mb-2">Konto</div>
-        <h1 style={{ fontSize: 28, lineHeight: 1.05 }}>Zmiana hasła</h1>
-        <p className="text-sm mt-2" style={{ color: "var(--color-ink-2)" }}>
+        <h1 className="h3" style={{ lineHeight: 1.05 }}>Zmiana hasła</h1>
+        <p className="small mt-2 text-secondary-emphasis">
           Zalogowano jako {session.user.email}
         </p>
       </header>
       <ChangePasswordForm />
-      <div className="mt-8">
-        <a href="/" className="btn" style={{ padding: "6px 12px", fontSize: 12 }}>Powrót</a>
+      <div className="mt-4">
+        <a href="/" className="btn btn-outline-secondary btn-sm rounded-pill">Powrót</a>
       </div>
     </div>
   );

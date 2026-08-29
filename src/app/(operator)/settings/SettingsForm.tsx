@@ -49,65 +49,69 @@ export function SettingsForm({ settings }: { settings: Settings }) {
   }
 
   return (
-    <form onSubmit={submit} className="card p-6 space-y-4">
+    <form onSubmit={submit} className="card shadow-sm p-4 d-flex flex-column gap-4">
       <div>
-        <label className="label">Nazwa organizacji</label>
-        <input className="input" value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} />
+        <label className="form-label eyebrow">Nazwa organizacji</label>
+        <input className="form-control" value={organizationName} onChange={(e) => setOrganizationName(e.target.value)} />
       </div>
 
       <div>
-        <label className="label">Logo</label>
-        {logoUrl && <img src={logoUrl} alt="Logo" style={{ height: 40, marginBottom: 8 }} />}
-        <div className="flex gap-2">
-          <input ref={fileRef} type="file" accept="image/*" className="input" />
-          <button type="button" className="btn btn-sm" onClick={uploadLogo} disabled={pending}>Wgraj</button>
+        <label className="form-label eyebrow">Logo</label>
+        {logoUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={logoUrl} alt="Logo" className="d-block mb-2" style={{ height: 40 }} />
+        )}
+        <div className="d-flex gap-2">
+          <input ref={fileRef} type="file" accept="image/*" className="form-control" />
+          <button type="button" className="btn btn-sm btn-outline-secondary rounded-pill text-nowrap" onClick={uploadLogo} disabled={pending}>Wgraj</button>
         </div>
+        <div className="form-text">Widoczne w nagłówku panelu operatora, panelu uczestnika i na ekranie logowania.</div>
       </div>
 
-      <div className="border-t pt-4 space-y-4" style={{ borderColor: "var(--color-rule-soft)" }}>
+      <div className="border-top pt-4 d-flex flex-column gap-3">
         <div className="eyebrow">Wartości domyślne nowej sprawy</div>
-        <div className="grid sm:grid-cols-2 gap-3">
-          <div>
-            <label className="label">Jawność głosowania</label>
-            <select className="input" value={defaultVoteVisibility} onChange={(e) => setDefaultVoteVisibility(e.target.value as VoteVisibility)}>
+        <div className="row g-3">
+          <div className="col-12 col-sm-6">
+            <label className="form-label eyebrow">Jawność głosowania</label>
+            <select className="form-select" value={defaultVoteVisibility} onChange={(e) => setDefaultVoteVisibility(e.target.value as VoteVisibility)}>
               {Object.entries(VOTE_VISIBILITY_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </div>
-          <div>
-            <label className="label">Tryb zakończenia</label>
-            <select className="input" value={defaultCloseMode} onChange={(e) => setDefaultCloseMode(e.target.value as CloseMode)}>
+          <div className="col-12 col-sm-6">
+            <label className="form-label eyebrow">Tryb zakończenia</label>
+            <select className="form-select" value={defaultCloseMode} onChange={(e) => setDefaultCloseMode(e.target.value as CloseMode)}>
               {Object.entries(CLOSE_MODE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </div>
-          <div>
-            <label className="label">Publikacja wyników</label>
-            <select className="input" value={defaultResultsVisibility} onChange={(e) => setDefaultResultsVisibility(e.target.value as ResultsVisibility)}>
+          <div className="col-12 col-sm-6">
+            <label className="form-label eyebrow">Publikacja wyników</label>
+            <select className="form-select" value={defaultResultsVisibility} onChange={(e) => setDefaultResultsVisibility(e.target.value as ResultsVisibility)}>
               {Object.entries(RESULTS_VISIBILITY_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </div>
         </div>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={defaultAllowVoteChange} onChange={(e) => setDefaultAllowVoteChange(e.target.checked)} />
-          Dopuszczalna zmiana głosu
-        </label>
+        <div className="form-check">
+          <input type="checkbox" className="form-check-input" id="defaultAllowVoteChange" checked={defaultAllowVoteChange} onChange={(e) => setDefaultAllowVoteChange(e.target.checked)} />
+          <label className="form-check-label small" htmlFor="defaultAllowVoteChange">Dopuszczalna zmiana głosu</label>
+        </div>
       </div>
 
-      <div className="border-t pt-4 space-y-4" style={{ borderColor: "var(--color-rule-soft)" }}>
+      <div className="border-top pt-4 d-flex flex-column gap-3">
         <div className="eyebrow">Dokumenty</div>
-        <div className="grid sm:grid-cols-2 gap-3">
-          <div>
-            <label className="label">Limit wielkości pliku (MB)</label>
-            <input type="number" min={1} className="input" value={maxDocumentSizeMB} onChange={(e) => setMaxDocumentSizeMB(Number(e.target.value))} />
+        <div className="row g-3">
+          <div className="col-12 col-sm-6">
+            <label className="form-label eyebrow">Limit wielkości pliku (MB)</label>
+            <input type="number" min={1} className="form-control" value={maxDocumentSizeMB} onChange={(e) => setMaxDocumentSizeMB(Number(e.target.value))} />
           </div>
-          <div>
-            <label className="label">Dopuszczalne typy plików</label>
-            <input className="input" value={allowedDocumentTypes} onChange={(e) => setAllowedDocumentTypes(e.target.value)} placeholder="pdf, doc, docx, jpg" />
+          <div className="col-12 col-sm-6">
+            <label className="form-label eyebrow">Dopuszczalne typy plików</label>
+            <input className="form-control" value={allowedDocumentTypes} onChange={(e) => setAllowedDocumentTypes(e.target.value)} placeholder="pdf, doc, docx, jpg" />
           </div>
         </div>
       </div>
 
-      {msg && <div className="text-sm" style={{ color: msg.ok ? "var(--color-yes)" : "var(--color-no)" }}>{msg.text}</div>}
-      <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? "Zapisywanie…" : "Zapisz ustawienia"}</button>
+      {msg && <div className={`alert ${msg.ok ? "alert-success" : "alert-danger"} py-2 mb-0`}>{msg.text}</div>}
+      <button type="submit" className="btn btn-primary rounded-pill" disabled={pending}>{pending ? "Zapisywanie…" : "Zapisz ustawienia"}</button>
     </form>
   );
 }

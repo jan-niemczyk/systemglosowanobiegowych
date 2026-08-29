@@ -10,10 +10,10 @@ export default async function NewCasePage() {
   ]);
 
   return (
-    <div className="px-6 py-8 max-w-[640px] mx-auto">
-      <header className="mb-6">
+    <div className="container py-4 py-md-5" style={{ maxWidth: 640 }}>
+      <header className="mb-4">
         <div className="eyebrow mb-2">Sprawy obiegowe</div>
-        <h1 style={{ fontSize: 28 }}>Nowa sprawa</h1>
+        <h1 className="h3 mb-0">Nowa sprawa</h1>
       </header>
       <NewCaseForm bodies={bodies.map((b) => ({ id: b.id, name: b.name }))} settings={settings} />
     </div>

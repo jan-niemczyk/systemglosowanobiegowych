@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
-export default function LoginForm() {
+export default function LoginForm({ organizationName, logoUrl }: { organizationName: string; logoUrl: string | null }) {
   const router = useRouter();
   const params = useSearchParams();
   const from = params.get("from") ?? "/";
@@ -28,23 +28,25 @@ export default function LoginForm() {
   }
 
   return (
-    <main className="no-grid min-h-screen flex items-center justify-center px-6" style={{ background: "var(--color-paper)" }}>
-      <div className="w-full max-w-[440px]">
-        {/* nagłówek z pieczęcią */}
-        <header className="mb-10">
+    <main className="min-vh-100 d-flex align-items-center justify-content-center px-3">
+      <div className="w-100" style={{ maxWidth: 440 }}>
+        <header className="mb-5">
+          {logoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt={organizationName} style={{ height: 48, marginBottom: 16 }} />
+          )}
           <div className="eyebrow mb-3">System Głosowań Obiegowych</div>
-          <h1 style={{ fontSize: 44, lineHeight: 1.05, fontWeight: 500 }}>
+          <h1 style={{ fontSize: 44, lineHeight: 1.05 }}>
             iGŁOSOWANIA.
           </h1>
-          <p className="mt-3 text-sm" style={{ color: "var(--color-ink-2)" }}>
+          <p className="mt-3 small text-secondary-emphasis">
             Zaloguj się, aby przejść do swoich spraw.
           </p>
         </header>
 
-        {/* karta logowania */}
-        <form onSubmit={onSubmit} className="card p-8">
-          <div className="mb-5">
-            <label className="label" htmlFor="email">Adres e-mail</label>
+        <form onSubmit={onSubmit} className="card shadow p-4 p-sm-5">
+          <div className="mb-4">
+            <label className="form-label eyebrow" htmlFor="email">Adres e-mail</label>
             <input
               id="email"
               type="email"
@@ -52,12 +54,12 @@ export default function LoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="input"
+              className="form-control"
               placeholder="np. anna.kowalska@miasto.pl"
             />
           </div>
-          <div className="mb-6">
-            <label className="label" htmlFor="password">Hasło</label>
+          <div className="mb-4">
+            <label className="form-label eyebrow" htmlFor="password">Hasło</label>
             <input
               id="password"
               type="password"
@@ -65,17 +67,17 @@ export default function LoginForm() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input"
+              className="form-control"
             />
           </div>
 
           {error && (
-            <div className="mb-5 px-3 py-2 text-sm" style={{ background: "var(--color-no-bg)", border: "1px solid var(--color-no)", color: "var(--color-no)" }}>
+            <div className="alert alert-danger py-2 mb-4">
               {error}
             </div>
           )}
 
-          <button type="submit" className="btn btn-primary w-full" disabled={pending}>
+          <button type="submit" className="btn btn-primary w-100 rounded-pill" disabled={pending}>
             {pending ? "Logowanie…" : "Zaloguj się"}
           </button>
         </form>

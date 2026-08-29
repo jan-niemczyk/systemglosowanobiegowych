@@ -14,15 +14,15 @@ export default async function BodyDetailPage({ params }: { params: Promise<{ id:
   if (!body) notFound();
 
   return (
-    <div className="px-6 py-8 max-w-[700px] mx-auto space-y-6">
+    <div className="container py-4 py-md-5 d-flex flex-column gap-4" style={{ maxWidth: 700 }}>
       <header>
         <div className="eyebrow mb-2">Organ</div>
-        <h1 style={{ fontSize: 28 }}>{body.name}</h1>
-        {body.description && <p className="text-sm mt-2" style={{ color: "var(--color-ink-2)" }}>{body.description}</p>}
+        <h1 className="h3 mb-0">{body.name}</h1>
+        {body.description && <p className="small mt-2 text-secondary-emphasis">{body.description}</p>}
       </header>
 
-      <section>
-        <h2 className="text-sm font-medium mb-3">Skład ({body.members.length})</h2>
+      <section className="card shadow-sm p-4">
+        <h2 className="small fw-medium mb-3">Skład ({body.members.length})</h2>
         <BodyMembersEditor
           bodyId={body.id}
           members={body.members.map((m) => ({ userId: m.userId, hasVotingRight: m.hasVotingRight, firstName: m.user.firstName, lastName: m.user.lastName, email: m.user.email }))}

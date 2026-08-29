@@ -48,21 +48,21 @@ export default async function MyCaseDetailPage({ params }: { params: Promise<{ i
   const resultsVisible = kase.status === "RESULTS_PUBLISHED";
 
   return (
-    <div className="px-6 py-8 max-w-[720px] mx-auto space-y-8">
+    <div className="container py-4 py-md-5 d-flex flex-column gap-4" style={{ maxWidth: 720 }}>
       <header>
         <div className="eyebrow mb-2">Sprawa {kase.number ? `nr ${kase.number}` : ""}</div>
-        <h1 style={{ fontSize: 26 }}>{kase.title}</h1>
-        {kase.description && <p className="text-sm mt-2" style={{ color: "var(--color-ink-2)" }}>{kase.description}</p>}
-        <div className="flex items-center gap-3 mt-3 flex-wrap">
+        <h1 className="h4">{kase.title}</h1>
+        {kase.description && <p className="small mt-2 text-secondary-emphasis">{kase.description}</p>}
+        <div className="d-flex align-items-center gap-3 mt-3 flex-wrap">
           <StatusPill status={kase.status} />
-          {kase.body && <span className="text-sm" style={{ color: "var(--color-ink-3)" }}>{kase.body.name}</span>}
-          {kase.deadlineAt && <span className="text-sm" style={{ color: "var(--color-ink-3)" }}>Termin: {formatDateTime(kase.deadlineAt)}</span>}
-          {!participant.hasVotingRight && <span className="pill pill-neutral">Bez prawa głosu w tej sprawie</span>}
+          {kase.body && <span className="small text-secondary-emphasis">{kase.body.name}</span>}
+          {kase.deadlineAt && <span className="small text-secondary-emphasis">Termin: {formatDateTime(kase.deadlineAt)}</span>}
+          {!participant.hasVotingRight && <span className="badge rounded-pill text-bg-light border">Bez prawa głosu w tej sprawie</span>}
         </div>
       </header>
 
-      <section className="space-y-4">
-        <h2 className="text-sm font-medium">Pozycje głosowania</h2>
+      <section className="d-flex flex-column gap-3">
+        <h2 className="small fw-medium mb-0">Pozycje głosowania</h2>
         {kase.items.map((item) => {
           const docs = visibleDocsFor(item.documents);
           if (kase.status === "OPEN" && item.status === "OPEN" && participant.hasVotingRight) {
@@ -97,9 +97,9 @@ export default async function MyCaseDetailPage({ params }: { params: Promise<{ i
           // zamknięte, wyniki jeszcze nieopublikowane albo brak prawa głosu - tylko potwierdzenie własnego udziału
           const voted = item.visibility === "SECRET" ? votedSecretItemIds.has(item.id) : !!ballotByItem.get(item.id);
           return (
-            <div key={item.id} className="card-soft p-4">
-              <div className="font-medium text-sm">{item.order}. {item.title}</div>
-              <div className="text-sm mt-2" style={{ color: "var(--color-ink-3)" }}>
+            <div key={item.id} className="card card-soft p-4">
+              <div className="fw-medium small">{item.order}. {item.title}</div>
+              <div className="small mt-2 text-secondary-emphasis">
                 {item.status !== "OPEN" && kase.status !== "OPEN" && !resultsVisible && "Głosowanie zakończone, oczekuje na publikację wyników. "}
                 {participant.hasVotingRight ? (voted ? "Twój głos został oddany." : "Nie oddano głosu.") : ""}
               </div>
@@ -111,7 +111,7 @@ export default async function MyCaseDetailPage({ params }: { params: Promise<{ i
 
       {(kase.status === "CLOSED" || kase.status === "RESULTS_PUBLISHED") && (
         <section>
-          <a className="btn btn-sm" href={`/api/cases/${kase.id}/confirmation`}>Pobierz potwierdzenie udziału (PDF)</a>
+          <a className="btn btn-sm btn-outline-secondary rounded-pill" href={`/api/cases/${kase.id}/confirmation`}>Pobierz potwierdzenie udziału (PDF)</a>
         </section>
       )}
     </div>

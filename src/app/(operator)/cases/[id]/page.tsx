@@ -48,41 +48,43 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
   };
 
   return (
-    <div className="px-6 py-8 max-w-[1000px] mx-auto space-y-8">
-      <header className="flex items-start justify-between gap-4 flex-wrap">
+    <div className="container py-4 py-md-5 d-flex flex-column gap-4" style={{ maxWidth: 1000 }}>
+      <header className="d-flex align-items-start justify-content-between gap-4 flex-wrap">
         <div>
           <div className="eyebrow mb-2">Sprawa {kase.number ? `nr ${kase.number}` : ""}</div>
-          <h1 style={{ fontSize: 28 }}>{kase.title}</h1>
-          {kase.description && <p className="text-sm mt-2 max-w-[560px]" style={{ color: "var(--color-ink-2)" }}>{kase.description}</p>}
-          <div className="flex items-center gap-3 mt-3">
+          <h1 className="h3">{kase.title}</h1>
+          {kase.description && <p className="small mt-2 text-secondary-emphasis" style={{ maxWidth: 560 }}>{kase.description}</p>}
+          <div className="d-flex align-items-center gap-3 mt-3">
             <StatusPill status={kase.status} />
-            {kase.body && <span className="text-sm" style={{ color: "var(--color-ink-3)" }}>{kase.body.name}</span>}
+            {kase.body && <span className="small text-secondary-emphasis">{kase.body.name}</span>}
           </div>
         </div>
         <CaseActions caseId={kase.id} status={kase.status} readiness={readiness} />
       </header>
 
-      <section className="card-soft p-4 grid sm:grid-cols-2 gap-3 text-sm">
-        <Info label="Tryb zakończenia" value={CLOSE_MODE_LABEL[kase.closeMode]} />
-        <Info label="Publikacja wyników" value={RESULTS_VISIBILITY_LABEL[kase.resultsVisibility]} />
-        <Info label="Zmiana głosu" value={kase.allowVoteChange ? "Dopuszczalna (jawne, do zamknięcia)" : "Niedopuszczalna"} />
-        <Info label="Termin końcowy" value={formatDateTime(kase.deadlineAt)} />
-        <Info label="Otwarto" value={formatDateTime(kase.openedAt)} />
-        <Info label="Zamknięto" value={formatDateTime(kase.closedAt)} />
+      <section className="card card-soft shadow-sm p-4">
+        <div className="row row-cols-1 row-cols-sm-2 g-3 small">
+          <Info label="Tryb zakończenia" value={CLOSE_MODE_LABEL[kase.closeMode]} />
+          <Info label="Publikacja wyników" value={RESULTS_VISIBILITY_LABEL[kase.resultsVisibility]} />
+          <Info label="Zmiana głosu" value={kase.allowVoteChange ? "Dopuszczalna (jawne, do zamknięcia)" : "Niedopuszczalna"} />
+          <Info label="Termin końcowy" value={formatDateTime(kase.deadlineAt)} />
+          <Info label="Otwarto" value={formatDateTime(kase.openedAt)} />
+          <Info label="Zamknięto" value={formatDateTime(kase.closedAt)} />
+        </div>
       </section>
 
       {isDraft && (!readiness.hasParticipants || !readiness.hasItems) && (
-        <div className="card-soft p-4 text-sm" style={{ borderColor: "var(--color-abstain)" }}>
-          <div className="font-medium mb-1">Warunki otwarcia sprawy</div>
-          <ul className="list-disc pl-5 space-y-0.5">
-            <li style={{ color: readiness.hasParticipants ? "var(--color-yes)" : "var(--color-ink)" }}>Co najmniej jeden uczestnik składu {readiness.hasParticipants ? "✓" : ""}</li>
-            <li style={{ color: readiness.hasItems ? "var(--color-yes)" : "var(--color-ink)" }}>Co najmniej jedna pozycja głosowania {readiness.hasItems ? "✓" : ""}</li>
+        <div className="card card-soft p-4 small border-warning-subtle">
+          <div className="fw-medium mb-1">Warunki otwarcia sprawy</div>
+          <ul className="mb-0 ps-3">
+            <li className={readiness.hasParticipants ? "text-vote-yes" : undefined}>Co najmniej jeden uczestnik składu {readiness.hasParticipants ? "✓" : ""}</li>
+            <li className={readiness.hasItems ? "text-vote-yes" : undefined}>Co najmniej jedna pozycja głosowania {readiness.hasItems ? "✓" : ""}</li>
           </ul>
         </div>
       )}
 
-      <section>
-        <h2 className="text-sm font-medium mb-3">Skład uprawnionych ({kase.participants.length})</h2>
+      <section className="card shadow-sm p-4">
+        <h2 className="small fw-medium mb-3">Skład uprawnionych ({kase.participants.length})</h2>
         <ParticipantsEditor
           caseId={kase.id}
           editable={isDraft}
@@ -95,8 +97,8 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
         />
       </section>
 
-      <section>
-        <h2 className="text-sm font-medium mb-3">Pozycje głosowania ({kase.items.length})</h2>
+      <section className="card shadow-sm p-4">
+        <h2 className="small fw-medium mb-3">Pozycje głosowania ({kase.items.length})</h2>
         {isDraft ? (
           <ItemsEditor
             caseId={kase.id}
@@ -106,13 +108,13 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
             }))}
           />
         ) : (
-          <div className="space-y-3">
+          <div className="d-flex flex-column gap-3">
             {kase.items.map((item) => {
               const votedUserIds = item.visibility === "SECRET"
                 ? new Set(item.secretMarkers.map((m) => m.userId))
                 : new Set(item.ballots.map((b) => b.userId).filter((v): v is string => !!v));
               return (
-                <div key={item.id} className="space-y-2">
+                <div key={item.id} className="d-flex flex-column gap-2">
                   {isOpen ? (
                     <LiveItemPanel
                       item={item}
@@ -136,8 +138,8 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
       </section>
 
       {isClosedOrPublished && (
-        <section>
-          <h2 className="text-sm font-medium mb-3">Wydruki</h2>
+        <section className="card shadow-sm p-4">
+          <h2 className="small fw-medium mb-3">Wydruki</h2>
           <ReportsPanel caseId={kase.id} items={kase.items.map((i) => ({ id: i.id, title: i.title }))} />
         </section>
       )}
@@ -148,7 +150,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
 function Info({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-xs uppercase tracking-wide" style={{ color: "var(--color-ink-3)" }}>{label}</div>
+      <div className="eyebrow">{label}</div>
       <div>{value}</div>
     </div>
   );

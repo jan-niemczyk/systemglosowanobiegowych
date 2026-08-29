@@ -44,29 +44,29 @@ export function CaseActions({
   const canOpen = readiness.hasParticipants && readiness.hasItems;
 
   return (
-    <div className="flex flex-col items-end gap-2">
-      <div className="flex gap-2">
+    <div className="d-flex flex-column align-items-end gap-2">
+      <div className="d-flex gap-2">
         {status === "DRAFT" && (
           <>
-            <button className="btn btn-danger btn-sm" disabled={pending} onClick={() => call("/cancel", "Anulować sprawę?")}>Anuluj</button>
-            <button className="btn btn-primary" disabled={pending || !canOpen} onClick={() => call("/open")}>Otwórz sprawę</button>
+            <button className="btn btn-outline-danger btn-sm rounded-pill" disabled={pending} onClick={() => call("/cancel", "Anulować sprawę?")}>Anuluj</button>
+            <button className="btn btn-primary rounded-pill" disabled={pending || !canOpen} onClick={() => call("/open")}>Otwórz sprawę</button>
           </>
         )}
         {status === "OPEN" && (
           <>
-            <button className="btn btn-danger btn-sm" disabled={pending} onClick={() => call("/cancel", "Anulować otwartą sprawę?")}>Anuluj</button>
-            <button className="btn btn-primary" disabled={pending} onClick={() => call("/close", "Zamknąć głosowanie ręcznie? Tej operacji nie można cofnąć.")}>Zamknij sprawę</button>
+            <button className="btn btn-outline-danger btn-sm rounded-pill" disabled={pending} onClick={() => call("/cancel", "Anulować otwartą sprawę?")}>Anuluj</button>
+            <button className="btn btn-primary rounded-pill" disabled={pending} onClick={() => call("/close", "Zamknąć głosowanie ręcznie? Tej operacji nie można cofnąć.")}>Zamknij sprawę</button>
           </>
         )}
         {status === "CLOSED" && (
-          <button className="btn btn-primary" disabled={pending} onClick={() => call("/publish-results")}>Opublikuj wyniki</button>
+          <button className="btn btn-primary rounded-pill" disabled={pending} onClick={() => call("/publish-results")}>Opublikuj wyniki</button>
         )}
-        <button className="btn btn-danger btn-sm" disabled={pending} onClick={remove}>
+        <button className="btn btn-outline-danger btn-sm rounded-pill" disabled={pending} onClick={remove}>
           {status === "DRAFT" ? "Usuń projekt" : "Usuń sprawę"}
         </button>
       </div>
       {errors.length > 0 && (
-        <div className="text-sm text-right" style={{ color: "var(--color-no)" }}>
+        <div className="text-end small text-vote-no">
           {errors.map((e, i) => <div key={i}>{e}</div>)}
         </div>
       )}

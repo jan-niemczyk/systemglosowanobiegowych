@@ -1,0 +1,399 @@
+/**
+ * System wizualny iGŁOSOWANIA — Bootstrap 5.3 z autorskim motywem Sass (zamiast
+ * Tailwind CSS). Nowoczesny, "miększy" wygląd (zaokrąglenia, delikatne cienie,
+ * więcej przestrzeni) dla całej aplikacji — Z JEDNYM WYJĄTKIEM: aktywne pola
+ * głosowania uczestnika (src/app/(participant)/my-cases/[id]/VotingItemCard.tsx)
+ * mają zachowany dotychczasowy wygląd 1:1 (na wyraźne życzenie), stąd kilka klas
+ * niżej istnieje wyłącznie dla tego jednego pliku (oznaczone komentarzem).
+ *
+ * Kolejność jest krytyczna dla Sass/Bootstrapa: najpierw NASZE nadpisania zmiennych
+ * (Bootstrap używa `!default`, więc podana tu wartość wygrywa), potem import źródeł
+ * Bootstrapa, na końcu cienki layer własnych klas, których Bootstrap nie ma.
+ */
+
+// ─────────────────────────────────────────────────────────────────
+//  1) Zmienne Sass Bootstrapa — nadpisania SPRZED importu
+// ─────────────────────────────────────────────────────────────────
+
+// Same funkcje (shade-color, tint-color…) - bez CSS, potrzebne niżej. Bootstrap
+// importuje ten plik ponownie przy właściwym imporcie (nieszkodliwe - same funkcje).
+@import "bootstrap/scss/functions";
+
+// Fonty (ładowane przez next/font w layout.tsx jako zmienne CSS na <html>).
+$font-family-sans-serif: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+$headings-font-family: var(--font-heading), var(--font-sans), sans-serif;
+$headings-font-weight: 600;
+$headings-letter-spacing: -0.01em;
+
+// Paleta marki i statusów — te same wartości co w dawnym globals.css, teraz jako
+// zmienne Sass, żeby zasilić $theme-colors (patrz niżej) i nasz własny layer.
+$brand-blue: #2563eb;
+$brand-teal: #0d9c8f;
+$ink: #0f172a;
+$ink-2: #334155;
+$ink-3: #64748b;
+$paper-2: #f1f5f9;
+
+$vote-yes: #15803d;
+$vote-no: #dc2626;
+$vote-abstain: #ca8a04;
+$live: #e11d48;
+
+$status-draft: $ink-3;
+$status-open: $brand-blue;
+$status-closed: $ink;
+$status-published: $brand-teal;
+$status-cancelled: #b91c1c;
+
+// Semantyka ogólna Bootstrapa dostrojona do tej samej rodziny barw (dzięki temu
+// .alert-success/.alert-danger/.alert-warning itd. same trafiają w te same odcienie
+// co głosy ZA/PRZECIW/WSTRZYMUJĘ SIĘ, bez ręcznego powielania kolorów).
+$primary: $brand-blue;
+$secondary: $ink-3;
+$success: $vote-yes;
+$danger: $vote-no;
+$warning: $vote-abstain;
+$info: $brand-teal;
+$light: $paper-2;
+$dark: $ink;
+
+$body-bg: #ffffff;
+$body-color: $ink;
+$link-decoration: none;
+$link-hover-color: shade-color($primary, 15%);
+
+// Rozszerzenie palety Bootstrapa o kolory specyficzne dla aplikacji — dzięki temu
+// Bootstrap sam generuje .btn-vote-yes/.text-vote-yes/.bg-vote-yes/.border-vote-yes
+// itd. (utilities i warianty przycisków pętlują CAŁĄ mapę $theme-colors, nie tylko
+// domyślną ósemkę).
+$theme-colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  "success": $success,
+  "info": $info,
+  "warning": $warning,
+  "danger": $danger,
+  "light": $light,
+  "dark": $dark,
+  "vote-yes": $vote-yes,
+  "vote-no": $vote-no,
+  "vote-abstain": $vote-abstain,
+  "live": $live,
+  "status-draft": $status-draft,
+  "status-open": $status-open,
+  "status-closed": $status-closed,
+  "status-published": $status-published,
+  "status-cancelled": $status-cancelled,
+);
+
+// "Miększy", nowocześniejszy wygląd — zaokrąglenia. Card/badge/input/button
+// dziedziczą z $border-radius, więc jedna zmiana niesie się przez całą bibliotekę.
+$border-radius: 0.6rem;
+$border-radius-sm: 0.4rem;
+$border-radius-lg: 0.9rem;
+$border-radius-xl: 1.25rem;
+
+$box-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.04);
+$box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+
+$card-spacer-y: 1.25rem;
+$card-spacer-x: 1.25rem;
+
+// ─────────────────────────────────────────────────────────────────
+//  2) Import Bootstrapa (wyłącznie CSS — apka nie ma dropdownów/modali/tooltipów/
+//     collapse, więc bootstrap.bundle.js/Popper nie są potrzebne).
+// ─────────────────────────────────────────────────────────────────
+@import "bootstrap/scss/bootstrap";
+
+// ─────────────────────────────────────────────────────────────────
+//  3) Własny, cienki layer — wyłącznie to, czego Bootstrap nie ma gotowego.
+// ─────────────────────────────────────────────────────────────────
+
+html,
+body {
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// liczby zawsze tabularne (wyniki głosowań, liczniki)
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--bs-dark);
+  color: #fff;
+}
+
+// Mikroetykieta sekcji — wersaliki, tracking. Bootstrap nie ma odpowiednika.
+.eyebrow {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--bs-secondary-color);
+  font-weight: 600;
+}
+
+// Wariant karty-wiersza listy — subtelniejszy niż domyślna .card (bez cienia,
+// jaśniejsze obramowanie). Używany do wierszy w listach, .card zostaje dla
+// kontenerów sekcji/stron (patrz plan modernizacji — .card ma być widocznym
+// elementem nowego wyglądu, nie tylko przeniesioną nazwą).
+.card-soft {
+  border-color: var(--bs-border-color-translucent);
+  box-shadow: none;
+}
+
+// Odznaki wyniku głosowania i statusu sprawy — dokładne, rozpoznawalne pary
+// kolor/tło jak w poprzedniej wersji (ważne dla spójności ze STATUS_LABEL
+// używanym w całej apce), zbudowane jako lekkie rozszerzenie .badge.
+.badge-vote-yes {
+  color: $vote-yes;
+  background-color: #dcfce7;
+}
+.badge-vote-no {
+  color: $vote-no;
+  background-color: #fee2e2;
+}
+.badge-vote-abstain {
+  color: $vote-abstain;
+  background-color: #fef9c3;
+}
+.badge-status-draft {
+  color: $status-draft;
+  background-color: #f1f5f9;
+}
+.badge-status-open {
+  color: $status-open;
+  background-color: #dbeafe;
+}
+.badge-status-closed {
+  color: $status-closed;
+  background-color: #e2e8f0;
+}
+.badge-status-published {
+  color: $status-published;
+  background-color: #ccfbf1;
+}
+.badge-status-cancelled {
+  color: $status-cancelled;
+  background-color: #fee2e2;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+// Odznaka "Trwa głosowanie" — jedyna animowana odznaka w apce (pulsująca kropka).
+.badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: $live;
+  background: #fff;
+  border: 1px solid $live;
+}
+.badge-live::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: $live;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.slide-in {
+  animation: slide-in 180ms ease-out;
+}
+
+// Link nawigacji w nagłówkach (operator/uczestnik) - pigułkowe podświetlenie na hover.
+.nav-link-pill {
+  transition: background-color 120ms ease;
+  &:hover {
+    background-color: var(--bs-tertiary-bg);
+  }
+}
+
+// Klasa sygnalizowana już wcześniej w obu nagłówkach, dotąd nigdzie niezdefiniowana -
+// realnie ukrywa nawigację/przyciski przy drukowaniu strony z przeglądarki.
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+//  WYŁĄCZNIE dla VotingItemCard.tsx — zamrożony wygląd aktywnych pól
+//  głosowania u głosującego (na wyraźne życzenie użytkownika). Odtwarza
+//  dawny system (.card/.btn/.pill i zmienne --color-*) 1:1, niezależnie
+//  od reszty motywu Bootstrapa poniżej, żeby ten jeden ekran wyglądał
+//  dokładnie tak samo jak przed migracją na Bootstrapa. Wartości = dawne
+//  --color-* z pierwotnego globals.css (te same zmienne Sass co reszta
+//  motywu, więc nie ma dwóch źródeł prawdy dla samych kolorów).
+// ─────────────────────────────────────────────────────────────────
+:root {
+  --color-live: #{$live};
+  --color-ink: #{$ink};
+  --color-ink-2: #{$ink-2};
+  --color-ink-3: #{$ink-3};
+  --color-paper-2: #{$paper-2};
+  --color-rule: #{$ink};
+  --color-rule-soft: #e2e8f0;
+  --color-yes: #{$vote-yes};
+  --color-yes-bg: #dcfce7;
+  --color-no: #{$vote-no};
+  --color-no-bg: #fee2e2;
+  --color-abstain: #{$vote-abstain};
+  --color-abstain-bg: #fef9c3;
+}
+
+.legacy-card {
+  background: #fff;
+  border: 1px solid var(--color-rule);
+  border-radius: 2px;
+}
+
+.legacy-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-ink-3);
+}
+
+.legacy-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border: 1px solid var(--color-rule);
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 18px;
+  background: #fff;
+}
+.legacy-pill-live {
+  border-color: var(--color-live);
+  color: var(--color-live);
+}
+.legacy-pill-live::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-live);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.legacy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  border: 1px solid var(--color-rule);
+  border-radius: 2px;
+  background: #fff;
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: background 80ms ease, transform 60ms ease;
+  user-select: none;
+}
+@media (hover: hover) {
+  .legacy-btn:hover {
+    background: var(--color-paper-2);
+  }
+}
+.legacy-btn:active {
+  transform: translateY(1px);
+}
+.legacy-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.legacy-btn-primary {
+  background: var(--color-ink);
+  color: #fff;
+  border-color: var(--color-ink);
+}
+@media (hover: hover) {
+  .legacy-btn-primary:hover {
+    background: #1a1f2e;
+  }
+}
+
+.legacy-btn-yes {
+  background: var(--color-yes);
+  color: #fff;
+  border-color: var(--color-yes);
+}
+.legacy-btn-no {
+  background: var(--color-no);
+  color: #fff;
+  border-color: var(--color-no);
+}
+.legacy-btn-abstain {
+  background: var(--color-abstain);
+  color: #fff;
+  border-color: var(--color-abstain);
+}
+@media (hover: hover) {
+  .legacy-btn-yes:hover {
+    background: #18632f;
+    border-color: #18632f;
+  }
+  .legacy-btn-no:hover {
+    background: #a40d26;
+    border-color: #a40d26;
+  }
+  .legacy-btn-abstain:hover {
+    background: #9c720a;
+    border-color: #9c720a;
+  }
+}
+
+.legacy-btn-lg {
+  padding: 18px 24px;
+  font-size: 15px;
+}
+.legacy-btn-xl {
+  padding: 28px 32px;
+  font-size: 18px;
+}
+
+// Wiersz opcji na liście kandydatów - podświetlenie na hover (tylko myszka).
+.legacy-option-row {
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .legacy-option-row:hover {
+    background: var(--color-paper-2);
+  }
+}

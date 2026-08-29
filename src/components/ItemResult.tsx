@@ -29,46 +29,46 @@ export function ItemResult({ item }: { item: Item; showVoting?: boolean }) {
     : 0;
 
   return (
-    <div className="card-soft p-4">
-      <div className="flex items-start justify-between gap-3">
+    <div className="card card-soft p-4">
+      <div className="d-flex align-items-start justify-content-between gap-3">
         <div>
-          <div className="font-medium text-sm">{item.order}. {item.title}</div>
-          <div className="text-xs mt-1" style={{ color: "var(--color-ink-3)" }}>
+          <div className="fw-medium small">{item.order}. {item.title}</div>
+          <div className="text-secondary-emphasis mt-1" style={{ fontSize: 12 }}>
             {VOTE_VISIBILITY_LABEL[item.visibility]}
           </div>
         </div>
-        {!closed && <span className="pill pill-live">Trwa głosowanie</span>}
+        {!closed && <span className="badge rounded-pill badge-live">Trwa głosowanie</span>}
       </div>
 
       {closed && (
-        <div className="mt-3 text-sm space-y-3">
-          <div style={{ color: "var(--color-ink-3)" }}>
+        <div className="mt-3 small d-flex flex-column gap-3">
+          <div className="text-secondary-emphasis">
             Uprawnionych: {item.resultEligibleCount ?? "-"} Oddano głosów: {item.resultCastCount ?? "-"}
           </div>
           {item.type === "STANDARD" && (
-            <div className="flex gap-4 num">
-              <span style={{ color: "var(--color-yes)" }}>ZA: {item.resultYes ?? 0}</span>
-              <span style={{ color: "var(--color-no)" }}>PRZECIW: {item.resultNo ?? 0}</span>
-              <span style={{ color: "var(--color-abstain)" }}>WSTRZ.: {item.resultAbstain ?? 0}</span>
+            <div className="d-flex gap-4 num">
+              <span className="text-vote-yes">ZA: {item.resultYes ?? 0}</span>
+              <span className="text-vote-no">PRZECIW: {item.resultNo ?? 0}</span>
+              <span className="text-vote-abstain">WSTRZ.: {item.resultAbstain ?? 0}</span>
             </div>
           )}
           {(item.type === "PACKAGE" || item.type === "LIST") && item.options.length > 0 && (
-            <table className="w-full text-sm border-collapse">
+            <table className="table table-sm align-middle mb-0">
               <thead>
-                <tr className="text-left" style={{ color: "var(--color-ink-3)" }}>
-                  <th className="pb-1 font-normal">Pozycja</th>
-                  <th className="pb-1 font-normal num">ZA</th>
-                  <th className="pb-1 font-normal num">PRZECIW</th>
-                  {item.type === "PACKAGE" && <th className="pb-1 font-normal num">WSTRZ.</th>}
+                <tr className="text-secondary-emphasis">
+                  <th className="fw-normal">Pozycja</th>
+                  <th className="fw-normal num text-end">ZA</th>
+                  <th className="fw-normal num text-end">PRZECIW</th>
+                  {item.type === "PACKAGE" && <th className="fw-normal num text-end">WSTRZ.</th>}
                 </tr>
               </thead>
               <tbody>
                 {item.options.map((o) => (
-                  <tr key={o.id} className="border-t" style={{ borderColor: "var(--color-rule-soft)" }}>
-                    <td className="py-1">{o.label}</td>
-                    <td className="py-1 num" style={{ color: "var(--color-yes)" }}>{o.resultYes ?? 0}</td>
-                    <td className="py-1 num" style={{ color: "var(--color-no)" }}>{o.resultNo ?? 0}</td>
-                    {item.type === "PACKAGE" && <td className="py-1 num" style={{ color: "var(--color-abstain)" }}>{o.resultAbstain ?? 0}</td>}
+                  <tr key={o.id}>
+                    <td>{o.label}</td>
+                    <td className="num text-end text-vote-yes">{o.resultYes ?? 0}</td>
+                    <td className="num text-end text-vote-no">{o.resultNo ?? 0}</td>
+                    {item.type === "PACKAGE" && <td className="num text-end text-vote-abstain">{o.resultAbstain ?? 0}</td>}
                   </tr>
                 ))}
               </tbody>
@@ -76,24 +76,24 @@ export function ItemResult({ item }: { item: Item; showVoting?: boolean }) {
           )}
 
           {item.visibility === "SECRET" && (
-            <div className="text-xs italic" style={{ color: "var(--color-ink-3)" }}>Głosowanie tajne - bez wykazu imiennego.</div>
+            <div className="fst-italic text-secondary-emphasis" style={{ fontSize: 12 }}>Głosowanie tajne - bez wykazu imiennego.</div>
           )}
 
           {namedRows && namedRows.length > 0 && (
             <div>
               <div className="eyebrow mb-1">Wyniki imienne</div>
-              <table className="w-full text-sm border-collapse">
+              <table className="table table-sm align-middle mb-0">
                 <thead>
-                  <tr className="text-left" style={{ color: "var(--color-ink-3)" }}>
-                    <th className="pb-1 font-normal">Nazwisko i imię</th>
-                    <th className="pb-1 font-normal">Głos</th>
+                  <tr className="text-secondary-emphasis">
+                    <th className="fw-normal">Nazwisko i imię</th>
+                    <th className="fw-normal">Głos</th>
                   </tr>
                 </thead>
                 <tbody>
                   {namedRows.map((b, i) => (
-                    <tr key={i} className="border-t" style={{ borderColor: "var(--color-rule-soft)" }}>
-                      <td className="py-1">{b.voterLastName} {b.voterFirstName}</td>
-                      <td className="py-1">
+                    <tr key={i}>
+                      <td>{b.voterLastName} {b.voterFirstName}</td>
+                      <td>
                         {item.type === "STANDARD"
                           ? (b.choice ? CHOICE_LABEL[b.choice] : "-")
                           : item.type === "PACKAGE"
@@ -105,7 +105,7 @@ export function ItemResult({ item }: { item: Item; showVoting?: boolean }) {
                 </tbody>
               </table>
               {item.type === "LIST" && againstAllCount > 0 && (
-                <div className="text-xs mt-1" style={{ color: "var(--color-ink-3)" }}>
+                <div className="text-secondary-emphasis mt-1" style={{ fontSize: 12 }}>
                   Żadnej kandydatury nie poparło: {againstAllCount}
                 </div>
               )}

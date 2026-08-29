@@ -42,46 +42,48 @@ export function BodyMembersEditor({ bodyId, members, users }: { bodyId: string; 
   }
 
   return (
-    <div className="space-y-4">
+    <div className="d-flex flex-column gap-4">
       {members.length === 0 ? (
-        <p className="text-sm" style={{ color: "var(--color-ink-3)" }}>Skład jest pusty.</p>
+        <p className="small text-secondary-emphasis mb-0">Skład jest pusty.</p>
       ) : (
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="text-left" style={{ color: "var(--color-ink-3)" }}>
-              <th className="pb-1 font-normal">Osoba</th>
-              <th className="pb-1 font-normal">Prawo głosu</th>
-              <th className="pb-1 font-normal"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {members.map((m) => (
-              <tr key={m.userId} className="border-t" style={{ borderColor: "var(--color-rule-soft)" }}>
-                <td className="py-1">{m.lastName} {m.firstName}</td>
-                <td className="py-1">
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" checked={m.hasVotingRight} disabled={pending} onChange={() => toggleRight(m)} />
-                    {m.hasVotingRight ? "Tak" : "Nie"}
-                  </label>
-                </td>
-                <td className="py-1 text-right">
-                  <button className="btn btn-sm btn-danger" disabled={pending} onClick={() => remove(m)}>Usuń</button>
-                </td>
+        <div className="table-responsive">
+          <table className="table table-sm align-middle mb-0">
+            <thead>
+              <tr className="text-secondary-emphasis">
+                <th className="fw-normal">Osoba</th>
+                <th className="fw-normal">Prawo głosu</th>
+                <th className="fw-normal"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {members.map((m) => (
+                <tr key={m.userId}>
+                  <td>{m.lastName} {m.firstName}</td>
+                  <td>
+                    <div className="form-check mb-0">
+                      <input type="checkbox" className="form-check-input" id={`member-vote-${m.userId}`} checked={m.hasVotingRight} disabled={pending} onChange={() => toggleRight(m)} />
+                      <label className="form-check-label" htmlFor={`member-vote-${m.userId}`}>{m.hasVotingRight ? "Tak" : "Nie"}</label>
+                    </div>
+                  </td>
+                  <td className="text-end">
+                    <button className="btn btn-sm btn-outline-danger" disabled={pending} onClick={() => remove(m)}>Usuń</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
-      <div className="card-soft p-4 flex gap-2 items-end">
-        <div className="flex-1">
-          <label className="label">Dodaj osoby</label>
-          <select multiple className="input" style={{ height: 120 }} value={selectedUserIds}
+      <div className="card card-soft p-4 d-flex flex-row gap-2 align-items-end">
+        <div className="flex-grow-1">
+          <label className="form-label eyebrow">Dodaj osoby</label>
+          <select multiple className="form-select" style={{ height: 120 }} value={selectedUserIds}
             onChange={(e) => setSelectedUserIds(Array.from(e.target.selectedOptions).map((o) => o.value))}>
             {available.map((u) => <option key={u.id} value={u.id}>{u.lastName} {u.firstName} ({u.email})</option>)}
           </select>
         </div>
-        <button className="btn btn-sm" disabled={selectedUserIds.length === 0 || pending} onClick={add}>Dodaj zaznaczone</button>
+        <button className="btn btn-sm btn-outline-secondary rounded-pill" disabled={selectedUserIds.length === 0 || pending} onClick={add}>Dodaj zaznaczone</button>
       </div>
     </div>
   );

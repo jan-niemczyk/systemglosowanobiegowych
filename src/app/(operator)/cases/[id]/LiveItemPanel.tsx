@@ -21,46 +21,46 @@ export function LiveItemPanel({
   const notVoted = eligible.filter((p) => !votedUserIds.has(p.userId)).sort((a, b) => a.lastName.localeCompare(b.lastName, "pl"));
 
   return (
-    <div className="card-soft p-4">
-      <div className="flex items-start justify-between gap-3">
+    <div className="card card-soft p-4">
+      <div className="d-flex align-items-start justify-content-between gap-3">
         <div>
-          <div className="font-medium text-sm">{item.order}. {item.title}</div>
-          <div className="text-xs mt-1" style={{ color: "var(--color-ink-3)" }}>
+          <div className="fw-medium small">{item.order}. {item.title}</div>
+          <div className="text-secondary-emphasis mt-1" style={{ fontSize: 12 }}>
             {VOTE_TYPE_LABEL[item.type]} {VOTE_VISIBILITY_LABEL[item.visibility]}
           </div>
         </div>
-        <span className="pill pill-live">Trwa głosowanie</span>
+        <span className="badge rounded-pill badge-live">Trwa głosowanie</span>
       </div>
 
-      <div className="mt-3 text-sm space-y-3">
-        <div style={{ color: "var(--color-ink-3)" }}>
+      <div className="mt-3 small d-flex flex-column gap-3">
+        <div className="text-secondary-emphasis">
           Oddano głosów: <span className="num">{voted.length}</span> / <span className="num">{eligible.length}</span>
         </div>
 
         {tally && (
-          <div className="flex gap-4 num">
-            <span style={{ color: "var(--color-yes)" }}>ZA: {tally.yes}</span>
-            <span style={{ color: "var(--color-no)" }}>PRZECIW: {tally.no}</span>
-            <span style={{ color: "var(--color-abstain)" }}>WSTRZ.: {tally.abstain}</span>
+          <div className="d-flex gap-4 num">
+            <span className="text-vote-yes">ZA: {tally.yes}</span>
+            <span className="text-vote-no">PRZECIW: {tally.no}</span>
+            <span className="text-vote-abstain">WSTRZ.: {tally.abstain}</span>
           </div>
         )}
         {item.visibility === "SECRET" && (
-          <div className="text-xs italic" style={{ color: "var(--color-ink-3)" }}>Głosowanie tajne - wybór nie jest widoczny przed zamknięciem.</div>
+          <div className="fst-italic text-secondary-emphasis" style={{ fontSize: 12 }}>Głosowanie tajne - wybór nie jest widoczny przed zamknięciem.</div>
         )}
 
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
+        <div className="row row-cols-1 row-cols-sm-2 g-4">
+          <div className="col">
             <div className="eyebrow mb-1">Głosowali ({voted.length})</div>
-            {voted.length === 0 ? <p style={{ color: "var(--color-ink-3)" }}>-</p> : (
-              <ul className="space-y-0.5">
+            {voted.length === 0 ? <p className="text-secondary-emphasis mb-0">-</p> : (
+              <ul className="list-unstyled d-flex flex-column gap-1 mb-0">
                 {voted.map((p) => <li key={p.userId}>{p.lastName} {p.firstName}</li>)}
               </ul>
             )}
           </div>
-          <div>
+          <div className="col">
             <div className="eyebrow mb-1">Jeszcze nie głosowali ({notVoted.length})</div>
-            {notVoted.length === 0 ? <p style={{ color: "var(--color-ink-3)" }}>-</p> : (
-              <ul className="space-y-0.5">
+            {notVoted.length === 0 ? <p className="text-secondary-emphasis mb-0">-</p> : (
+              <ul className="list-unstyled d-flex flex-column gap-1 mb-0">
                 {notVoted.map((p) => <li key={p.userId}>{p.lastName} {p.firstName}</li>)}
               </ul>
             )}
