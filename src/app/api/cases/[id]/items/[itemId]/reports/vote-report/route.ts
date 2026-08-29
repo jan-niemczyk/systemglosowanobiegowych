@@ -50,9 +50,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string; ite
     return csvResponse(`raport-glosowania-${itemId.slice(-8)}.csv`, toCsv(rows));
   }
 
-  const headLabel = caseInfo.caseNumber
-    ? `Sprawa nr ${caseInfo.caseNumber} - głosowanie nr ${block.order}`
-    : `Głosowanie nr ${block.order}`;
+  const headLabel = `Głosowanie nr ${block.order}`;
 
   const buffer = await renderPdf({
     pageMargins: [40, 48, 40, 40],

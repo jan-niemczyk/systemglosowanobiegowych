@@ -7,7 +7,7 @@
  * pojawiają (dane liczbowe jak w oryginale, ale bez per-osobowej ekspozycji).
  *
  * `standalone: true` (samodzielny "Raport głosowania") dokłada nagłówek dokumentu
- * (organ / sprawa / "Sprawa nr X - głosowanie nr Y (znacznik czasu)"); `standalone: false`
+ * (organ / sprawa / "Głosowanie nr Y (znacznik czasu)"); `standalone: false`
  * (osadzone w Protokole) pomija go - nagłówek sprawy jest tam wypisany raz, na górze.
  */
 import type { ItemReportBlock } from "@/lib/voteReportData";
@@ -149,9 +149,7 @@ export function itemReportPdfContent(block: ItemReportBlock, opts: { standalone:
     if (caseInfo.organizationName) c.push({ text: caseInfo.organizationName, fontSize: FS, margin: [0, 0, 0, 2] });
     if (caseInfo.caseTitle) c.push({ text: caseInfo.caseTitle, fontSize: FS, margin: [0, 0, 0, 4] });
     const ts = formatDateTimeSeconds(caseInfo.closedAt);
-    const head = caseInfo.caseNumber
-      ? `Sprawa nr ${caseInfo.caseNumber} - głosowanie nr ${block.order} (${ts})`
-      : `Głosowanie nr ${block.order} (${ts})`;
+    const head = `Głosowanie nr ${block.order} (${ts})`;
     c.push({ text: head, fontSize: FS, bold: true, margin: [0, 0, 0, 8] });
   }
 

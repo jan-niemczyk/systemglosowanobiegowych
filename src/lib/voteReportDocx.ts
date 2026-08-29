@@ -88,9 +88,7 @@ export function itemReportDocxBlocks(block: ItemReportBlock, opts: { standalone:
     if (caseInfo.organizationName) out.push(p(caseInfo.organizationName));
     if (caseInfo.caseTitle) out.push(p(caseInfo.caseTitle));
     const ts = formatDateTimeSeconds(caseInfo.closedAt);
-    const head = caseInfo.caseNumber
-      ? `Sprawa nr ${caseInfo.caseNumber} - głosowanie nr ${block.order} (${ts})`
-      : `Głosowanie nr ${block.order} (${ts})`;
+    const head = `Głosowanie nr ${block.order} (${ts})`;
     out.push(p(head, { bold: true, size: 20 }));
   }
 
