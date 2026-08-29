@@ -3,7 +3,22 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { logEvent } from "@/lib/eventLog";
 import type { Role } from "@prisma/client";
+
+/**
+ * IP klienta zza reverse proxy (Caddy) - Caddy DOPISUJE własne ustalenie adresu na
+ * KONIEC nagłówka X-Forwarded-For (nie nadpisuje), więc ostatni segment jest tym,
+ * czego nie da się podszyć nagłówkiem wysłanym przez samego klienta.
+ */
+function getClientIp(request: Request): string | null {
+  const xff = request.headers.get("x-forwarded-for");
+  if (xff) {
+    const parts = xff.split(",").map((s) => s.trim()).filter(Boolean);
+    if (parts.length > 0) return parts[parts.length - 1];
+  }
+  return request.headers.get("x-real-ip");
+}
 
 declare module "next-auth" {
   interface Session {
@@ -49,7 +64,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "E-mail", type: "email" },
         password: { label: "Hasło", type: "password" },
       },
-      async authorize(raw) {
+      async authorize(raw, request) {
         const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
         const { email, password } = parsed.data;
@@ -59,6 +74,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const ok = await bcrypt.compare(password, user.passwordHash);
         if (!ok) return null;
+
+        if (user.role !== "OPERATOR") {
+          await logEvent({
+            action: "PARTICIPANT_LOGIN",
+            description: "Zalogowano",
+            userId: user.id,
+            ip: getClientIp(request),
+          });
+        }
 
         return {
           id: user.id,

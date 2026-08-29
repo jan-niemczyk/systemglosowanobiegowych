@@ -4,7 +4,7 @@
  * pozycją jej raport głosowania (podsuma + wyniki imienne).
  */
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, HeadingLevel } from "docx";
-import { formatDateTime } from "@/lib/labels";
+import { formatDateTimeSeconds } from "@/lib/labels";
 import { buildItemReport, type ReportItemInput, type ReportParticipant, type ReportCaseInfo } from "@/lib/voteReportData";
 import { itemReportDocxBlocks } from "@/lib/voteReportDocx";
 
@@ -47,9 +47,9 @@ export async function generateProtocolDocx(kase: ProtocolCase, organizationName:
 
   const metaRows: [string, string][] = [
     ["Organ", kase.body?.name ?? "-"],
-    ["Otwarto", formatDateTime(kase.openedAt)],
-    ["Termin końcowy", formatDateTime(kase.deadlineAt)],
-    ["Zamknięto", formatDateTime(kase.closedAt)],
+    ["Otwarto", formatDateTimeSeconds(kase.openedAt)],
+    ["Termin końcowy", formatDateTimeSeconds(kase.deadlineAt)],
+    ["Zamknięto", formatDateTimeSeconds(kase.closedAt)],
   ];
   children.push(new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
@@ -72,6 +72,8 @@ export async function generateProtocolDocx(kase: ProtocolCase, organizationName:
   }));
   children.push(p(""));
 
+  children.push(new Paragraph({ text: "Pozycje:", heading: HeadingLevel.HEADING_2, run: { font: FONT }, spacing: { before: 100, after: 80 } }));
+
   for (const item of kase.items) {
     if (item.status === "CLOSED") {
       const block = buildItemReport(item, kase.participants, caseInfo);
@@ -83,7 +85,7 @@ export async function generateProtocolDocx(kase: ProtocolCase, organizationName:
   }
 
   children.push(new Paragraph({
-    children: [new TextRun({ text: `Wydruk wygenerowano: ${formatDateTime(new Date())}`, size: 16, color: "777777", font: FONT })],
+    children: [new TextRun({ text: `Wydruk wygenerowano: ${formatDateTimeSeconds(new Date())}`, size: 16, font: FONT })],
     spacing: { before: 300 },
   }));
 

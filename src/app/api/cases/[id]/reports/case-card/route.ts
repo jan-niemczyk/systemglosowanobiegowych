@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { renderPdf, pdfResponse } from "@/lib/pdf";
-import { formatDateTime } from "@/lib/labels";
+import { formatDateTimeSeconds } from "@/lib/labels";
 import { buildItemReport, type ReportCaseInfo } from "@/lib/voteReportData";
 import { itemReportPdfContent } from "@/lib/voteReportPdf";
 import { NextResponse } from "next/server";
@@ -43,7 +43,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   }
 
   const content: unknown[] = [
-    { text: settings.organizationName, fontSize: 9, color: "#555555" },
+    { text: settings.organizationName, fontSize: 9 },
     { text: "Protokół", fontSize: 16, bold: true, margin: [0, 4, 0, 2] },
     { text: kase.title, fontSize: 13, margin: [0, 0, 0, 8] },
     {
@@ -51,9 +51,9 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
         widths: ["auto", "*"],
         body: [
           ["Organ", kase.body?.name ?? "-"],
-          ["Otwarto", formatDateTime(kase.openedAt)],
-          ["Termin końcowy", formatDateTime(kase.deadlineAt)],
-          ["Zamknięto", formatDateTime(kase.closedAt)],
+          ["Otwarto", formatDateTimeSeconds(kase.openedAt)],
+          ["Termin końcowy", formatDateTimeSeconds(kase.deadlineAt)],
+          ["Zamknięto", formatDateTimeSeconds(kase.closedAt)],
         ],
       },
       layout: "lightHorizontalLines",
@@ -76,6 +76,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     margin: [0, 0, 0, 12],
   });
 
+  content.push({ text: "Pozycje:", fontSize: 12, bold: true, margin: [0, 8, 0, 4] });
+
   for (const item of kase.items) {
     if (item.status === "CLOSED") {
       const block = buildItemReport(item, kase.participants, caseInfo);
@@ -92,8 +94,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   }
 
   content.push({
-    text: `Wydruk wygenerowano: ${formatDateTime(new Date())}`,
-    fontSize: 8, color: "#777777", margin: [0, 16, 0, 0],
+    text: `Wydruk wygenerowano: ${formatDateTimeSeconds(new Date())}`,
+    fontSize: 8, margin: [0, 16, 0, 0],
   });
 
   const buffer = await renderPdf({ content, pageMargins: [40, 40, 40, 40] });

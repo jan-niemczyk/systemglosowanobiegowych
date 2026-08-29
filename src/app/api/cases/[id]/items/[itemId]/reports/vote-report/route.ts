@@ -1,17 +1,15 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { renderPdf, pdfResponse } from "@/lib/pdf";
-import { toCsv, csvResponse } from "@/lib/csv";
 import { buildItemReport, type ReportCaseInfo } from "@/lib/voteReportData";
 import { itemReportPdfContent } from "@/lib/voteReportPdf";
 import { NextResponse } from "next/server";
 
-/** GET .../items/[itemId]/reports/vote-report - jeden, spójny raport głosowania (PDF domyślnie, CSV na żądanie), 1:1 z iOBRAD. */
-export async function GET(req: Request, ctx: { params: Promise<{ id: string; itemId: string }> }) {
+/** GET .../items/[itemId]/reports/vote-report - jeden, spójny raport głosowania (PDF), 1:1 z iOBRAD. */
+export async function GET(_req: Request, ctx: { params: Promise<{ id: string; itemId: string }> }) {
   const session = await auth();
   if (!session || session.user.role !== "OPERATOR") return new NextResponse("Unauthorized", { status: 401 });
   const { itemId } = await ctx.params;
-  const format = new URL(req.url).searchParams.get("format");
 
   const item = await prisma.votingItem.findUnique({
     where: { id: itemId },
@@ -32,23 +30,6 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string; ite
     closedAt: item.case.closedAt,
   };
   const block = buildItemReport(item, item.case.participants, caseInfo);
-
-  if (format === "csv") {
-    const rows: (string | number)[][] = [["Pozycja", block.title], []];
-    if (block.secret) rows.push(["Głosowanie tajne"], []);
-    rows.push(block.summaryParts);
-    if (block.candidates) rows.push([], ["Kandydaci wg kolejności na liście"], ...block.candidates.map((c, i) => [`${i + 1}.`, c]));
-    if (block.packagePositions) {
-      rows.push([], ["Pozycja", "Za", "Przeciw", "Wstrzym."]);
-      for (const p of block.packagePositions) rows.push([p.label, p.yes, p.no, p.abstain]);
-    }
-    if (block.listCandidates) {
-      rows.push([], ["Kandydat", "Głosów"]);
-      for (const c of block.listCandidates) rows.push([c.label, c.yes]);
-    }
-    if (block.againstAllCount != null) rows.push([], [`Nie poparło żadnej kandydatury: ${block.againstAllCount}`]);
-    return csvResponse(`raport-glosowania-${itemId.slice(-8)}.csv`, toCsv(rows));
-  }
 
   const headLabel = `Głosowanie nr ${block.order}`;
 

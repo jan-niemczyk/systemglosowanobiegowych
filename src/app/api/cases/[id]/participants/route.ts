@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { logEvent } from "@/lib/eventLog";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { CaseStatus } from "@prisma/client";
@@ -53,6 +53,6 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     });
 
   await prisma.caseParticipant.createMany({ data, skipDuplicates: true });
-  await audit({ action: "PARTICIPANT_ADDED", description: `Dodano ${data.length} osób do składu sprawy`, caseId: id, userId: session.user.id });
+  await logEvent({ action: "PARTICIPANT_ADDED", description: `Dodano ${data.length} osób do składu sprawy`, caseId: id, userId: session.user.id });
   return NextResponse.json({ ok: true, added: data.length });
 }

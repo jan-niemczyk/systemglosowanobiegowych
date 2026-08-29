@@ -7,7 +7,7 @@ import { StatusPill } from "@/components/StatusPill";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [openCases, needsPublish, upcoming, recentAudit] = await Promise.all([
+  const [openCases, needsPublish, upcoming] = await Promise.all([
     prisma.case.findMany({ where: { status: CaseStatus.OPEN }, orderBy: { deadlineAt: "asc" }, take: 10 }),
     prisma.case.findMany({ where: { status: CaseStatus.CLOSED }, orderBy: { closedAt: "desc" }, take: 10 }),
     prisma.case.findMany({
@@ -15,7 +15,6 @@ export default async function DashboardPage() {
       orderBy: { deadlineAt: "asc" },
       take: 5,
     }),
-    prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 12, include: { case: true, user: true } }),
   ]);
 
   return (
@@ -53,28 +52,6 @@ export default async function DashboardPage() {
           <CaseMiniList title={`Wymagają publikacji wyników (${needsPublish.length})`} cases={needsPublish} empty="Brak spraw oczekujących na publikację wyników." />
         </div>
       </div>
-
-      <section className="card shadow-sm">
-        <div className="card-header bg-white fw-medium small">Ostatnie czynności</div>
-        <div className="card-body">
-          <ul className="list-unstyled d-flex flex-column gap-2 mb-0 small">
-            {recentAudit.map((l) => (
-              <li key={l.id} className="d-flex align-items-center gap-3">
-                <span className="num text-secondary-emphasis flex-shrink-0" style={{ fontSize: 12 }}>{formatDateTime(l.createdAt)}</span>
-                <span>{l.description}</span>
-                {l.case && (
-                  <Link href={`/cases/${l.case.id}`} className="text-secondary-emphasis" style={{ fontSize: 12 }}>
-                    ({l.case.title})
-                  </Link>
-                )}
-              </li>
-            ))}
-          </ul>
-          <div className="mt-3">
-            <Link href="/audit" className="btn btn-outline-secondary btn-sm">Pełny rejestr czynności</Link>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

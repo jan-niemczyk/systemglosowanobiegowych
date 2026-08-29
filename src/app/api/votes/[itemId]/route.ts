@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { closeCase, haveAllVoted } from "@/lib/closeCase";
+import { logEvent } from "@/lib/eventLog";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { CaseStatus, ItemStatus, VoteType, VoteVisibility, VoteChoice, CloseMode } from "@prisma/client";
@@ -134,6 +135,13 @@ export async function POST(req: Request, ctx: { params: Promise<{ itemId: string
       });
     }
   }
+
+  await logEvent({
+    action: "VOTE_CAST",
+    description: `Oddano głos: ${item.title}`,
+    caseId: item.caseId,
+    userId,
+  });
 
   if (item.case.closeMode === CloseMode.ALL_VOTED || item.case.closeMode === CloseMode.DEADLINE_OR_ALL_VOTED) {
     const allVoted = await haveAllVoted(item.caseId);

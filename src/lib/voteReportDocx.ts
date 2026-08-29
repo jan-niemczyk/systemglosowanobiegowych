@@ -103,7 +103,7 @@ export function itemReportDocxBlocks(block: ItemReportBlock, opts: { standalone:
 
   const summary = (parts: string[]) => new Paragraph({
     children: [new TextRun({ text: parts.join("    "), bold: true, size: 20, font: FONT })],
-    keepNext: true, spacing: { after: 80 },
+    keepNext: true, spacing: { before: 80, after: 200 },
   });
 
   if (!isPackage) out.push(summary(block.summaryParts));

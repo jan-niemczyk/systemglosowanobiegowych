@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { logEvent } from "@/lib/eventLog";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { VoteVisibility, CloseMode, ResultsVisibility } from "@prisma/client";
@@ -38,7 +38,7 @@ export async function PATCH(req: Request) {
     update: parsed.data,
   });
 
-  await audit({
+  await logEvent({
     action: "SETTINGS_CHANGED",
     description: "Zmieniono ustawienia globalne",
     userId: session.user.id,

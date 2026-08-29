@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { logEvent } from "@/lib/eventLog";
 import { NextResponse } from "next/server";
 import { writeFile, mkdir, unlink } from "fs/promises";
 import path from "path";
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     update: { logoUrl: url },
   });
 
-  await audit({ action: "SETTINGS_CHANGED", description: "Wgrano logo organizacji", userId: session.user.id });
+  await logEvent({ action: "SETTINGS_CHANGED", description: "Wgrano logo organizacji", userId: session.user.id });
   return NextResponse.json({ ok: true, url });
 }
 

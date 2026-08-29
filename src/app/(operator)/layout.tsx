@@ -41,7 +41,7 @@ function TopBar({ userName, organizationName, logoUrl }: { userName: string; org
             <NavLink href="/cases">Sprawy</NavLink>
             <NavLink href="/bodies">Organy</NavLink>
             <NavLink href="/users">Osoby</NavLink>
-            <NavLink href="/audit">Rejestr czynności</NavLink>
+            <NavLink href="/logins">Logowania</NavLink>
             <NavLink href="/settings">Ustawienia</NavLink>
           </nav>
         </div>

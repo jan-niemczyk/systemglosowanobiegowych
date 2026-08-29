@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { logEvent } from "@/lib/eventLog";
 import { documentFilePath } from "@/lib/documentStorage";
 import { NextResponse } from "next/server";
 import { unlink } from "fs/promises";
@@ -67,7 +67,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   if (parsed.data.deadlineAt !== undefined) data.deadlineAt = parsed.data.deadlineAt ? new Date(parsed.data.deadlineAt) : null;
 
   await prisma.case.update({ where: { id }, data });
-  await audit({ action: "CASE_UPDATED", description: "Zaktualizowano dane sprawy", caseId: id, userId: session.user.id });
+  await logEvent({ action: "CASE_UPDATED", description: "Zaktualizowano dane sprawy", caseId: id, userId: session.user.id });
   return NextResponse.json({ ok: true });
 }
 
@@ -89,7 +89,7 @@ export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string 
   await prisma.case.delete({ where: { id } });
   await Promise.all(docs.map((d) => unlink(documentFilePath(d.storedName)).catch(() => {})));
 
-  await audit({
+  await logEvent({
     action: "CASE_DELETED",
     description: `Usunięto sprawę „${kase.title}”`,
     userId: session.user.id,

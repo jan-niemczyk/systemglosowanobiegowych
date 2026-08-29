@@ -12,7 +12,6 @@ export function ReportsPanel({ caseId, items }: { caseId: string; items: { id: s
             <li key={item.id} className="d-flex align-items-center gap-2">
               <span className="text-truncate">{item.title}</span>
               <a className="btn btn-sm btn-outline-secondary" href={`/api/cases/${caseId}/items/${item.id}/reports/vote-report`}>Raport głosowania</a>
-              <a className="btn btn-sm btn-outline-secondary" href={`/api/cases/${caseId}/items/${item.id}/reports/vote-report?format=csv`}>CSV</a>
             </li>
           ))}
         </ul>

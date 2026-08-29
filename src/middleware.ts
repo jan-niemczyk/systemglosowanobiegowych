@@ -21,7 +21,7 @@ export default auth((req) => {
     return NextResponse.redirect(url);
   }
 
-  const operatorOnly = ["/dashboard", "/cases", "/bodies", "/users", "/audit", "/settings"];
+  const operatorOnly = ["/dashboard", "/cases", "/bodies", "/users", "/logins", "/settings"];
   const participantOnly = ["/my-cases"];
 
   if (operatorOnly.some((p) => path.startsWith(p)) && role !== "OPERATOR") {

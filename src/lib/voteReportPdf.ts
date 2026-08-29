@@ -16,7 +16,9 @@ import { formatDateTimeSeconds } from "@/lib/labels";
 const FS = 9;
 
 // Czarno-białe, cienkie linie poziome między wierszami (zamiast szarych domyślnych).
-const BW_LINES = {
+// Eksportowane - używane też w innych wydrukach (np. potwierdzenie oddania głosu),
+// żeby zachować tę samą stylistykę tabel w całej rodzinie wydruków.
+export const BW_LINES = {
   hLineWidth: (i: number, node: { table: { body: unknown[] } }) => (i === 0 || i === node.table.body.length ? 0.8 : 0.4),
   vLineWidth: () => 0,
   hLineColor: () => "#000000",
@@ -27,7 +29,7 @@ function summaryRow(parts: string[]): Record<string, unknown> {
   return {
     columns: parts.map((t) => ({ text: t, fontSize: FS, bold: true, width: "auto" })),
     columnGap: 18,
-    margin: [0, 2, 0, 2],
+    margin: [0, 4, 0, 10],
   };
 }
 

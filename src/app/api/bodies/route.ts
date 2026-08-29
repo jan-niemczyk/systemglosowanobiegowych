@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { logEvent } from "@/lib/eventLog";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -32,6 +32,6 @@ export async function POST(req: Request) {
   if (existing) return new NextResponse("Organ o tej nazwie już istnieje", { status: 400 });
 
   const body = await prisma.body.create({ data: { name: parsed.data.name, description: parsed.data.description ?? null } });
-  await audit({ action: "BODY_CREATED", description: `Utworzono organ „${body.name}”`, userId: session.user.id });
+  await logEvent({ action: "BODY_CREATED", description: `Utworzono organ „${body.name}”`, userId: session.user.id });
   return NextResponse.json({ ok: true, id: body.id });
 }

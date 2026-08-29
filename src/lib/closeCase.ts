@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { logEvent } from "@/lib/eventLog";
 import { computeListVoteResult } from "@/lib/listVote";
 import { VoteType, VoteVisibility, VoteChoice, ItemStatus, CaseStatus, ResultsVisibility } from "@prisma/client";
 
@@ -122,13 +122,13 @@ export async function closeCase(caseId: string, opts?: { closedByUserId?: string
     },
   });
 
-  await audit({
+  await logEvent({
     action: "CASE_CLOSED",
     description: opts?.reason ? `Sprawa zamknięta (${opts.reason})` : "Sprawa zamknięta",
     caseId, userId: opts?.closedByUserId,
   });
   if (autoPublish) {
-    await audit({ action: "RESULTS_PUBLISHED", description: "Wyniki opublikowane automatycznie po zamknięciu", caseId, userId: opts?.closedByUserId });
+    await logEvent({ action: "RESULTS_PUBLISHED", description: "Wyniki opublikowane automatycznie po zamknięciu", caseId, userId: opts?.closedByUserId });
   }
 }
 

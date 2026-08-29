@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { logEvent } from "@/lib/eventLog";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -34,7 +34,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return new NextResponse(`Bad request: ${parsed.error.message}`, { status: 400 });
   await prisma.body.update({ where: { id }, data: parsed.data });
-  await audit({ action: "BODY_UPDATED", description: "Zaktualizowano dane organu", caseId: undefined, userId: session.user.id });
+  await logEvent({ action: "BODY_UPDATED", description: "Zaktualizowano dane organu", caseId: undefined, userId: session.user.id });
   return NextResponse.json({ ok: true });
 }
 
@@ -45,6 +45,6 @@ export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string 
   const body = await prisma.body.findUnique({ where: { id } });
   if (!body) return new NextResponse("Not found", { status: 404 });
   await prisma.body.delete({ where: { id } });
-  await audit({ action: "BODY_DELETED", description: `Usunięto organ „${body.name}”`, userId: session.user.id });
+  await logEvent({ action: "BODY_DELETED", description: `Usunięto organ „${body.name}”`, userId: session.user.id });
   return NextResponse.json({ ok: true });
 }

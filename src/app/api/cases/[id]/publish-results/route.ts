@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { logEvent } from "@/lib/eventLog";
 import { NextResponse } from "next/server";
 import { CaseStatus } from "@prisma/client";
 
@@ -15,6 +15,6 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
   if (kase.status !== CaseStatus.CLOSED) return new NextResponse("Sprawa musi być zamknięta", { status: 400 });
 
   await prisma.case.update({ where: { id }, data: { status: CaseStatus.RESULTS_PUBLISHED, resultsPublishedAt: new Date() } });
-  await audit({ action: "RESULTS_PUBLISHED", description: "Wyniki opublikowane ręcznie przez operatora", caseId: id, userId: session.user.id });
+  await logEvent({ action: "RESULTS_PUBLISHED", description: "Wyniki opublikowane ręcznie przez operatora", caseId: id, userId: session.user.id });
   return NextResponse.json({ ok: true });
 }

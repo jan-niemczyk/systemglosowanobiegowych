@@ -72,7 +72,7 @@ enum DocumentKind {
   RESULT // dokument wynikowy - publikowany po zamknięciu
 }
 
-enum AuditAction {
+enum EventAction {
   CASE_CREATED
   CASE_UPDATED
   CASE_OPENED
@@ -88,6 +88,8 @@ enum AuditAction {
   BODY_CREATED
   BODY_UPDATED
   BODY_DELETED
+  VOTE_CAST
+  PARTICIPANT_LOGIN
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -111,7 +113,7 @@ model User {
   caseParticipations CaseParticipant[]
   operatedCases      Case[]            @relation("CaseOperator")
   ballots            Ballot[]
-  auditLogs          AuditLog[]
+  eventLogs          EventLog[]
   uploadedDocuments  CaseDocument[]
 
   @@index([role])
@@ -200,7 +202,7 @@ model Case {
 
   participants CaseParticipant[]
   items        VotingItem[]
-  auditLogs    AuditLog[]
+  eventLogs    EventLog[]
 
   @@index([status])
   @@index([deadlineAt])
@@ -360,17 +362,21 @@ model CaseDocument {
 }
 
 // ─────────────────────────────────────────────────────────────────
-//  REJESTR CZYNNOŚCI (sekcja 10)
+//  DZIENNIK ZDARZEŃ (sekcja 10) - wyłącznie do eksportu w formacie TXT na
+//  żądanie operatora (brak przeglądarkowego rejestru w UI); logowania
+//  uczestników (`ip`) mają dodatkowo dedykowany podgląd w panelu operatora.
 // ─────────────────────────────────────────────────────────────────
 
-model AuditLog {
+model EventLog {
   id          String      @id @default(cuid())
   caseId      String?
   case        Case?       @relation(fields: [caseId], references: [id], onDelete: SetNull)
   userId      String?
   user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
-  action      AuditAction
+  action      EventAction
   description String
+  /// Adres IP - wypełniany wyłącznie dla PARTICIPANT_LOGIN.
+  ip          String?
   metadata    Json?
   createdAt   DateTime    @default(now())
 

@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { logEvent } from "@/lib/eventLog";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
   }
 
   const createdCount = results.filter((r) => r.status === "created").length;
-  await audit({
+  await logEvent({
     action: "SETTINGS_CHANGED",
     description: `Import użytkowników: utworzono ${createdCount} z ${parsed.data.rows.length}`,
     userId: session.user.id,

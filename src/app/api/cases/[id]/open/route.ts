@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { logEvent } from "@/lib/eventLog";
 import { NextResponse } from "next/server";
 import { CaseStatus, ItemStatus } from "@prisma/client";
 
@@ -32,6 +32,6 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
     prisma.votingItem.updateMany({ where: { caseId: id }, data: { status: ItemStatus.OPEN } }),
   ]);
 
-  await audit({ action: "CASE_OPENED", description: "Sprawa otwarta - rozpoczęto głosowanie", caseId: id, userId: session.user.id });
+  await logEvent({ action: "CASE_OPENED", description: "Sprawa otwarta - rozpoczęto głosowanie", caseId: id, userId: session.user.id });
   return NextResponse.json({ ok: true });
 }

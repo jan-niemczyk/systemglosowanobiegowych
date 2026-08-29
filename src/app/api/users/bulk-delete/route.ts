@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { logEvent } from "@/lib/eventLog";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     }
   }
 
-  await audit({
+  await logEvent({
     action: "SETTINGS_CHANGED",
     description: `Hurtowe usuwanie kont: usunięto ${deleted}, dezaktywowano ${deactivated} (z historią)`,
     userId: session.user.id,

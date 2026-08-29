@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { logEvent } from "@/lib/eventLog";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { CloseMode, ResultsVisibility } from "@prisma/client";
@@ -58,6 +58,6 @@ export async function POST(req: Request) {
     },
   });
 
-  await audit({ action: "CASE_CREATED", description: `Utworzono sprawę „${created.title}”`, caseId: created.id, userId: session.user.id });
+  await logEvent({ action: "CASE_CREATED", description: `Utworzono sprawę „${created.title}”`, caseId: created.id, userId: session.user.id });
   return NextResponse.json({ ok: true, id: created.id });
 }

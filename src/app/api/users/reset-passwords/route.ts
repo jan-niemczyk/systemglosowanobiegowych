@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { audit } from "@/lib/audit";
+import { logEvent } from "@/lib/eventLog";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     cards.push({ name: `${u.firstName} ${u.lastName}`.trim(), email: u.email, password });
   }
 
-  await audit({
+  await logEvent({
     action: "SETTINGS_CHANGED",
     description: `Zresetowano hasła dla ${cards.length} kont (odcinki logowania)`,
     userId: session.user.id,
