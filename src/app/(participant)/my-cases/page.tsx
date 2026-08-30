@@ -51,7 +51,7 @@ export default async function MyCasesPage() {
 function CaseRow({ c }: { c: { id: string; number: string | null; title: string; status: "DRAFT" | "OPEN" | "CLOSED" | "RESULTS_PUBLISHED" | "CANCELLED"; deadlineAt: Date | null } }) {
   return (
     <li className="card card-soft p-3 d-flex flex-row align-items-center justify-content-between gap-3">
-      <Link href={`/my-cases/${c.id}`} className="min-w-0 text-decoration-none text-body">
+      <Link href={`/my-cases/${c.id}`} className="d-block min-w-0 text-decoration-none text-body">
         <div className="fw-medium text-truncate">{c.number ? `${c.number} - ` : ""}{c.title}</div>
         {c.deadlineAt && <div className="text-secondary-emphasis mt-1" style={{ fontSize: 12 }}>Termin: {formatDateTime(c.deadlineAt)}</div>}
       </Link>

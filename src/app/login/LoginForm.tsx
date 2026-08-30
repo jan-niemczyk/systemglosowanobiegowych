@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
-export default function LoginForm({ organizationName, logoUrl }: { organizationName: string; logoUrl: string | null }) {
+export default function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const from = params.get("from") ?? "/";
@@ -31,10 +31,6 @@ export default function LoginForm({ organizationName, logoUrl }: { organizationN
     <main className="min-vh-100 d-flex align-items-center justify-content-center px-3">
       <div className="w-100" style={{ maxWidth: 440 }}>
         <header className="mb-5">
-          {logoUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt={organizationName} style={{ height: 48, marginBottom: 16 }} />
-          )}
           <div className="eyebrow mb-3">System Głosowań Obiegowych</div>
           <h1 style={{ fontSize: 44, lineHeight: 1.05 }}>
             iGŁOSOWANIA.

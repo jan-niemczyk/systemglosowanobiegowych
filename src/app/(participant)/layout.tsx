@@ -15,7 +15,7 @@ export default async function ParticipantLayout({ children }: { children: React.
           <Link href="/my-cases" className="d-flex align-items-baseline gap-2 min-w-0 text-decoration-none text-body">
             {settings.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={settings.logoUrl} alt={settings.organizationName} style={{ height: 28, width: "auto" }} />
+              <img src={settings.logoUrl} alt={settings.organizationName} style={{ height: 40, width: "auto" }} />
             ) : (
               <span style={{ fontFamily: "var(--font-heading)", fontSize: 20, fontWeight: 600 }}>iGŁOSOWANIA</span>
             )}

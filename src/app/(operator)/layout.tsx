@@ -31,7 +31,7 @@ function TopBar({ userName, organizationName, logoUrl }: { userName: string; org
           <Link href="/dashboard" className="d-flex align-items-baseline gap-2 text-decoration-none text-body flex-shrink-0">
             {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoUrl} alt={organizationName} style={{ height: 32, width: "auto" }} />
+              <img src={logoUrl} alt={organizationName} style={{ height: 40, width: "auto" }} />
             ) : (
               <span style={{ fontFamily: "var(--font-heading)", fontSize: 22, fontWeight: 600, letterSpacing: "-0.01em" }}>
                 iGŁOSOWANIA

@@ -67,7 +67,7 @@ function CaseMiniList({ title, cases, empty }: { title: string; cases: { id: str
           <ul className="list-unstyled d-flex flex-column gap-2 mb-0">
             {cases.map((c) => (
               <li key={c.id} className="card card-soft p-3 d-flex flex-row align-items-center justify-content-between gap-3">
-                <Link href={`/cases/${c.id}`} className="small fw-medium text-truncate text-decoration-none text-body">
+                <Link href={`/cases/${c.id}`} className="d-block min-w-0 small fw-medium text-truncate text-decoration-none text-body">
                   {c.number ? `${c.number} - ` : ""}{c.title}
                 </Link>
                 <StatusPill status={c.status} />
