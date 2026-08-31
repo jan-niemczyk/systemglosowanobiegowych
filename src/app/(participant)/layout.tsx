@@ -19,7 +19,7 @@ export default async function ParticipantLayout({ children }: { children: React.
             ) : (
               <span style={{ fontFamily: "var(--font-heading)", fontSize: 20, fontWeight: 600 }}>iGŁOSOWANIA</span>
             )}
-            <span className="eyebrow d-none d-sm-inline">Moje sprawy</span>
+            <span className="eyebrow d-none d-sm-inline">{settings.organizationName}</span>
           </Link>
           <div className="d-flex align-items-center gap-2 min-w-0">
             <div className="small fw-medium text-truncate d-none d-sm-block">

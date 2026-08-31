@@ -16,6 +16,7 @@ export function UsersManager({ users }: { users: UserRow[] }) {
   const [pending, startTransition] = useTransition();
   const [showAdd, setShowAdd] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const loginUrl = typeof window !== "undefined" ? `${window.location.origin}/login` : "";
 
   function toggle(id: string) {
@@ -76,32 +77,113 @@ export function UsersManager({ users }: { users: UserRow[] }) {
                 <th className="fw-normal">E-mail (login)</th>
                 <th className="fw-normal">Funkcja</th>
                 <th className="fw-normal">Rola</th>
-                <th className="fw-normal pe-3">Aktywne</th>
+                <th className="fw-normal">Aktywne</th>
+                <th className="fw-normal pe-3"></th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id}>
-                  <td className="ps-3"><input type="checkbox" className="form-check-input" checked={selected.has(u.id)} onChange={() => toggle(u.id)} /></td>
-                  <td>{u.lastName} {u.firstName}</td>
-                  <td>{u.email}</td>
-                  <td>{u.functionTitle ?? "-"}</td>
-                  <td>
-                    <select className="form-select form-select-sm" style={{ width: "auto" }} value={u.role} onChange={(e) => updateUser(u.id, { role: e.target.value })}>
-                      <option value="OPERATOR">Operator</option>
-                      <option value="PARTICIPANT">Uczestnik</option>
-                    </select>
-                  </td>
-                  <td className="pe-3">
-                    <input type="checkbox" className="form-check-input" checked={u.active} onChange={(e) => updateUser(u.id, { active: e.target.checked })} />
-                  </td>
-                </tr>
+                <UserTableRow
+                  key={u.id}
+                  user={u}
+                  selected={selected.has(u.id)}
+                  onToggleSelected={() => toggle(u.id)}
+                  editing={editingId === u.id}
+                  onEdit={() => setEditingId(u.id)}
+                  onDoneEditing={() => setEditingId(null)}
+                  onUpdate={updateUser}
+                  pending={pending}
+                />
               ))}
             </tbody>
           </table>
         </div>
       </div>
     </div>
+  );
+}
+
+function UserTableRow({
+  user, selected, onToggleSelected, editing, onEdit, onDoneEditing, onUpdate, pending,
+}: {
+  user: UserRow;
+  selected: boolean;
+  onToggleSelected: () => void;
+  editing: boolean;
+  onEdit: () => void;
+  onDoneEditing: () => void;
+  onUpdate: (id: string, data: Record<string, unknown>) => void;
+  pending: boolean;
+}) {
+  const toast = useToast();
+  const router = useRouter();
+  const [firstName, setFirstName] = useState(user.firstName);
+  const [lastName, setLastName] = useState(user.lastName);
+  const [email, setEmail] = useState(user.email);
+  const [functionTitle, setFunctionTitle] = useState(user.functionTitle ?? "");
+  const [saving, startTransition] = useTransition();
+
+  function save(e: React.FormEvent) {
+    e.preventDefault();
+    startTransition(async () => {
+      const r = await fetch(`/api/users/${user.id}`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ firstName, lastName, email, functionTitle: functionTitle || null }),
+      });
+      if (r.ok) { toast.success("Dane osoby zostały zaktualizowane."); onDoneEditing(); router.refresh(); }
+      else toast.error(await readApiError(r));
+    });
+  }
+
+  function cancel() {
+    setFirstName(user.firstName); setLastName(user.lastName); setEmail(user.email); setFunctionTitle(user.functionTitle ?? "");
+    onDoneEditing();
+  }
+
+  if (editing) {
+    return (
+      <tr>
+        <td className="ps-3"></td>
+        <td colSpan={2}>
+          <div className="d-flex gap-2">
+            <input className="form-control form-control-sm" style={{ maxWidth: 120 }} required value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Imię" />
+            <input className="form-control form-control-sm" style={{ maxWidth: 140 }} required value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Nazwisko" />
+            <input type="email" className="form-control form-control-sm" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-mail" />
+          </div>
+        </td>
+        <td>
+          <input className="form-control form-control-sm" value={functionTitle} onChange={(e) => setFunctionTitle(e.target.value)} placeholder="Funkcja" />
+        </td>
+        <td colSpan={2} className="text-secondary-emphasis small">Rola i aktywność - w widoku listy</td>
+        <td className="pe-3 text-end">
+          <div className="d-flex gap-2 justify-content-end">
+            <button type="button" className="btn btn-primary btn-sm" disabled={saving} onClick={save}>{saving ? "Zapisywanie…" : "Zapisz"}</button>
+            <button type="button" className="btn btn-sm btn-outline-secondary" disabled={saving} onClick={cancel}>Anuluj</button>
+          </div>
+        </td>
+      </tr>
+    );
+  }
+
+  return (
+    <tr>
+      <td className="ps-3"><input type="checkbox" className="form-check-input" checked={selected} onChange={onToggleSelected} /></td>
+      <td>{user.lastName} {user.firstName}</td>
+      <td>{user.email}</td>
+      <td>{user.functionTitle ?? "-"}</td>
+      <td>
+        <select className="form-select form-select-sm" style={{ width: "auto" }} value={user.role} onChange={(e) => onUpdate(user.id, { role: e.target.value })}>
+          <option value="OPERATOR">Operator</option>
+          <option value="PARTICIPANT">Uczestnik</option>
+        </select>
+      </td>
+      <td>
+        <input type="checkbox" className="form-check-input" checked={user.active} onChange={(e) => onUpdate(user.id, { active: e.target.checked })} />
+      </td>
+      <td className="pe-3 text-end">
+        <button type="button" className="btn btn-sm btn-outline-secondary" disabled={pending} onClick={onEdit}>Edytuj</button>
+      </td>
+    </tr>
   );
 }
 

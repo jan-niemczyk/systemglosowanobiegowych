@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { BodyMembersEditor } from "./BodyMembersEditor";
+import { BodyHeader } from "./BodyHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -15,11 +16,7 @@ export default async function BodyDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="container py-4 py-md-5 d-flex flex-column gap-4" style={{ maxWidth: 700 }}>
-      <header>
-        <div className="eyebrow mb-2">Organ</div>
-        <h1 className="h3 mb-0">{body.name}</h1>
-        {body.description && <p className="small mt-2 text-secondary-emphasis">{body.description}</p>}
-      </header>
+      <BodyHeader bodyId={body.id} name={body.name} description={body.description} />
 
       <section className="card shadow-sm p-4">
         <h2 className="small fw-medium mb-3">Skład ({body.members.length})</h2>
