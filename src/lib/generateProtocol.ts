@@ -72,7 +72,7 @@ export async function generateProtocolDocx(kase: ProtocolCase, organizationName:
   }));
   children.push(p(""));
 
-  children.push(new Paragraph({ text: "Pozycje:", heading: HeadingLevel.HEADING_2, run: { font: FONT }, spacing: { before: 100, after: 80 } }));
+  children.push(new Paragraph({ text: "Sprawy:", heading: HeadingLevel.HEADING_2, run: { font: FONT }, spacing: { before: 100, after: 80 } }));
 
   for (const item of kase.items) {
     if (item.status === "CLOSED") {

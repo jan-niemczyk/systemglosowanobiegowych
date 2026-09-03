@@ -76,7 +76,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     margin: [0, 0, 0, 12],
   });
 
-  content.push({ text: "Pozycje:", fontSize: 12, bold: true, margin: [0, 8, 0, 4] });
+  content.push({ text: "Sprawy:", fontSize: 12, bold: true, margin: [0, 8, 0, 4] });
 
   for (const item of kase.items) {
     if (item.status === "CLOSED") {

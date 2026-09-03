@@ -145,8 +145,7 @@ export function itemReportDocxBlocks(block: ItemReportBlock, opts: { standalone:
     out.push(twoColumnMarks(block.standardRows.map((r) => ({ name: r.name, mark: r.mark }))));
   }
 
-  if (block.resolution) {
-    out.push(p("Rozstrzygnięcie", { bold: true }));
+  if (block.resolution && !opts.standalone) {
     out.push(p(block.resolution));
   }
 
