@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { logEvent } from "@/lib/eventLog";
+import { notifyResultsPublished } from "@/lib/notifications";
 import { NextResponse } from "next/server";
 import { CaseStatus } from "@prisma/client";
 
@@ -16,5 +17,6 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
 
   await prisma.case.update({ where: { id }, data: { status: CaseStatus.RESULTS_PUBLISHED, resultsPublishedAt: new Date() } });
   await logEvent({ action: "RESULTS_PUBLISHED", description: "Wyniki opublikowane ręcznie przez operatora", caseId: id, userId: session.user.id });
+  await notifyResultsPublished(id);
   return NextResponse.json({ ok: true });
 }

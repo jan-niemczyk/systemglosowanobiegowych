@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { logEvent } from "@/lib/eventLog";
+import { notifyCaseOpened } from "@/lib/notifications";
 import { NextResponse } from "next/server";
 import { CaseStatus, ItemStatus } from "@prisma/client";
 
@@ -33,5 +34,6 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
   ]);
 
   await logEvent({ action: "CASE_OPENED", description: "Sprawa otwarta - rozpoczęto głosowanie", caseId: id, userId: session.user.id });
+  await notifyCaseOpened(id);
   return NextResponse.json({ ok: true });
 }

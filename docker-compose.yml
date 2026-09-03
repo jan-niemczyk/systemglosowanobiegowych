@@ -62,6 +62,8 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-sgo}:${POSTGRES_PASSWORD:-sgo_dev_pw}@db:5432/${POSTGRES_DB:-sgo}
       SCHEDULER_INTERVAL_SECONDS: ${SCHEDULER_INTERVAL_SECONDS:-60}
+      # Do budowy linków w e-mailach powiadomień o automatycznym zamknięciu sprawy/publikacji wyników.
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://glosowania.mswz.pl}
       NODE_ENV: production
       TZ: Europe/Warsaw
     command: ["npx", "tsx", "scripts/scheduler.ts"]

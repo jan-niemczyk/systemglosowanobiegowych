@@ -13,11 +13,17 @@ const schema = z.object({
   defaultAllowVoteChange: z.boolean().optional(),
   maxDocumentSizeMB: z.number().int().min(1).max(200).optional(),
   allowedDocumentTypes: z.array(z.string().min(1).max(10)).optional(),
+  emailEnabled: z.boolean().optional(),
+  smtpHost: z.string().max(255).nullable().optional(),
+  smtpPort: z.number().int().min(1).max(65535).optional(),
+  smtpUser: z.string().max(255).nullable().optional(),
+  smtpPassword: z.string().max(500).nullable().optional(),
+  smtpSecure: z.boolean().optional(),
 });
 
 export async function GET() {
   const session = await auth();
-  if (!session) return new NextResponse("Unauthorized", { status: 401 });
+  if (!session || session.user.role !== "OPERATOR") return new NextResponse("Unauthorized", { status: 401 });
   const settings = await prisma.settings.upsert({
     where: { id: "singleton" }, create: { id: "singleton" }, update: {},
   });

@@ -39,6 +39,9 @@ poprzedniego modelu opartego na posiedzeniu.
   osobnego pulpitu przewodniczącego ani sterowania przebiegiem w czasie rzeczywistym.
 - **Rejestr czynności**: utworzenie, konfiguracja, otwarcie, zamknięcie i publikacja wyników
   każdej sprawy są rozliczalne.
+- **Powiadomienia e-mail**: po skonfigurowaniu dowolnej skrzynki SMTP w panelu Ustawienia,
+  uczestnicy dostają automatyczny e-mail przy rozpoczęciu głosowania i przy publikacji wyników
+  (ręcznej i automatycznej).
 
 ## Stos technologiczny
 

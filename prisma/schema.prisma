@@ -90,6 +90,7 @@ enum EventAction {
   BODY_DELETED
   VOTE_CAST
   PARTICIPANT_LOGIN
+  EMAIL_SENT
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -133,7 +134,18 @@ model Settings {
   maxDocumentSizeMB        Int               @default(20)
   /// Dopuszczalne rozszerzenia plików dokumentów (bez kropki, małe litery).
   allowedDocumentTypes     String[]          @default(["pdf", "doc", "docx", "odt", "jpg", "jpeg", "png"])
-  updatedAt                DateTime          @updatedAt
+
+  // ── powiadomienia e-mail (dowolna skrzynka SMTP skonfigurowana przez operatora) ──
+  emailEnabled Boolean @default(false)
+  smtpHost     String?
+  smtpPort     Int     @default(587)
+  smtpUser     String?
+  /// Hasło do skrzynki SMTP - przechowywane jawnie (brak w tej aplikacji mechanizmu
+  /// szyfrowania odwracalnego; świadoma decyzja operatora przy konfiguracji w Ustawieniach).
+  smtpPassword String?
+  smtpSecure   Boolean @default(false)
+
+  updatedAt DateTime @updatedAt
 }
 
 // ─────────────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { logEvent } from "@/lib/eventLog";
 import { computeListVoteResult } from "@/lib/listVote";
+import { notifyResultsPublished } from "@/lib/notifications";
 import { VoteType, VoteVisibility, VoteChoice, ItemStatus, CaseStatus, ResultsVisibility } from "@prisma/client";
 
 /**
@@ -129,6 +130,7 @@ export async function closeCase(caseId: string, opts?: { closedByUserId?: string
   });
   if (autoPublish) {
     await logEvent({ action: "RESULTS_PUBLISHED", description: "Wyniki opublikowane automatycznie po zamknięciu", caseId, userId: opts?.closedByUserId });
+    await notifyResultsPublished(caseId);
   }
 }
 
