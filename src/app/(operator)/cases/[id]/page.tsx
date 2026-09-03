@@ -9,6 +9,7 @@ import { ItemDocumentsPanel } from "./ItemDocumentsPanel";
 import { ItemResult } from "@/components/ItemResult";
 import { LiveItemPanel, computeLiveTally } from "./LiveItemPanel";
 import { ReportsPanel } from "./ReportsPanel";
+import { ResolutionEditor } from "./ResolutionEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -123,7 +124,12 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
                       tally={computeLiveTally(item, item.ballots)}
                     />
                   ) : (
-                    <ItemResult item={item} />
+                    <>
+                      <ItemResult item={item} />
+                      {isClosedOrPublished && (
+                        <ResolutionEditor caseId={kase.id} itemId={item.id} resolution={item.resolution} />
+                      )}
+                    </>
                   )}
                   <ItemDocumentsPanel
                     caseId={kase.id}

@@ -211,5 +211,10 @@ export function itemReportPdfContent(block: ItemReportBlock, opts: { standalone:
     c.push(twoColumnMarks(block.standardRows.map((r) => ({ name: r.name, mark: r.mark }))));
   }
 
+  if (block.resolution) {
+    c.push({ text: "Rozstrzygnięcie", fontSize: FS, bold: true, margin: [0, 6, 0, 3] });
+    c.push({ text: block.resolution, fontSize: FS, margin: [0, 0, 0, 4] });
+  }
+
   return { stack: c, margin: [0, 0, 0, 10] };
 }

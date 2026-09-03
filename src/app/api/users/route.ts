@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { notifyAccountsCreated } from "@/lib/notifications";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
@@ -53,5 +54,8 @@ export async function POST(req: Request) {
       active: parsed.data.active ?? true,
     },
   });
+  if (u.active) {
+    await notifyAccountsCreated([{ email: u.email, firstName: u.firstName, password: parsed.data.password }]);
+  }
   return NextResponse.json({ ok: true, id: u.id });
 }

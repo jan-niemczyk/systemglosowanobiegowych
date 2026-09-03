@@ -12,14 +12,14 @@ export default async function ParticipantLayout({ children }: { children: React.
     <div className="min-vh-100 d-flex flex-column">
       <header className="no-print sticky-top bg-white border-bottom shadow-sm">
         <div className="d-flex align-items-center justify-content-between px-3 gap-2" style={{ height: 64 }}>
-          <Link href="/my-cases" className="d-flex align-items-baseline gap-2 min-w-0 text-decoration-none text-body">
+          <Link href="/my-cases" className="d-flex align-items-center gap-2 min-w-0 text-decoration-none text-body">
             {settings.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={settings.logoUrl} alt={settings.organizationName} style={{ height: 40, width: "auto" }} />
             ) : (
               <span style={{ fontFamily: "var(--font-heading)", fontSize: 20, fontWeight: 600 }}>iGŁOSOWANIA</span>
             )}
-            <span className="eyebrow d-none d-sm-inline">{settings.organizationName}</span>
+            <span className="small d-none d-sm-inline">{settings.organizationName}</span>
           </Link>
           <div className="d-flex align-items-center gap-2 min-w-0">
             <div className="small fw-medium text-truncate d-none d-sm-block">

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { logEvent } from "@/lib/eventLog";
+import { notifyAccountsCreated } from "@/lib/notifications";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
@@ -43,6 +44,7 @@ export async function POST(req: Request) {
   if (!parsed.success) return new NextResponse(`Bad request: ${parsed.error.message}`, { status: 400 });
 
   const results: { email: string; name: string; password: string | null; status: "created" | "skipped" | "error"; error?: string }[] = [];
+  const createdForEmail: { email: string; firstName: string; password: string }[] = [];
 
   for (const row of parsed.data.rows) {
     try {
@@ -78,6 +80,7 @@ export async function POST(req: Request) {
         password,
         status: "created",
       });
+      createdForEmail.push({ email: row.email, firstName: row.firstName, password });
     } catch (e) {
       results.push({
         email: row.email,
@@ -88,6 +91,8 @@ export async function POST(req: Request) {
       });
     }
   }
+
+  await notifyAccountsCreated(createdForEmail);
 
   const createdCount = results.filter((r) => r.status === "created").length;
   await logEvent({

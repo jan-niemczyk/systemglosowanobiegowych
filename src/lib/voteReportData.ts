@@ -26,6 +26,7 @@ export interface ReportItemInput {
   resultYes: number | null;
   resultNo: number | null;
   resultAbstain: number | null;
+  resolution: string | null;
   options: { id: string; label: string; resultYes: number | null; resultNo: number | null; resultAbstain: number | null }[];
   ballots: { userId: string | null; voterFirstName: string | null; voterLastName: string | null; choice: VoteChoice | null; selections: { optionId: string; choice: VoteChoice | null }[] }[];
 }
@@ -67,6 +68,8 @@ export interface ItemReportBlock {
   listNonVoterNames?: string[];
   /** LIST, jawne: liczba osób, które oddały głos, ale nie poparły żadnej kandydatury. */
   againstAllCount?: number;
+  /** Rozstrzygnięcie - dowolna treść operatora, drukowana na końcu bloku pozycji. */
+  resolution?: string | null;
 }
 
 function fullName(last: string | null, first: string | null): string {
@@ -90,6 +93,7 @@ export function buildItemReport(item: ReportItemInput, participants: ReportParti
     caseInfo,
     eligibleCount: eligible,
     summaryParts: [],
+    resolution: item.resolution,
   };
 
   const sortedParticipants = [...participants].sort((a, b) => comparePl(a.lastName, b.lastName) || comparePl(a.firstName, b.firstName));

@@ -87,9 +87,11 @@ export default async function MyCaseDetailPage({ params }: { params: Promise<{ i
             );
           }
           if (resultsVisible) {
+            // Rozstrzygnięcie jest wyłącznie do Protokołu operatora - nigdy nie trafia do payloadu strony uczestnika.
+            const { resolution: _resolution, ...itemWithoutResolution } = item;
             return (
               <div key={item.id}>
-                <ItemResult item={item} />
+                <ItemResult item={itemWithoutResolution} />
                 <ItemDocuments documents={docs} />
               </div>
             );
