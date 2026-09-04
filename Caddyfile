@@ -1,5 +1,5 @@
 # Caddy automatycznie pobiera i odnawia certyfikat Let's Encrypt dla tej domeny.
-obiegowe.mswz.pl {
+mrp.iobrady.pl {
 	# Reverse proxy do aplikacji Next.js w kontenerze "app" (port 3000 w sieci dockera).
 	# lb_try_duration/lb_try_interval: po przebudowie kontenera "app" (nowy adres IP
 	# w sieci dockera) Caddy potrafi przez chwilę trzymać nieaktualny wpis DNS/pulę

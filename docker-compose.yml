@@ -28,7 +28,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-sgo}:${POSTGRES_PASSWORD:-sgo_dev_pw}@db:5432/${POSTGRES_DB:-sgo}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://obiegowe.mswz.pl}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://mrp.iobrady.pl}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
       INIT_SEED: ${INIT_SEED:-false}
       SEED_OPERATOR_EMAIL: ${SEED_OPERATOR_EMAIL:-operator@sgo.local}
@@ -63,7 +63,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-sgo}:${POSTGRES_PASSWORD:-sgo_dev_pw}@db:5432/${POSTGRES_DB:-sgo}
       SCHEDULER_INTERVAL_SECONDS: ${SCHEDULER_INTERVAL_SECONDS:-60}
       # Do budowy linków w e-mailach powiadomień o automatycznym zamknięciu sprawy/publikacji wyników.
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://obiegowe.mswz.pl}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-https://mrp.iobrady.pl}
       NODE_ENV: production
       TZ: Europe/Warsaw
     command: ["npx", "tsx", "scripts/scheduler.ts"]
