@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
-import { StatusPill } from "@/components/StatusPill";
-import { formatDateTime, CLOSE_MODE_LABEL, RESULTS_VISIBILITY_LABEL } from "@/lib/labels";
+import { CaseSettingsEditor } from "./CaseSettingsEditor";
 import { CaseActions } from "./CaseActions";
 import { ParticipantsEditor } from "./ParticipantsEditor";
 import { ItemsEditor } from "./ItemsEditor";
@@ -50,29 +49,24 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="container py-4 py-md-5 d-flex flex-column gap-4" style={{ maxWidth: 1000 }}>
-      <header className="d-flex align-items-start justify-content-between gap-4 flex-wrap">
-        <div>
-          <div className="eyebrow mb-2">Sprawa {kase.number ? `nr ${kase.number}` : ""}</div>
-          <h1 className="h3">{kase.title}</h1>
-          {kase.description && <p className="small mt-2 text-secondary-emphasis" style={{ maxWidth: 560 }}>{kase.description}</p>}
-          <div className="d-flex align-items-center gap-3 mt-3">
-            <StatusPill status={kase.status} />
-            {kase.body && <span className="small text-secondary-emphasis">{kase.body.name}</span>}
-          </div>
-        </div>
+      <CaseSettingsEditor
+        caseId={kase.id}
+        status={kase.status}
+        title={kase.title}
+        number={kase.number}
+        description={kase.description}
+        bodyId={kase.bodyId}
+        bodyName={kase.body?.name ?? null}
+        bodies={bodies.map((b) => ({ id: b.id, name: b.name }))}
+        closeMode={kase.closeMode}
+        resultsVisibility={kase.resultsVisibility}
+        allowVoteChange={kase.allowVoteChange}
+        deadlineAt={kase.deadlineAt}
+        openedAt={kase.openedAt}
+        closedAt={kase.closedAt}
+      >
         <CaseActions caseId={kase.id} status={kase.status} readiness={readiness} />
-      </header>
-
-      <section className="card card-soft shadow-sm p-4">
-        <div className="row row-cols-1 row-cols-sm-2 g-3 small">
-          <Info label="Tryb zakończenia" value={CLOSE_MODE_LABEL[kase.closeMode]} />
-          <Info label="Publikacja wyników" value={RESULTS_VISIBILITY_LABEL[kase.resultsVisibility]} />
-          <Info label="Zmiana głosu" value={kase.allowVoteChange ? "Dopuszczalna (jawne, do zamknięcia)" : "Niedopuszczalna"} />
-          <Info label="Termin końcowy" value={formatDateTime(kase.deadlineAt)} />
-          <Info label="Otwarto" value={formatDateTime(kase.openedAt)} />
-          <Info label="Zamknięto" value={formatDateTime(kase.closedAt)} />
-        </div>
-      </section>
+      </CaseSettingsEditor>
 
       {isDraft && (!readiness.hasParticipants || !readiness.hasItems) && (
         <div className="card card-soft p-4 small border-warning-subtle">
@@ -149,15 +143,6 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
           <ReportsPanel caseId={kase.id} items={kase.items.map((i) => ({ id: i.id, title: i.title }))} />
         </section>
       )}
-    </div>
-  );
-}
-
-function Info({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <div className="eyebrow">{label}</div>
-      <div>{value}</div>
     </div>
   );
 }

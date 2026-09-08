@@ -18,6 +18,19 @@ const schema = z.object({
   deadlineAt: z.string().nullable().optional(),
 });
 
+/**
+ * Pola sprawy edytowalne w danym statusie. DRAFT/OPEN - wszystko (operator może
+ * dostroić konfigurację nawet w trakcie trwającego głosowania). CLOSED/RESULTS_PUBLISHED -
+ * wyłącznie tytuł i organ (korekta metadanych po fakcie - reszta konfiguracji jest już
+ * nieistotna, sprawa jest zamknięta). Inne statusy (CANCELLED) - brak edycji.
+ */
+const EDITABLE_FIELDS_BY_STATUS: Partial<Record<CaseStatus, Set<string>>> = {
+  [CaseStatus.DRAFT]: new Set(["title", "number", "description", "bodyId", "closeMode", "resultsVisibility", "allowVoteChange", "deadlineAt"]),
+  [CaseStatus.OPEN]: new Set(["title", "number", "description", "bodyId", "closeMode", "resultsVisibility", "allowVoteChange", "deadlineAt"]),
+  [CaseStatus.CLOSED]: new Set(["title", "bodyId"]),
+  [CaseStatus.RESULTS_PUBLISHED]: new Set(["title", "bodyId"]),
+};
+
 async function loadForOperator(id: string) {
   return prisma.case.findUnique({
     where: { id },
@@ -56,12 +69,18 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 
   const kase = await prisma.case.findUnique({ where: { id } });
   if (!kase) return new NextResponse("Not found", { status: 404 });
-  if (kase.status !== CaseStatus.DRAFT) {
-    return new NextResponse("Sprawę można edytować tylko w statusie „projekt”", { status: 400 });
+  const editableFields = EDITABLE_FIELDS_BY_STATUS[kase.status];
+  if (!editableFields) {
+    return new NextResponse("Sprawy w tym statusie nie można edytować", { status: 400 });
   }
 
   const parsed = schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return new NextResponse(`Bad request: ${parsed.error.message}`, { status: 400 });
+
+  const disallowed = Object.keys(parsed.data).filter((f) => !editableFields.has(f));
+  if (disallowed.length > 0) {
+    return new NextResponse(`Tych pól nie można edytować w bieżącym statusie sprawy: ${disallowed.join(", ")}`, { status: 400 });
+  }
 
   const data: Record<string, unknown> = { ...parsed.data };
   if (parsed.data.deadlineAt !== undefined) data.deadlineAt = parsed.data.deadlineAt ? new Date(parsed.data.deadlineAt) : null;
