@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { renderPdf, pdfResponse } from "@/lib/pdf";
 import { formatDateTimeSeconds } from "@/lib/labels";
 import { buildItemReport, type ReportCaseInfo } from "@/lib/voteReportData";
-import { itemReportPdfContent } from "@/lib/voteReportPdf";
+import { itemReportPdfContent, BW_LINES } from "@/lib/voteReportPdf";
 import { NextResponse } from "next/server";
 
 /**
@@ -56,7 +56,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
           ["Zamknięto", formatDateTimeSeconds(kase.closedAt)],
         ],
       },
-      layout: "lightHorizontalLines",
+      layout: BW_LINES,
       margin: [0, 0, 0, 12],
     },
   ];
@@ -72,7 +72,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
         ...kase.participants.map((p) => [`${p.lastName} ${p.firstName}`, votedUserIds.has(p.userId) ? "tak" : "nie"]),
       ],
     },
-    layout: "lightHorizontalLines",
+    layout: BW_LINES,
     margin: [0, 0, 0, 12],
   });
 
