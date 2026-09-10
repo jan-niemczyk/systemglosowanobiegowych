@@ -19,7 +19,25 @@ export function ItemDocumentsPanel({
   const [kind, setKind] = useState<DocumentKind>("DRAFT");
   const [expanded, setExpanded] = useState(documents.length > 0);
   const [error, setError] = useState<string | null>(null);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   const [pending, startTransition] = useTransition();
+
+  function startRename(d: Doc) {
+    setRenamingId(d.id);
+    setRenameValue(d.fileName);
+  }
+
+  function saveRename(docId: string) {
+    startTransition(async () => {
+      const r = await fetch(`/api/documents/${docId}`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: renameValue }),
+      });
+      if (r.ok) { toast.success("Nazwa pliku została zmieniona."); setRenamingId(null); router.refresh(); }
+      else toast.error(await readApiError(r));
+    });
+  }
 
   function upload(e: React.FormEvent) {
     e.preventDefault();
@@ -77,11 +95,30 @@ export function ItemDocumentsPanel({
             <tbody>
               {documents.map((d) => (
                 <tr key={d.id}>
-                  <td><a href={`/api/documents/${d.id}`} className="link-primary">{d.fileName}</a></td>
+                  <td>
+                    {renamingId === d.id ? (
+                      <input
+                        className="form-control form-control-sm" autoFocus
+                        value={renameValue} onChange={(e) => setRenameValue(e.target.value)}
+                      />
+                    ) : (
+                      <a href={`/api/documents/${d.id}`} className="link-primary">{d.fileName}</a>
+                    )}
+                  </td>
                   <td>{DOCUMENT_KIND_LABEL[d.kind]}</td>
                   <td className="num" style={{ fontSize: 12 }}>{Math.round(d.sizeBytes / 1024)} KB</td>
                   <td className="text-end">
-                    <button className="btn btn-sm btn-outline-danger" disabled={pending} onClick={() => remove(d.id)}>Usuń</button>
+                    {renamingId === d.id ? (
+                      <div className="d-flex gap-1 justify-content-end">
+                        <button className="btn btn-sm btn-outline-secondary" disabled={pending} onClick={() => saveRename(d.id)}>Zapisz</button>
+                        <button className="btn btn-sm btn-outline-secondary" disabled={pending} onClick={() => setRenamingId(null)}>Anuluj</button>
+                      </div>
+                    ) : (
+                      <div className="d-flex gap-1 justify-content-end">
+                        <button className="btn btn-sm btn-outline-secondary" disabled={pending} onClick={() => startRename(d)}>Zmień nazwę</button>
+                        <button className="btn btn-sm btn-outline-danger" disabled={pending} onClick={() => remove(d.id)}>Usuń</button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

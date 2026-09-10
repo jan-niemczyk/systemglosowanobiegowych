@@ -3,7 +3,10 @@ import { prisma } from "@/lib/db";
 import { documentFilePath } from "@/lib/documentStorage";
 import { NextResponse } from "next/server";
 import { readFile, unlink } from "fs/promises";
+import { z } from "zod";
 import { DocumentKind, CaseStatus } from "@prisma/client";
+
+const patchSchema = z.object({ fileName: z.string().min(1).max(255) });
 
 function isVisibleNow(kind: DocumentKind, status: CaseStatus): boolean {
   if (status === CaseStatus.DRAFT) return false;
@@ -38,6 +41,22 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   } catch {
     return new NextResponse("Plik nie został odnaleziony", { status: 404 });
   }
+}
+
+/** PATCH /api/documents/[id] - zmiana nazwy wyświetlanej dokumentu (nie dotyka pliku na dysku). */
+export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const session = await auth();
+  if (!session || session.user.role !== "OPERATOR") return new NextResponse("Unauthorized", { status: 401 });
+  const { id } = await ctx.params;
+
+  const doc = await prisma.caseDocument.findUnique({ where: { id } });
+  if (!doc) return new NextResponse("Not found", { status: 404 });
+
+  const parsed = patchSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return new NextResponse(`Bad request: ${parsed.error.message}`, { status: 400 });
+
+  await prisma.caseDocument.update({ where: { id }, data: { fileName: parsed.data.fileName } });
+  return NextResponse.json({ ok: true });
 }
 
 /** DELETE /api/documents/[id] - operator może usunąć dokument w każdym momencie (bez logowania). */

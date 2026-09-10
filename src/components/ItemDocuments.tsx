@@ -1,4 +1,5 @@
 import { DOCUMENT_KIND_LABEL } from "@/lib/labels";
+import { IconDocument } from "@/components/ui/Icon";
 import type { DocumentKind } from "@prisma/client";
 
 type Doc = { id: string; kind: DocumentKind; fileName: string };
@@ -7,13 +8,21 @@ type Doc = { id: string; kind: DocumentKind; fileName: string };
 export function ItemDocuments({ documents }: { documents: Doc[] }) {
   if (documents.length === 0) return null;
   return (
-    <ul className="list-unstyled small mt-2 mb-0">
-      {documents.map((d) => (
-        <li key={d.id} className="mb-1">
-          <a className="link-primary" href={`/api/documents/${d.id}`}>{d.fileName}</a>
-          <span className="ms-2 text-secondary-emphasis" style={{ fontSize: 12 }}>({DOCUMENT_KIND_LABEL[d.kind]})</span>
-        </li>
-      ))}
-    </ul>
+    <div className="card card-soft mt-2 p-3 d-flex flex-column gap-2">
+      <div className="eyebrow mb-1">Załączone dokumenty</div>
+      <div className="list-group list-group-flush">
+        {documents.map((d) => (
+          <a
+            key={d.id}
+            href={`/api/documents/${d.id}`}
+            className="list-group-item list-group-item-action d-flex align-items-center gap-2 px-2"
+          >
+            <IconDocument size={18} className="text-secondary-emphasis" />
+            <span className="flex-grow-1 text-truncate small">{d.fileName}</span>
+            <span className="badge text-bg-light border small text-nowrap">{DOCUMENT_KIND_LABEL[d.kind]}</span>
+          </a>
+        ))}
+      </div>
+    </div>
   );
 }
