@@ -98,6 +98,14 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     fontSize: 8, margin: [0, 16, 0, 0],
   });
 
-  const buffer = await renderPdf({ content, pageMargins: [40, 40, 40, 40] });
+  const buffer = await renderPdf({
+    content,
+    pageMargins: [40, 40, 40, 50],
+    // Numeracja stron tylko gdy protokół ma więcej niż jedną stronę.
+    footer: (currentPage: number, pageCount: number) =>
+      pageCount > 1
+        ? { text: `Strona ${currentPage} z ${pageCount}`, fontSize: 8, alignment: "center", margin: [40, 12, 40, 0] }
+        : { text: "" },
+  });
   return pdfResponse(`protokol-${kase.id.slice(-8)}.pdf`, buffer);
 }

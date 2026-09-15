@@ -215,5 +215,9 @@ export function itemReportPdfContent(block: ItemReportBlock, opts: { standalone:
     c.push({ text: block.resolution, fontSize: FS, margin: [0, 6, 0, 4] });
   }
 
-  return { stack: c, margin: [0, 0, 0, 10] };
+  // W protokole pozycja ma być niepodzielna na strony. Ten sam próg ostrożności
+  // co przy pakiecie wyżej: bloku wyższego niż strona pdfmake i tak nie zmieści,
+  // więc przy dużej liczbie uprawnionych zostawiamy naturalne łamanie.
+  const keepTogether = !opts.standalone && !isPackage && block.eligibleCount <= 40;
+  return { stack: c, margin: [0, 0, 0, 10], ...(keepTogether ? { unbreakable: true } : {}) };
 }
