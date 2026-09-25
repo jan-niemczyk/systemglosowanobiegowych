@@ -9,6 +9,7 @@ import { ItemResult } from "@/components/ItemResult";
 import { LiveItemPanel, computeLiveTally } from "./LiveItemPanel";
 import { ReportsPanel } from "./ReportsPanel";
 import { ResolutionEditor } from "./ResolutionEditor";
+import { ItemTitleEditor } from "./ItemTitleEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -110,6 +111,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
                 : new Set(item.ballots.map((b) => b.userId).filter((v): v is string => !!v));
               return (
                 <div key={item.id} className="d-flex flex-column gap-2">
+                  <ItemTitleEditor caseId={kase.id} itemId={item.id} title={item.title} />
                   {isOpen ? (
                     <LiveItemPanel
                       item={item}
